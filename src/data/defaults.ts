@@ -19,7 +19,7 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
     taglineNe: 'प्राविधिक नवीनता, रणनीतिक नेतृत्व र दिगो सामुदायिक सशक्तिकरण मार्फत युवाहरूलाई सशक्त बनाउँदै।',
     welcomeBadgeEn: 'Welcome to my digital space',
     welcomeBadgeNe: 'मेरो डिजिटल पोर्टलमा स्वागत छ',
-    heroImage: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s320/20602.jpg',
+    heroImage: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg',
     ctaPrimaryEn: 'View Photo Journey',
     ctaPrimaryNe: 'दृश्य यात्रा अन्वेषण गर्नुहोस्',
     ctaSecondaryEn: 'Get in Touch',

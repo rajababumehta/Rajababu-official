@@ -93,13 +93,19 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEYS.SYSTEM_SETTINGS);
       if (saved) {
         const parsed = JSON.parse(saved);
+        const currentHero = parsed.profile?.heroImage;
+        const heroImage =
+          !currentHero || currentHero.includes('/s320/20602.jpg')
+            ? DEFAULT_SYSTEM_SETTINGS.profile.heroImage
+            : currentHero;
+
         return {
           ...DEFAULT_SYSTEM_SETTINGS,
           ...parsed,
           profile: {
             ...DEFAULT_SYSTEM_SETTINGS.profile,
             ...parsed.profile,
-            heroImage: parsed.profile?.heroImage || DEFAULT_SYSTEM_SETTINGS.profile.heroImage,
+            heroImage,
           },
           about: {
             ...DEFAULT_SYSTEM_SETTINGS.about,
