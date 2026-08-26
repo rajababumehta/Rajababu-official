@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -11,9 +11,13 @@ import {
   Sparkles,
   Link,
   Image as ImageIcon,
+  Upload,
+  Camera,
+  Loader2,
 } from 'lucide-react';
 import { Language, Moment } from '../types';
 import { generateLikesFromPreset, formatLikes } from '../utils/likesFormatter';
+import { uploadProfilePhoto } from '../services/firebase';
 
 interface EditMomentModalProps {
   moment: Moment | null;
@@ -44,6 +48,10 @@ export const EditMomentModal: React.FC<EditMomentModalProps> = ({
   const [likes, setLikes] = useState<number>(0);
   const [customLikesInput, setCustomLikesInput] = useState<string>('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (moment) {
@@ -78,12 +86,38 @@ export const EditMomentModal: React.FC<EditMomentModalProps> = ({
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      onShowToast('Please select a valid image file (PNG, JPG, WEBP).', 'error');
+      return;
+    }
+
+    setIsUploadingPhoto(true);
+    setUploadProgress(10);
+
+    try {
+      const result = await uploadProfilePhoto(file, (percent) => {
+        setUploadProgress(percent);
+      });
+      setImgUrl(result.url);
+      onShowToast('New photo uploaded and updated successfully!', 'success');
+    } catch (err: any) {
+      onShowToast(`Failed to upload photo: ${err?.message || 'Unknown error'}`, 'error');
+    } finally {
+      setIsUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!imgUrl.trim()) {
       onShowToast(
-        language === 'NE' ? 'कृपया मान्य तस्बिर लिंक (URL) प्रविष्ट गर्नुहोस्।' : 'Please provide a valid image link URL.',
+        language === 'NE' ? 'कृपया मान्य तस्बिर लिंक (URL) वा फोटो चयन गर्नुहोस्।' : 'Please provide a valid image link URL or upload a photo.',
         'error'
       );
       return;
@@ -99,6 +133,7 @@ export const EditMomentModal: React.FC<EditMomentModalProps> = ({
       category,
       date: eventDate,
       likes: Math.max(0, likes),
+      lastModified: Date.now(),
     };
 
     onUpdateMoment(updated);
@@ -146,7 +181,7 @@ export const EditMomentModal: React.FC<EditMomentModalProps> = ({
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-slate-100 font-heading">
-                    {language === 'NE' ? 'तस्बिर विवरण सम्पादन (लिङ्क मार्फत)' : 'Edit Moment & Photo Link'}
+                    {language === 'NE' ? 'तस्बिर विवरण सम्पादन' : 'Edit Moment & Photo'}
                   </h3>
                   <p className="text-xs text-slate-400">
                     ID: <span className="font-mono text-slate-300">{moment.id}</span>
@@ -164,15 +199,46 @@ export const EditMomentModal: React.FC<EditMomentModalProps> = ({
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5 overflow-y-auto pr-1 flex-1">
-              {/* Photo Display & Direct Image Link URL */}
+              {/* Photo Display, Direct Upload & Image Link */}
               <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-blue-500/20 space-y-4">
-                <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400">
-                  <Link className="w-4 h-4 text-blue-400" />
-                  <span>{language === 'NE' ? 'तस्बिर वेब लिंक (Image URL)' : 'Photo Web Link (Image URL)'}</span>
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-400">
+                    <ImageIcon className="w-4 h-4 text-blue-400" />
+                    <span>{language === 'NE' ? 'तस्बिर परिवर्तन (अपलोड वा लिंक)' : 'Photo Selection (Upload or Link)'}</span>
+                  </label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingPhoto}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/30 disabled:opacity-50"
+                  >
+                    {isUploadingPhoto ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Uploading ({uploadProgress}%)...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Upload New File</span>
+                      </>
+                    )}
+                  </button>
+                </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                  <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-slate-900 border-2 border-slate-800 flex items-center justify-center shrink-0 shadow-lg">
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="relative w-28 h-28 rounded-2xl overflow-hidden bg-slate-900 border-2 border-slate-800 hover:border-blue-500/50 flex items-center justify-center shrink-0 shadow-lg cursor-pointer group transition-all"
+                    title="Click to replace image file"
+                  >
                     {imgUrl ? (
                       <img
                         src={imgUrl}
@@ -183,6 +249,10 @@ export const EditMomentModal: React.FC<EditMomentModalProps> = ({
                     ) : (
                       <ImageIcon className="w-8 h-8 text-slate-600" />
                     )}
+                    <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity text-[10px] font-semibold gap-1">
+                      <Camera className="w-4 h-4 text-blue-400" />
+                      <span>Change</span>
+                    </div>
                   </div>
 
                   <div className="flex-1 w-full space-y-2">
@@ -191,15 +261,15 @@ export const EditMomentModal: React.FC<EditMomentModalProps> = ({
                         type="url"
                         value={imgUrl}
                         onChange={(e) => setImgUrl(e.target.value)}
-                        placeholder="https://blogger.googleusercontent.com/..."
+                        placeholder="https://..."
                         className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 text-xs font-mono focus:outline-none focus:border-blue-500"
                         required
                       />
                     </div>
                     <p className="text-[11px] text-slate-400">
                       {language === 'NE'
-                        ? 'तस्बिर केवल वेब लिंक (URL) मार्फत परिवर्तन गर्न सकिन्छ।'
-                        : 'Photo is changed strictly through image link URL.'}
+                        ? 'तपाईँ कम्प्युटर/मोबाइलबाट नयाँ फोटो अपलोड गर्न सक्नुहुन्छ वा सिधै URL लिंक राख्न सक्नुहुन्छ।'
+                        : 'Upload a new photo from your device or paste a direct image web link.'}
                     </p>
                   </div>
                 </div>

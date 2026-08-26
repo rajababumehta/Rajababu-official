@@ -339,7 +339,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (!editingImage) return;
 
     try {
-      if (isFirebaseLive && editingImage.isFirebase) {
+      if (isFirebaseLive) {
         await updateClipzoneImage(editingImage.id, {
           title: editingImage.title,
           titleNe: editingImage.titleNe,
@@ -353,14 +353,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       if (onImagesChange) {
         onImagesChange(
-          images.map((img) => (img.id === editingImage.id ? editingImage : img))
+          images.map((img) => (img.id === editingImage.id ? { ...editingImage, isFirebase: true } : img))
         );
       }
 
-      onShowToast('Image details updated successfully!', 'success');
+      onShowToast('Image details updated and saved successfully!', 'success');
       setEditingImage(null);
     } catch (err: any) {
-      onShowToast(`Failed to update image: ${err.message}`, 'error');
+      onShowToast(`Failed to update image: ${err?.message || 'Error occurred'}`, 'error');
     }
   };
 

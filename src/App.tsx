@@ -64,6 +64,7 @@ const clipzoneImageToMoment = (img: ClipzoneImage): Moment => ({
   date: img.uploadDate ? new Date(img.uploadDate).toLocaleDateString() : 'Recent',
   isUserUploaded: true,
   uploadedAt: img.uploadDate,
+  lastModified: Date.now(),
 });
 
 export default function App() {
