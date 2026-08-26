@@ -12,6 +12,7 @@ export interface Moment {
   date: string;
   isUserUploaded?: boolean;
   uploadedAt?: string;
+  lastModified?: number;
 }
 
 export interface Comment {
@@ -134,6 +135,7 @@ export interface SystemSettings {
   experience: ExperienceSettings;
   contact: ContactSettings;
   autoLikes: AutoLikesConfig;
+  lastModified?: number;
 }
 
 export interface FirebaseConfig {

@@ -32,6 +32,7 @@ import {
   subscribeToAuth,
   subscribeToSystemSettings,
   saveSystemSettingsToFirestore,
+  updateClipzoneImage,
   deleteClipzoneImage,
   getFirebaseInstances,
   LOCAL_ADMIN_STORAGE_KEY,
@@ -255,14 +256,36 @@ export default function App() {
   useEffect(() => {
     const unsubscribeSettings = subscribeToSystemSettings((remoteSettings) => {
       if (remoteSettings && remoteSettings.profile) {
-        setSystemSettings((prev) => ({
-          ...prev,
-          ...remoteSettings,
-          profile: {
-            ...prev.profile,
-            ...remoteSettings.profile,
-          },
-        }));
+        setSystemSettings((prev) => {
+          const localModified = prev.lastModified || 0;
+          let remoteModified = 0;
+          if (typeof remoteSettings.lastModified === 'number') {
+            remoteModified = remoteSettings.lastModified;
+          } else if (remoteSettings.updatedAt?.toMillis) {
+            remoteModified = remoteSettings.updatedAt.toMillis();
+          } else if (remoteSettings.updatedAt) {
+            remoteModified = new Date(remoteSettings.updatedAt).getTime();
+          }
+
+          // If local modification is strictly newer than incoming remote snapshot, keep local!
+          if (localModified > 0 && remoteModified > 0 && remoteModified < localModified) {
+            return prev;
+          }
+
+          // Merge profile, keeping heroImage valid
+          const mergedHeroImage = remoteSettings.profile.heroImage || prev.profile.heroImage;
+
+          return {
+            ...prev,
+            ...remoteSettings,
+            profile: {
+              ...prev.profile,
+              ...remoteSettings.profile,
+              heroImage: mergedHeroImage,
+            },
+            lastModified: Math.max(localModified, remoteModified),
+          };
+        });
       }
     });
     return () => unsubscribeSettings();
@@ -281,10 +304,23 @@ export default function App() {
           .map(clipzoneImageToMoment);
 
         setMoments((prev) => {
-          // Merge Firestore images with non-duplicate existing moments
+          const prevMap = new Map<string, Moment>(prev.map((m) => [m.id, m]));
+
+          const mergedFb = convertedMoments.map((remoteM) => {
+            const localM = prevMap.get(remoteM.id);
+            if (localM && localM.lastModified) {
+              const remoteTime = remoteM.uploadedAt ? new Date(remoteM.uploadedAt).getTime() : 0;
+              // If local edit is newer, preserve local version
+              if (localM.lastModified > remoteTime) {
+                return localM;
+              }
+            }
+            return remoteM;
+          });
+
           const fbIdSet = new Set(convertedMoments.map((m) => m.id));
           const existingNonFb = prev.filter((m) => !fbIdSet.has(m.id) && !deletedIds.includes(m.id));
-          return [...convertedMoments, ...existingNonFb];
+          return [...mergedFb, ...existingNonFb];
         });
       }
     });
@@ -327,6 +363,11 @@ export default function App() {
   };
 
   const handleAddMoment = (newMoment: Moment) => {
+    const momentWithTimestamp: Moment = {
+      ...newMoment,
+      lastModified: Date.now(),
+    };
+
     // If this ID was previously marked deleted, remove it from tombstone blacklist
     try {
       const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
@@ -338,11 +379,42 @@ export default function App() {
     } catch (e) {
       console.error(e);
     }
-    setMoments((prev) => [newMoment, ...prev]);
+    setMoments((prev) => [momentWithTimestamp, ...prev]);
   };
 
-  const handleUpdateMoment = (updated: Moment) => {
-    setMoments((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
+  const handleUpdateMoment = async (updated: Moment) => {
+    const momentWithTimestamp: Moment = {
+      ...updated,
+      lastModified: Date.now(),
+    };
+
+    // 1. Update state
+    setMoments((prev) => prev.map((m) => (m.id === updated.id ? momentWithTimestamp : m)));
+
+    // 2. Persist to localStorage immediately
+    try {
+      const savedStr = localStorage.getItem(STORAGE_KEYS.CUSTOM_MOMENTS);
+      const currentList: Moment[] = savedStr ? JSON.parse(savedStr) : [];
+      const updatedList = currentList.map((m) => (m.id === updated.id ? momentWithTimestamp : m));
+      localStorage.setItem(STORAGE_KEYS.CUSTOM_MOMENTS, JSON.stringify(updatedList));
+    } catch (e) {
+      console.error('Failed to immediately persist updated moment', e);
+    }
+
+    // 3. Sync update to Firestore
+    try {
+      await updateClipzoneImage(updated.id, {
+        title: updated.titleEn,
+        titleNe: updated.titleNe,
+        description: updated.descEn,
+        descNe: updated.descNe,
+        imgUrl: updated.imgUrl,
+        category: updated.category,
+        likes: updated.likes,
+      });
+    } catch (e) {
+      console.warn('Firestore update sync notice:', e);
+    }
   };
 
   const handleDeleteMoment = async (id: string) => {
@@ -609,6 +681,7 @@ export default function App() {
               ...prev.profile,
               heroImage: newUrl,
             },
+            lastModified: Date.now(),
           }));
         }}
         onOpenSystemModal={() => setIsSystemModalOpen(true)}

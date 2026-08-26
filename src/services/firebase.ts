@@ -602,10 +602,14 @@ export const updateClipzoneImage = async (
   }
 
   const docRef = doc(firestore, 'clipzone_images', imageId);
-  await updateDoc(docRef, {
-    ...updates,
-    updatedAt: serverTimestamp(),
-  });
+  await setDoc(
+    docRef,
+    {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
 };
 
 /**

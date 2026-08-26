@@ -342,7 +342,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       if (isFirebaseLive && editingImage.isFirebase) {
         await updateClipzoneImage(editingImage.id, {
           title: editingImage.title,
+          titleNe: editingImage.titleNe,
           description: editingImage.description,
+          descNe: editingImage.descNe,
+          imgUrl: editingImage.imgUrl,
           category: editingImage.category,
           likes: editingImage.likes,
         });

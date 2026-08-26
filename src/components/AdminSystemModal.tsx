@@ -74,7 +74,11 @@ export const AdminSystemModal: React.FC<AdminSystemModalProps> = ({
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    onSaveSystemSettings(draft);
+    const settingsWithTimestamp: SystemSettings = {
+      ...draft,
+      lastModified: Date.now(),
+    };
+    onSaveSystemSettings(settingsWithTimestamp);
     onShowToast(
       language === 'NE' ? 'साइट सेटिङ्स सफलतापूर्वक सुरक्षित भयो!' : 'System CMS settings saved successfully!',
       'success'
