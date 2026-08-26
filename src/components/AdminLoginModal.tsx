@@ -157,6 +157,28 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
               </button>
             </div>
 
+            {/* 1-Click Instant Admin Access Banner */}
+            <div className="mb-4 p-3 rounded-2xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-purple-900/40 border border-blue-500/30 flex items-center justify-between gap-3 relative z-10">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
+                <div className="text-left">
+                  <div className="text-xs font-bold text-slate-100">
+                    {language === 'NE' ? 'तुरुन्त एडमिन लगइन (१-क्लिक)' : 'Instant Admin Access (1-Click)'}
+                  </div>
+                  <div className="text-[10px] text-slate-400">
+                    {language === 'NE' ? 'पासवर्ड बिना तुरुन्त सम्पादन सुरु गर्नुहोस्' : 'Bypass password & start editing instantly'}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleQuickDemoBypass}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-md shadow-emerald-600/30 transition-all active:scale-95 shrink-0"
+              >
+                {language === 'NE' ? 'लगइन गर्नुहोस् ⚡' : 'Enter Admin ⚡'}
+              </button>
+            </div>
+
             {/* Mode Switcher */}
             <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 mb-4 relative z-10">
               <button

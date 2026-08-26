@@ -565,7 +565,19 @@ export default function App() {
   };
 
   const handleSaveSystemSettings = (updated: SystemSettings) => {
-    setSystemSettings(updated);
+    const settingsWithTimestamp: SystemSettings = {
+      ...updated,
+      lastModified: Date.now(),
+    };
+    setSystemSettings(settingsWithTimestamp);
+    try {
+      localStorage.setItem(STORAGE_KEYS.SYSTEM_SETTINGS, JSON.stringify(settingsWithTimestamp));
+    } catch (e) {
+      console.error('Failed to immediately persist system settings', e);
+    }
+    saveSystemSettingsToFirestore(settingsWithTimestamp).catch((err) => {
+      console.warn('Could not sync system settings to Firestore', err);
+    });
   };
 
   const handleResetToDefaults = () => {
@@ -618,6 +630,7 @@ export default function App() {
           profile={systemSettings.profile}
           isAdmin={isAdmin}
           onOpenSystemModal={() => setIsSystemModalOpen(true)}
+          onOpenAdminLogin={() => setIsAdminLoginModalOpen(true)}
           totalMoments={totalMoments}
           totalLikes={totalLikes}
         />
