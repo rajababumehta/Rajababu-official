@@ -95,7 +95,7 @@ export default function App() {
     };
   });
 
-  // 3. Moments Gallery State (Permanent persistence)
+  // 3. Moments Gallery State
   const [moments, setMoments] = useState<Moment[]>(() => {
     try {
       const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
@@ -104,8 +104,17 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEYS.CUSTOM_MOMENTS);
       if (saved !== null) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return parsed.filter((m: Moment) => !deletedIds.includes(m.id));
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Filter out legacy unsplash mock images and deleted IDs
+          const validMoments = parsed.filter(
+            (m: Moment) =>
+              !deletedIds.includes(m.id) &&
+              !m.imgUrl?.includes('unsplash.com') &&
+              !['moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6'].includes(m.id)
+          );
+          if (validMoments.length > 0) {
+            return validMoments;
+          }
         }
       }
       return DEFAULT_MOMENTS.filter((m) => !deletedIds.includes(m.id));

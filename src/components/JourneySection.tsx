@@ -140,37 +140,41 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
           </div>
         </div>
 
-        {/* Dynamic Category Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-10 no-scrollbar">
-          {categories.map((cat) => {
-            const isSelected = selectedCategory.toLowerCase() === cat.toLowerCase();
-            return (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                  isSelected
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 border border-blue-500'
-                    : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 hover:bg-slate-850 border border-slate-800'
-                }`}
-              >
-                {getCategoryBadgeLabel(cat)}
-              </button>
-            );
-          })}
-        </div>
+        {/* Dynamic Category Filter Pills (Only when moments exist) */}
+        {moments.length > 0 && categories.length > 1 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-10 no-scrollbar">
+            {categories.map((cat) => {
+              const isSelected = selectedCategory.toLowerCase() === cat.toLowerCase();
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                    isSelected
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 border border-blue-500'
+                      : 'bg-slate-900/80 text-slate-400 hover:text-slate-200 hover:bg-slate-850 border border-slate-800'
+                  }`}
+                >
+                  {getCategoryBadgeLabel(cat)}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Uncropped Media Grid */}
         {filteredMoments.length === 0 ? (
-          <div className="py-20 text-center rounded-3xl bg-slate-900/40 border border-slate-800/80 p-8">
-            <Layers className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-slate-200 mb-2">
-              {language === 'NE' ? 'यस श्रेणीमा कुनै तस्बिर छैन' : 'No moments found in this category'}
+          <div className="py-20 text-center rounded-3xl bg-slate-900/30 border border-slate-800/60 p-8 sm:p-12">
+            <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto mb-4">
+              <Camera className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-200 mb-2">
+              {language === 'NE' ? 'तस्बिरहरू थप्न तयार छ' : 'Ready for Moments & Photo Links'}
             </h3>
-            <p className="text-sm text-slate-400 max-w-md mx-auto">
+            <p className="text-sm sm:text-base text-slate-400 max-w-lg mx-auto leading-relaxed">
               {language === 'NE'
-                ? 'कृपया अर्को श्रेणी छान्नुहोस्।'
-                : 'Please select another category filter above.'}
+                ? 'तपाईँले प्रदान गर्नुहुने तस्बिर लिंकहरू यहाँ उच्च गुणस्तर र पूर्ण आकारमा प्रस्तुत गरिनेछन्।'
+                : 'All previous sample photos have been cleared. Send your image links to feature them in this gallery.'}
             </p>
           </div>
         ) : (
