@@ -1,19 +1,15 @@
 import React from 'react';
-import { Heart, Sparkles, ArrowUp, Shield } from 'lucide-react';
+import { Sparkles, ArrowUp } from 'lucide-react';
 import { Language, ProfileSettings } from '../types';
 
 interface FooterProps {
   language: Language;
   profile: ProfileSettings;
-  isAdmin?: boolean;
-  onOpenAdminLogin?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   language,
   profile,
-  isAdmin,
-  onOpenAdminLogin,
 }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -36,28 +32,17 @@ export const Footer: React.FC<FooterProps> = ({
               <div className="text-xs text-slate-400">
                 {language === 'NE'
                   ? 'सर्वाधिकार सुरक्षित © २०२६'
-                  : 'Official Personal Portfolio & Media CMS © 2026'}
+                  : 'Official Personal Portfolio © 2026'}
               </div>
             </div>
           </div>
 
-          {/* Center Note & Admin Status / Trigger */}
+          {/* Center Note */}
           <div className="flex items-center gap-4 text-xs text-slate-400">
             <div className="flex items-center gap-1.5">
               <span>{language === 'NE' ? 'सशक्तिकरण र नवीनताका साथ निर्मित' : 'Crafted with passion for community & innovation'}</span>
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             </div>
-
-            {!isAdmin && onOpenAdminLogin && (
-              <button
-                onClick={onOpenAdminLogin}
-                className="flex items-center gap-1 text-[11px] text-slate-600 hover:text-blue-400 transition-colors"
-                title="Admin Control Access"
-              >
-                <Shield className="w-3 h-3" />
-                <span>Admin</span>
-              </button>
-            )}
           </div>
 
           {/* Scroll to top button */}
@@ -74,4 +59,5 @@ export const Footer: React.FC<FooterProps> = ({
     </footer>
   );
 };
+
 

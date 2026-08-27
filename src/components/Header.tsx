@@ -4,23 +4,19 @@ import {
   Sparkles,
   ArrowRight,
   Send,
-  Shield,
-  Lightbulb,
-  Code,
-  Edit3,
-  ChevronDown,
   Layers,
   Heart,
   Award,
+  Lightbulb,
+  Shield,
+  Code,
+  ChevronDown,
 } from 'lucide-react';
 import { Language, ProfileSettings } from '../types';
 
 interface HeaderProps {
   language: Language;
   profile: ProfileSettings;
-  isAdmin: boolean;
-  onOpenSystemModal: () => void;
-  onOpenAdminLogin?: () => void;
   totalMoments: number;
   totalLikes: number;
 }
@@ -28,9 +24,6 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   language,
   profile,
-  isAdmin,
-  onOpenSystemModal,
-  onOpenAdminLogin,
   totalMoments,
   totalLikes,
 }) => {
@@ -85,33 +78,6 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Subtle ambient glow orbs behind bottom hero text */}
       <div className="absolute bottom-24 left-1/4 -translate-x-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-16 right-1/4 translate-x-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-
-      {/* ADMIN FLOATING ACTION BUTTON (Top-Right) */}
-      <div className="absolute top-24 right-4 sm:right-8 z-30">
-        {isAdmin ? (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            onClick={onOpenSystemModal}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/90 hover:bg-slate-850 backdrop-blur-md border border-emerald-500/40 text-emerald-300 hover:text-white shadow-2xl text-xs font-semibold transition-all hover:scale-105 active:scale-95"
-            title="Admin CMS Settings"
-          >
-            <Edit3 className="w-3.5 h-3.5 text-emerald-400" />
-            <span>{language === 'NE' ? 'एडमिन: प्रोफाइल र तस्बिर सम्पादन' : 'Admin: Edit Profile & Photo'}</span>
-          </motion.button>
-        ) : onOpenAdminLogin ? (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            onClick={onOpenAdminLogin}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 hover:bg-slate-800 backdrop-blur-md border border-slate-700/80 text-slate-300 hover:text-blue-400 shadow-xl text-xs font-medium transition-all"
-            title="Admin Sign In"
-          >
-            <Shield className="w-3.5 h-3.5 text-blue-400" />
-            <span>{language === 'NE' ? 'एडमिन लगइन / सम्पादन' : 'Admin / Edit'}</span>
-          </motion.button>
-        ) : null}
-      </div>
 
       {/* 3. HERO FOREGROUND CONTAINER (Deeply anchored at bottom, never blocks face) */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-auto">

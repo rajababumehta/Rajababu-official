@@ -4,57 +4,40 @@ import {
   Camera,
   Heart,
   Calendar,
-  Tag,
   Zap,
   Eye,
-  Edit2,
-  Trash2,
   MessageSquare,
   Share2,
   X,
   Send,
-  PlusCircle,
-  Sparkles,
   Layers,
 } from 'lucide-react';
 import { Moment, Comment, Language } from '../types';
 import { formatLikes } from '../utils/likesFormatter';
-import { DeleteConfirmModal } from './DeleteConfirmModal';
 
 interface JourneySectionProps {
   language: Language;
   moments: Moment[];
-  isAdmin: boolean;
-  onOpenUploadModal: () => void;
-  onOpenEditModal: (moment: Moment) => void;
-  onDeleteMoment: (id: string) => void;
   onLikeMoment: (id: string) => void;
   userLikedMoments: string[];
   onAutoBoostAllLikes: () => void;
   commentsMap: Record<string, Comment[]>;
   onAddComment: (momentId: string, author: string, text: string) => void;
-  onDeleteComment?: (momentId: string, commentId: string) => void;
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
 }
 
 export const JourneySection: React.FC<JourneySectionProps> = ({
   language,
   moments,
-  isAdmin,
-  onOpenUploadModal,
-  onOpenEditModal,
-  onDeleteMoment,
   onLikeMoment,
   userLikedMoments,
   onAutoBoostAllLikes,
   commentsMap,
   onAddComment,
-  onDeleteComment,
   onShowToast,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeLightboxMoment, setActiveLightboxMoment] = useState<Moment | null>(null);
-  const [photoToDelete, setPhotoToDelete] = useState<Moment | null>(null);
 
   // Comment input state for Lightbox
   const [commentAuthor, setCommentAuthor] = useState('');
@@ -131,7 +114,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-3">
               <Camera className="w-3.5 h-3.5" />
-              <span>{language === 'NE' ? 'दृश्य यात्रा तथा संस्मरण' : 'Visual Journey & Media CMS'}</span>
+              <span>{language === 'NE' ? 'दृश्य यात्रा तथा संस्मरण' : 'Visual Journey & Moments'}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 font-heading tracking-tight">
               {language === 'NE' ? 'जीवनका महत्वपूर्ण क्षणहरू' : 'Moments of Impact & Leadership'}
@@ -143,7 +126,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
             </p>
           </div>
 
-          {/* Action Bar (Auto-Boost + Add Photo for Admin) */}
+          {/* Action Bar (Auto-Boost) */}
           <div className="flex flex-wrap items-center gap-3">
             <button
               id="btn-auto-boost-all-likes"
@@ -154,17 +137,6 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
               <Zap className="w-4 h-4 text-amber-300 animate-bounce" />
               <span>{language === 'NE' ? '⚡ सबैमा लाइक्स बढाउनुहोस्' : '⚡ Auto-Boost Likes'}</span>
             </button>
-
-            {isAdmin && (
-              <button
-                id="btn-journey-add-photo"
-                onClick={onOpenUploadModal}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98]"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>{language === 'NE' ? '+ तस्बिर लिङ्क थप्नुहोस्' : '+ Add Photo Link'}</span>
-              </button>
-            )}
           </div>
         </div>
 
@@ -195,20 +167,11 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
             <h3 className="text-lg font-bold text-slate-200 mb-2">
               {language === 'NE' ? 'यस श्रेणीमा कुनै तस्बिर छैन' : 'No moments found in this category'}
             </h3>
-            <p className="text-sm text-slate-400 max-w-md mx-auto mb-6">
+            <p className="text-sm text-slate-400 max-w-md mx-auto">
               {language === 'NE'
-                ? 'नयाँ तस्बिर अपलोड गर्न कृपया माथिको बटन प्रयोग गर्नुहोस् वा अन्य श्रेणी छान्नुहोस्।'
-                : 'Select another filter or upload your first photo using the admin controls.'}
+                ? 'कृपया अर्को श्रेणी छान्नुहोस्।'
+                : 'Please select another category filter above.'}
             </p>
-            {isAdmin && (
-              <button
-                onClick={onOpenUploadModal}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>{language === 'NE' ? '+ तस्बिर अपलोड गर्नुहोस्' : '+ Upload Photo Now'}</span>
-              </button>
-            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -252,26 +215,12 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                       </span>
                     </div>
 
-                    {/* Top Right Date & Quick Delete Badge */}
+                    {/* Top Right Date Badge */}
                     <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5">
                       <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-slate-800 text-[11px] font-medium text-slate-300">
                         <Calendar className="w-3 h-3 text-slate-400" />
                         {moment.date}
                       </span>
-                      {isAdmin && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPhotoToDelete(moment);
-                          }}
-                          className="p-1.5 rounded-lg bg-rose-950/90 hover:bg-rose-600 border border-rose-700/80 text-rose-300 hover:text-white shadow-lg transition-all"
-                          title={language === 'NE' ? 'तस्बिर स्थायी रूपमा मेटाउनुहोस्' : 'Delete photo permanently'}
-                          aria-label="Delete photo permanently"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
                     </div>
 
                     {/* Hover Toolbar overlay */}
@@ -288,36 +237,6 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                       >
                         <Eye className="w-5 h-5" />
                       </button>
-
-                      {isAdmin && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onOpenEditModal(moment);
-                            }}
-                            className="p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 shadow-lg transition-transform active:scale-90"
-                            title="Edit metadata & Likes"
-                            aria-label="Edit moment"
-                          >
-                            <Edit2 className="w-5 h-5" />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setPhotoToDelete(moment);
-                            }}
-                            className="p-3 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/40 transition-transform active:scale-90"
-                            title={language === 'NE' ? 'तस्बिर स्थायी रूपमा मेटाउनुहोस्' : 'Delete photo permanently'}
-                            aria-label="Delete photo"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        </>
-                      )}
                     </div>
                   </div>
 
@@ -338,22 +257,20 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                         onClick={() => onLikeMoment(moment.id)}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 ${
                           isLiked
-                            ? 'bg-pink-500/20 text-pink-400 border border-pink-500/40'
-                            : 'bg-slate-950 text-slate-400 hover:text-pink-400 hover:bg-pink-500/10 border border-slate-800'
+                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-inner'
+                            : 'bg-slate-950 text-slate-400 hover:text-rose-400 border border-slate-800'
                         }`}
-                        title={isLiked ? 'Liked by you' : 'Leave a like'}
+                        title={isLiked ? 'Unlike photo' : 'Like photo'}
                       >
-                        <Heart
-                          className={`w-4 h-4 ${isLiked ? 'fill-pink-500 text-pink-500 animate-pulse' : ''}`}
-                        />
-                        <span>{formatLikes(moment.likes)}</span>
+                        <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-rose-400 text-rose-400' : ''}`} />
+                        <span>{formatLikes(moment.likes || 0)}</span>
                       </button>
 
-                      {/* Comments & Share quick triggers */}
+                      {/* Right info: comments count & lightbox open */}
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setActiveLightboxMoment(moment)}
-                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 text-xs font-medium"
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 text-xs font-medium transition-colors"
                           title="View comments"
                         >
                           <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
@@ -362,7 +279,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
 
                         <button
                           onClick={() => handleCopyShareLink(moment)}
-                          className="p-1.5 rounded-xl bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800"
+                          className="p-1.5 rounded-xl bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 transition-colors"
                           title="Share link"
                         >
                           <Share2 className="w-3.5 h-3.5" />
@@ -378,131 +295,89 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
 
       </div>
 
-      {/* Interactive Lightbox Modal */}
+      {/* Lightbox Modal: Uncropped Full-Resolution View with Comments & Likes */}
       <AnimatePresence>
         {activeLightboxMoment && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/90 backdrop-blur-xl overflow-y-auto"
+            className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md p-4 sm:p-6 lg:p-8 flex items-center justify-center overflow-y-auto"
             onClick={() => setActiveLightboxMoment(null)}
           >
             <motion.div
-              initial={{ scale: 0.92, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-5xl rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 my-auto max-h-[90vh]"
+              className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 shadow-2xl my-auto max-h-[90vh]"
             >
-              {/* Close Button */}
-              <button
-                onClick={() => setActiveLightboxMoment(null)}
-                className="absolute top-4 right-4 z-40 p-2 rounded-full bg-slate-950/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 transition-colors"
-                aria-label="Close dialog"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              {/* Left Column: Full Uncropped Image */}
+              <div className="lg:col-span-7 bg-slate-950 flex items-center justify-center p-4 sm:p-6 relative min-h-[300px] lg:min-h-[500px]">
+                <img
+                  src={activeLightboxMoment.imgUrl}
+                  alt={activeLightboxMoment.titleEn}
+                  referrerPolicy="no-referrer"
+                  className="max-h-[70vh] w-auto max-w-full object-contain rounded-2xl drop-shadow-2xl"
+                />
 
-              {/* Left Column: High Res Uncropped Photo with Ambient Glow */}
-              <div className="lg:col-span-7 bg-slate-950 p-6 flex items-center justify-center relative min-h-[300px] sm:min-h-[450px]">
-                <img
-                  src={activeLightboxMoment.imgUrl}
-                  alt={activeLightboxMoment.titleEn}
-                  referrerPolicy="no-referrer"
-                  className="absolute inset-0 w-full h-full object-cover filter blur-3xl opacity-20"
-                />
-                <img
-                  src={activeLightboxMoment.imgUrl}
-                  alt={activeLightboxMoment.titleEn}
-                  referrerPolicy="no-referrer"
-                  className="relative z-10 max-h-[70vh] w-auto max-w-full object-contain rounded-2xl drop-shadow-[0_20px_40px_rgba(0,0,0,0.9)]"
-                />
+                <div className="absolute top-4 left-4 flex gap-2">
+                  <span className="px-3 py-1 rounded-xl bg-slate-950/80 backdrop-blur-md border border-slate-800 text-xs font-bold text-blue-400">
+                    {getCategoryBadgeLabel(activeLightboxMoment.category)}
+                  </span>
+                </div>
               </div>
 
-              {/* Right Column: Metadata, Like, Share & Comments Feed */}
-              <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 overflow-y-auto max-h-[70vh] lg:max-h-[85vh]">
+              {/* Right Column: Information, Likes & Visitor Comments */}
+              <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-slate-900/90 overflow-y-auto max-h-[85vh]">
                 <div>
-                  {/* Top Badges */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold">
-                      {getCategoryBadgeLabel(activeLightboxMoment.category)}
-                    </span>
-                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                  {/* Top Bar with Close Button */}
+                  <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
                       <Calendar className="w-3.5 h-3.5" />
-                      {activeLightboxMoment.date}
-                    </span>
+                      <span>{activeLightboxMoment.date}</span>
+                    </div>
+                    <button
+                      onClick={() => setActiveLightboxMoment(null)}
+                      className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
 
-                  <h3 className="text-xl sm:text-2xl font-extrabold text-slate-100 font-heading mb-3">
+                  {/* Title & Description */}
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-100 font-heading mb-3 leading-snug">
                     {language === 'NE' ? activeLightboxMoment.titleNe : activeLightboxMoment.titleEn}
                   </h3>
-
                   <p className="text-sm text-slate-300 leading-relaxed mb-6">
                     {language === 'NE' ? activeLightboxMoment.descNe : activeLightboxMoment.descEn}
                   </p>
 
-                  {/* Actions (Like + Share + Admin Edit + Delete Photo) */}
-                  <div className="flex flex-wrap items-center gap-2.5 pb-6 border-b border-slate-800 mb-6">
+                  {/* Interactions Row */}
+                  <div className="flex items-center gap-3 pb-6 border-b border-slate-800 mb-6">
                     <button
                       onClick={() => onLikeMoment(activeLightboxMoment.id)}
-                      className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-bold transition-all ${
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all active:scale-95 ${
                         userLikedMoments.includes(activeLightboxMoment.id)
-                          ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/30'
-                          : 'bg-slate-950 text-slate-300 hover:text-pink-400 border border-slate-800'
+                          ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-inner'
+                          : 'bg-slate-950 text-slate-300 hover:text-rose-400 border border-slate-800'
                       }`}
                     >
                       <Heart
                         className={`w-4 h-4 ${
-                          userLikedMoments.includes(activeLightboxMoment.id) ? 'fill-white' : ''
+                          userLikedMoments.includes(activeLightboxMoment.id) ? 'fill-rose-400 text-rose-400' : ''
                         }`}
                       />
-                      <span>
-                        {formatLikes(
-                          // Read up to date likes
-                          moments.find((m) => m.id === activeLightboxMoment.id)?.likes ?? activeLightboxMoment.likes
-                        )}{' '}
-                        {language === 'NE' ? 'लाइक्स' : 'Likes'}
-                      </span>
+                      <span>{formatLikes(activeLightboxMoment.likes || 0)} {language === 'NE' ? 'प्रतिक्रियाहरू' : 'Likes'}</span>
                     </button>
 
                     <button
                       onClick={() => handleCopyShareLink(activeLightboxMoment)}
-                      className="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800"
-                      title={language === 'NE' ? 'लिङ्क प्रतिलिपि गर्नुहोस्' : 'Copy Share Link'}
+                      className="p-3 rounded-2xl bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
+                      title="Copy link"
                     >
                       <Share2 className="w-4 h-4" />
                     </button>
-
-                    {isAdmin && (
-                      <button
-                        onClick={() => {
-                          const target = moments.find((m) => m.id === activeLightboxMoment.id) || activeLightboxMoment;
-                          setActiveLightboxMoment(null);
-                          onOpenEditModal(target);
-                        }}
-                        className="p-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-blue-400 border border-slate-800 hover:border-blue-500/40"
-                        title={language === 'NE' ? 'तस्बिर सम्पादन गर्नुहोस्' : 'Edit photo details'}
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                    )}
-
-                    {isAdmin && (
-                      <button
-                        onClick={() => {
-                          if (activeLightboxMoment) {
-                            setPhotoToDelete(activeLightboxMoment);
-                          }
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-rose-950/70 hover:bg-rose-600 border border-rose-800/80 hover:border-rose-600 text-rose-300 hover:text-white text-xs font-semibold shadow-lg shadow-rose-950/40 transition-all active:scale-95"
-                        title={language === 'NE' ? 'यो तस्बिर स्थायी रूपमा मेटाउनुहोस्' : 'Delete this photo permanently'}
-                      >
-                        <Trash2 className="w-4 h-4 text-rose-400" />
-                        <span>{language === 'NE' ? 'स्थायी मेटाउनुहोस्' : 'Delete Permanently'}</span>
-                      </button>
-                    )}
                   </div>
 
                   {/* Comments Feed */}
@@ -524,25 +399,13 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                         (commentsMap[activeLightboxMoment.id] || []).map((comment) => (
                           <div
                             key={comment.id}
-                            className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs group/comment"
+                            className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs"
                           >
                             <div className="flex items-center justify-between font-semibold text-slate-200 mb-1">
                               <span>{comment.author}</span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-[10px] text-slate-500">
-                                  {new Date(comment.createdAt).toLocaleDateString()}
-                                </span>
-                                {isAdmin && onDeleteComment && (
-                                  <button
-                                    type="button"
-                                    onClick={() => onDeleteComment(activeLightboxMoment.id, comment.id)}
-                                    className="p-1 rounded-md bg-rose-950/50 hover:bg-rose-600 text-rose-400 hover:text-white transition-colors"
-                                    title={language === 'NE' ? 'प्रतिक्रिया मेटाउनुहोस्' : 'Delete comment'}
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </button>
-                                )}
-                              </div>
+                              <span className="text-[10px] text-slate-500">
+                                {new Date(comment.createdAt).toLocaleDateString()}
+                              </span>
                             </div>
                             <p className="text-slate-400 leading-snug">{comment.text}</p>
                           </div>
@@ -583,21 +446,6 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* In-App Delete Confirmation Modal (100% reliable inside iframe) */}
-      <DeleteConfirmModal
-        isOpen={!!photoToDelete}
-        moment={photoToDelete}
-        language={language}
-        onClose={() => setPhotoToDelete(null)}
-        onConfirmDelete={(id) => {
-          setPhotoToDelete(null);
-          if (activeLightboxMoment?.id === id) {
-            setActiveLightboxMoment(null);
-          }
-          onDeleteMoment(id);
-        }}
-      />
     </section>
   );
 };

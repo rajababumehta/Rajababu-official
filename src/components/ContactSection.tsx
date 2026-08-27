@@ -8,8 +8,6 @@ import {
   Copy,
   Check,
   CheckCircle2,
-  Lock,
-  MessageCircle,
   ExternalLink,
 } from 'lucide-react';
 import { ContactSettings, Language } from '../types';
@@ -17,14 +15,12 @@ import { ContactSettings, Language } from '../types';
 interface ContactSectionProps {
   language: Language;
   contact: ContactSettings;
-  onSecretAdminLogin: () => void;
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
 }
 
 export const ContactSection: React.FC<ContactSectionProps> = ({
   language,
   contact,
-  onSecretAdminLogin,
   onShowToast,
 }) => {
   // Form State
@@ -55,21 +51,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    const cleanName = senderName.trim().toLowerCase();
-    const cleanEmail = senderEmail.trim().toLowerCase();
-    const cleanMsg = senderMessage.trim().toLowerCase();
-
-    // Secret Admin Gate check
-    // Name: admin, Email: rajababum426@gmail.com, Message: login
-    if (cleanName === 'admin' && cleanEmail === 'rajababum426@gmail.com' && cleanMsg === 'login') {
-      onSecretAdminLogin();
-      setSenderName('');
-      setSenderEmail('');
-      setSenderSubject('');
-      setSenderMessage('');
-      return;
-    }
 
     // Normal submission workflow
     setIsSubmitted(true);

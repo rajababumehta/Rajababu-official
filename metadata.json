@@ -1,6 +1,6 @@
 {
-  "name": "Rajababu Mehta Portfolio & AI Clipzone",
-  "description": "Full-stack portfolio and AI Clipzone CMS with Firebase Authentication, Firebase Storage image upload, Firestore real-time synchronization, bilingual English/Nepali support, and admin dashboard.",
+  "name": "Rajababu Mehta Portfolio & Visual Journey",
+  "description": "High-performance digital portfolio and visual journey showcase for Rajababu Mehta featuring uncropped photo galleries, real-time visitor interactions, likes, comments, and bilingual English/Nepali support.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
