@@ -63,11 +63,19 @@ export default function App() {
           profile: {
             ...DEFAULT_SYSTEM_SETTINGS.profile,
             ...parsed.profile,
+            name: 'Rajababu Mehta',
+            titleEn: DEFAULT_SYSTEM_SETTINGS.profile.titleEn,
+            taglineEn: DEFAULT_SYSTEM_SETTINGS.profile.taglineEn,
+            welcomeBadgeEn: DEFAULT_SYSTEM_SETTINGS.profile.welcomeBadgeEn,
             heroImage: FIXED_HERO_IMAGE,
           },
           about: {
             ...DEFAULT_SYSTEM_SETTINGS.about,
             ...parsed.about,
+            headingEn: DEFAULT_SYSTEM_SETTINGS.about.headingEn,
+            bioParagraph1En: DEFAULT_SYSTEM_SETTINGS.about.bioParagraph1En,
+            bioParagraph2En: DEFAULT_SYSTEM_SETTINGS.about.bioParagraph2En,
+            mottoEn: DEFAULT_SYSTEM_SETTINGS.about.mottoEn,
           },
           experience: {
             ...DEFAULT_SYSTEM_SETTINGS.experience,
@@ -105,12 +113,13 @@ export default function App() {
       if (saved !== null) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Filter out legacy unsplash mock images and deleted IDs
+          // Filter out legacy unsplash mock images, ai generated images and deleted IDs
           const validMoments = parsed.filter(
             (m: Moment) =>
               !deletedIds.includes(m.id) &&
               !m.imgUrl?.includes('unsplash.com') &&
-              !['moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6'].includes(m.id)
+              !m.imgUrl?.includes('rajababu_nature_moment') &&
+              !['moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6', 'moment-rajababu-nature'].includes(m.id)
           );
           if (validMoments.length > 0) {
             return validMoments;
@@ -168,6 +177,10 @@ export default function App() {
   // Sync state changes to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.LANGUAGE, language);
+    document.title =
+      language === 'NE'
+        ? 'राजाबाबु मेहता | आधिकारिक वेबसाइट - युवा सशक्तिकरण अधिवक्ता'
+        : 'Rajababu Mehta | Official Website - Youth Empowerment Advocate';
   }, [language]);
 
   useEffect(() => {

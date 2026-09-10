@@ -32,17 +32,17 @@ export const Header: React.FC<HeaderProps> = ({
     'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg';
 
   const rolesEn = [
-    'Visionary Community Leader',
-    'Technology & Strategy Specialist',
     'Youth Empowerment Advocate',
-    'Digital Transformation Architect',
+    'Innovator & Leader from Nepal',
+    'Technology & Strategy Specialist',
+    'Community Builder & Mentor',
   ];
 
   const rolesNe = [
-    'दूरदर्शी सामुदायिक नेता',
-    'प्रविधि तथा रणनीति विशेषज्ञ',
     'युवा सशक्तिकरण अधिवक्ता',
-    'डिजिटल रूपान्तरण योजनाकार',
+    'नेपालका अन्वेषक तथा नेतृत्वकर्ता',
+    'प्रविधि तथा रणनीति विशेषज्ञ',
+    'समुदाय निर्माता तथा मार्गदर्शक',
   ];
 
   const roles = language === 'NE' ? rolesNe : rolesEn;
@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* 1. HERO BACKGROUND COVER IMAGE (Full-viewport, uncropped top face anchoring) */}
       <img
         src={heroImageSrc}
-        alt={profile.name || 'Rajababu Mehta'}
+        alt="Rajababu Mehta - Youth Empowerment Advocate, Innovator, and Leader from Nepal"
         referrerPolicy="no-referrer"
         className="absolute inset-0 w-full h-full object-cover object-top filter brightness-95 contrast-105 pointer-events-none"
       />

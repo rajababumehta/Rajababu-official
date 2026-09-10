@@ -70,10 +70,18 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) =
           {/* Executive Narrative */}
           <div className="lg:col-span-7 flex flex-col justify-between p-8 sm:p-10 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm shadow-xl">
             <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-3">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>
+                  {language === 'NE'
+                    ? 'राजाबाबु मेहताको आधिकारिक व्यक्तिगत वेबसाइट'
+                    : 'Official Personal Website of Rajababu Mehta'}
+                </span>
+              </div>
               <h3 className="text-xl sm:text-2xl font-bold text-slate-100 font-heading mb-4">
                 {language === 'NE'
-                  ? 'स्थानीय प्रेरणा, विश्वव्यापी डिजिटल दृष्टिकोण'
-                  : 'Bridging Grassroots Aspirations with Global Tech'}
+                  ? 'युवा सशक्तिकरण, अन्वेषण र दिगो नेतृत्वको यात्रा'
+                  : 'Youth Empowerment, Innovation & Purpose-Driven Leadership'}
               </h3>
               <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-6">
                 {language === 'NE' ? about.bioParagraph1Ne : about.bioParagraph1En}

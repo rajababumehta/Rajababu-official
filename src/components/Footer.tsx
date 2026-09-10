@@ -26,13 +26,14 @@ export const Footer: React.FC<FooterProps> = ({
               RM
             </div>
             <div>
-              <div className="font-heading font-bold text-slate-100 text-sm">
-                {profile.name}
+              <div className="font-heading font-bold text-slate-100 text-sm flex items-center gap-2">
+                <span>{profile.name}</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20">rajababumehta.com.np</span>
               </div>
               <div className="text-xs text-slate-400">
                 {language === 'NE'
-                  ? 'सर्वाधिकार सुरक्षित © २०२६'
-                  : 'Official Personal Portfolio © 2026'}
+                  ? 'आधिकारिक वेबसाइट • युवा सशक्तिकरण अधिवक्ता, अन्वेषक र नेता • सर्वाधिकार सुरक्षित © २०२६'
+                  : 'Official Website • Youth Empowerment Advocate, Innovator & Leader • All rights reserved © 2026'}
               </div>
             </div>
           </div>

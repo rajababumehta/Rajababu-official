@@ -13,29 +13,29 @@ export const STORAGE_KEYS = {
 export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   profile: {
     name: 'Rajababu Mehta',
-    titleEn: 'Visionary Leader • Tech Strategist • Community Builder',
-    titleNe: 'दूरदर्शी नेता • प्रविधि रणनीतिकार • समुदाय निर्माता',
-    taglineEn: 'Empowering youth through technological innovation, strategic leadership, and sustainable community empowerment.',
-    taglineNe: 'प्राविधिक नवीनता, रणनीतिक नेतृत्व र दिगो सामुदायिक सशक्तिकरण मार्फत युवाहरूलाई सशक्त बनाउँदै।',
-    welcomeBadgeEn: 'Welcome to my digital space',
-    welcomeBadgeNe: 'मेरो डिजिटल पोर्टलमा स्वागत छ',
+    titleEn: 'Youth Empowerment Advocate • Innovator • Community Leader',
+    titleNe: 'युवा सशक्तिकरण अधिवक्ता • अन्वेषक • सामुदायिक नेता',
+    taglineEn: 'Empowering the next generation through technological innovation, youth mentorship, and sustainable community leadership across Nepal.',
+    taglineNe: 'नेपालभर प्राविधिक नवीनता, युवा मार्गदर्शन र दिगो सामुदायिक नेतृत्व मार्फत नयाँ पुस्तालाई सशक्त बनाउँदै।',
+    welcomeBadgeEn: 'Official Website of Rajababu Mehta',
+    welcomeBadgeNe: 'राजाबाबु मेहताको आधिकारिक वेबसाइट',
     heroImage: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg',
-    ctaPrimaryEn: 'View Photo Journey',
-    ctaPrimaryNe: 'दृश्य यात्रा अन्वेषण गर्नुहोस्',
-    ctaSecondaryEn: 'Get in Touch',
+    ctaPrimaryEn: 'View Moments of Impact',
+    ctaPrimaryNe: 'प्रभावका क्षणहरू हेर्नुहोस्',
+    ctaSecondaryEn: 'Connect with Rajababu',
     ctaSecondaryNe: 'सम्पर्क गर्नुहोस्',
   },
   about: {
-    badgeEn: 'Executive Overview',
-    badgeNe: 'कार्यकारी सिंहावलोकन',
-    headingEn: 'Pioneering Impact, Igniting Innovation',
-    headingNe: 'प्रभावकारी अगुवाइ, नवीनताको प्रज्वलन',
-    bioParagraph1En: 'Rajababu Mehta is an impassioned visionary, technologist, and dynamic community leader based in Nepal. With a relentless drive to bridge local aspirations with global digital innovation, he has spearheaded impactful socio-technical initiatives, student mentoring chapters, and strategic partnerships.',
-    bioParagraph1Ne: 'राजाबाबु मेहता नेपालमा आधारित एक भावुक दूरदर्शी, प्रविधिज्ञ र गतिशील सामुदायिक नेता हुनुहुन्छ। स्थानीय आकांक्षाहरूलाई विश्वव्यापी डिजिटल नवीनतासँग जोड्ने दृढ संकल्पका साथ, उहाँले प्रभावकारी सामाजिक-प्राविधिक पहलहरू, विद्यार्थी मार्गदर्शन अध्यायहरू र रणनीतिक साझेदारीहरूको नेतृत्व गर्नुभएको छ।',
-    bioParagraph2En: 'Guided by core values of integrity, empathy, and continuous learning, Rajababu actively drives workshops, coordinates high-impact community drives, and fosters next-generation digital literacy across diverse regions.',
-    bioParagraph2Ne: 'इमान्दारी, सहानुभूति र निरन्तर सिकाइका आधारभूत मूल्यहरूबाट निर्देशित भएर, राजाबाबुले कार्यशालाहरू सञ्चालन गर्नुहुन्छ, उच्च-प्रभाव सामुदायिक अभियानहरूको समन्वय गर्नुहुन्छ, र विभिन्न क्षेत्रहरूमा नयाँ पुस्ताको डिजिटल साक्षरतालाई बढावा दिनुहुन्छ।',
-    mottoEn: '"True leadership is not about title or prestige; it is about inspiring others to unlock their highest potential."',
-    mottoNe: '"साँचो नेतृत्व पद वा प्रतिष्ठामा होइन; अरूलाई उनीहरूको उच्चतम क्षमता अनलक गर्न प्रेरित गर्नमा हुन्छ।"',
+    badgeEn: 'Official Personal Profile',
+    badgeNe: 'आधिकारिक व्यक्तिगत प्रोफाइल',
+    headingEn: 'Official Website of Rajababu Mehta — Youth Empowerment Advocate & Innovator from Nepal',
+    headingNe: 'राजाबाबु मेहताको आधिकारिक वेबसाइट — नेपालका युवा सशक्तिकरण अधिवक्ता तथा अन्वेषक',
+    bioParagraph1En: 'Rajababu Mehta is an official Youth Empowerment Advocate, Innovator, and dynamic Community Leader from Nepal. Driven by a mission to bridge grassroots aspirations with progressive technological innovation, Rajababu Mehta has spearheaded impactful socio-technical initiatives, youth development workshops, and transformative community programs across Nepal.',
+    bioParagraph1Ne: 'राजाबाबु मेहता नेपालका एक आधिकारिक युवा सशक्तिकरण अधिवक्ता, अन्वेषक र गतिशील सामुदायिक नेता हुनुहुन्छ। स्थानीय युवा आकांक्षाहरूलाई आधुनिक प्राविधिक नवीनतासँग जोड्ने उद्देश्यका साथ, राजाबाबु मेहताले नेपालभर प्रभावकारी सामाजिक-प्राविधिक पहलहरू, युवा विकास कार्यशालाहरू र रूपान्तरणकारी सामुदायिक कार्यक्रमहरूको नेतृत्व गर्दै आउनुभएको छ।',
+    bioParagraph2En: 'Guided by core values of integrity, empathy, and collaborative innovation, Rajababu Mehta actively mobilizes young leaders, fosters digital literacy in underserved regions, and builds long-term institutional partnerships. This platform serves as the verified official website of Rajababu Mehta, documenting his leadership milestones, ongoing initiatives, and vision for Nepal’s digital future.',
+    bioParagraph2Ne: 'इमान्दारी, सहानुभूति र सहयोगी नवीनताका आधारभूत मूल्यहरूबाट निर्देशित भएर, राजाबाबु मेहताले युवा नेतृत्वकर्ताहरूलाई परिचालन गर्नुहुन्छ, विभिन्न क्षेत्रहरूमा डिजिटल साक्षरतालाई प्रवर्द्धन गर्नुहुन्छ र दीर्घकालीन संस्थागत साझेदारीहरू निर्माण गर्नुहुन्छ। यो वेबसाइट राजाबाबु मेहताको नेतृत्वका उपलब्धिहरू, सक्रिय पहलहरू र नेपालको डिजिटल भविष्यको दृष्टिकोण प्रस्तुत गर्ने प्रमाणित आधिकारिक डिजिटल मञ्च हो।',
+    mottoEn: '"True leadership is not about title or prestige; it is about inspiring others to unlock their highest potential." — Rajababu Mehta',
+    mottoNe: '"साँचो नेतृत्व पद वा प्रतिष्ठामा होइन; अरूलाई उनीहरूको उच्चतम क्षमता अनलक गर्न प्रेरित गर्नमा हुन्छ।" — राजाबाबु मेहता',
     stats: [
       {
         id: 'stat-1',
@@ -201,8 +201,8 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
     badgeNe: 'सम्पर्क गर्नुहोस्',
     headingEn: 'Let’s Collaborate & Build Something Visionary',
     headingNe: 'सहकार्य गरौं र केही दूरदर्शी निर्माण गरौं',
-    subheadingEn: 'Whether you want to discuss a new strategic venture, invite Rajababu for a keynote workshop, or partner on community impact initiatives, feel free to reach out!',
-    subheadingNe: 'नयाँ रणनीतिक पहलको बारेमा छलफल गर्न, कार्यशालाको लागि आमन्त्रित गर्न वा सामुदायिक प्रभाव पहलहरूमा साझेदारी गर्न चाहनुहुन्छ भने, कृपया सम्पर्क गर्नुहोस्!',
+    subheadingEn: 'Whether you want to discuss a new strategic venture, invite Rajababu Mehta for a keynote session, or partner on youth empowerment initiatives in Nepal, feel free to reach out!',
+    subheadingNe: 'नयाँ रणनीतिक पहलको बारेमा छलफल गर्न, राजाबाबु मेहतालाई कार्यशाला वा सम्मेलनका लागि आमन्त्रित गर्न वा युवा सशक्तिकरण पहलहरूमा साझेदारी गर्न चाहनुहुन्छ भने, कृपया सम्पर्क गर्नुहोस्!',
     email: 'rajababum026@gmail.com',
     phone: '+977 9819000000',
     locationEn: 'Kathmandu, Bagmati, Nepal',
@@ -220,30 +220,8 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   },
 };
 
-export const DEFAULT_MOMENTS: Moment[] = [
-  {
-    id: 'moment-rajababu-nature',
-    titleEn: 'Leadership in Focus: Vision & Resilience',
-    titleNe: 'दृष्टिकोण र दृढता: नेतृत्वको यात्रा',
-    descEn: 'Capturing moments of reflection, grounded focus, and commitment to driving positive impact in community and technology initiatives.',
-    descNe: 'समुदाय र प्रविधि पहलहरूमा सकारात्मक प्रभाव पार्ने दृढ संकल्प, चिन्तन र नेतृत्वका महत्वपूर्ण क्षणहरू।',
-    imgUrl: '/images/rajababu_nature_moment.jpg',
-    likes: 540,
-    category: 'Leadership',
-    date: '2026-08-16',
-    isUserUploaded: true,
-  },
-];
+export const DEFAULT_MOMENTS: Moment[] = [];
 
-export const DEFAULT_COMMENTS_MAP: Record<string, Comment[]> = {
-  'moment-rajababu-nature': [
-    {
-      id: 'comment-welcome-1',
-      momentId: 'moment-rajababu-nature',
-      author: 'Community Member',
-      text: 'Inspiring leadership and grounded vision! Keep moving forward.',
-      createdAt: '2026-08-17T09:00:00Z',
-    },
-  ],
-};
+export const DEFAULT_COMMENTS_MAP: Record<string, Comment[]> = {};
+
 

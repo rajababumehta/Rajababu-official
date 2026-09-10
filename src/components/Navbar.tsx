@@ -51,7 +51,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {profile.name}
               </span>
               <span className="text-[11px] text-slate-400 font-medium tracking-wide">
-                {language === 'NE' ? 'दूरदर्शी तथा प्रविधि नेतृत्व' : 'Visionary & Tech Leader'}
+                {language === 'NE' ? 'युवा सशक्तिकरण अधिवक्ता' : 'Youth Empowerment Advocate'}
               </span>
             </div>
           </a>
