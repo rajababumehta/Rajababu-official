@@ -32,8 +32,8 @@ export const Footer: React.FC<FooterProps> = ({
               </div>
               <div className="text-xs text-slate-400">
                 {language === 'NE'
-                  ? 'आधिकारिक वेबसाइट • युवा सशक्तिकरण अधिवक्ता, अन्वेषक र नेता • सर्वाधिकार सुरक्षित © २०२६'
-                  : 'Official Website • Youth Empowerment Advocate, Innovator & Leader • All rights reserved © 2026'}
+                  ? 'आधिकारिक वेबसाइट • वेबसाइट डेभलपर, विद्यार्थी तथा एआई व्याख्याकर्ता • वीरगञ्ज, नेपाल © २०२६'
+                  : 'Official Website • Website Developer, Student & AI Explainer • Birgunj, Nepal © 2026'}
               </div>
             </div>
           </div>
@@ -41,7 +41,7 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Center Note */}
           <div className="flex items-center gap-4 text-xs text-slate-400">
             <div className="flex items-center gap-1.5">
-              <span>{language === 'NE' ? 'सशक्तिकरण र नवीनताका साथ निर्मित' : 'Crafted with passion for community & innovation'}</span>
+              <span>{language === 'NE' ? 'सफा कोड र आधुनिक वेब प्रविधिका साथ निर्मित' : 'Crafted with clean code & modern web technology'}</span>
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             </div>
           </div>

@@ -32,17 +32,17 @@ export const Header: React.FC<HeaderProps> = ({
     'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg';
 
   const rolesEn = [
-    'Youth Empowerment Advocate',
-    'Innovator & Leader from Nepal',
-    'Technology & Strategy Specialist',
-    'Community Builder & Mentor',
+    'Website Developer',
+    'Student & Tech Explorer',
+    'AI Explainer',
+    'Custom Website Creator',
   ];
 
   const rolesNe = [
-    'युवा सशक्तिकरण अधिवक्ता',
-    'नेपालका अन्वेषक तथा नेतृत्वकर्ता',
-    'प्रविधि तथा रणनीति विशेषज्ञ',
-    'समुदाय निर्माता तथा मार्गदर्शक',
+    'वेबसाइट डेभलपर',
+    'विद्यार्थी तथा प्रविधि अन्वेषक',
+    'एआई व्याख्याकर्ता',
+    'कस्टम वेबसाइट निर्माता',
   ];
 
   const roles = language === 'NE' ? rolesNe : rolesEn;
@@ -63,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* 1. HERO BACKGROUND COVER IMAGE (Full-viewport, uncropped top face anchoring) */}
       <img
         src={heroImageSrc}
-        alt="Rajababu Mehta - Youth Empowerment Advocate, Innovator, and Leader from Nepal"
+        alt="Rajababu Mehta - Website Developer, Student, and AI Explainer from Birgunj Nepal"
         referrerPolicy="no-referrer"
         className="absolute inset-0 w-full h-full object-cover object-top filter brightness-95 contrast-105 pointer-events-none"
       />
@@ -93,8 +93,8 @@ export const Header: React.FC<HeaderProps> = ({
             <Sparkles className="w-4 h-4 text-blue-400 animate-pulse" />
             <span>
               {language === 'NE'
-                ? profile.welcomeBadgeNe || 'मेरो डिजिटल पोर्टलमा स्वागत छ'
-                : profile.welcomeBadgeEn || 'Welcome to my digital space'}
+                ? profile.welcomeBadgeNe || 'वेबसाइट बनाउन मलाई सम्पर्क गर्नुहोस्'
+                : profile.welcomeBadgeEn || 'Available for Custom Website Projects'}
             </span>
           </motion.div>
 
@@ -124,26 +124,26 @@ export const Header: React.FC<HeaderProps> = ({
             </AnimatePresence>
           </div>
 
-          {/* 3 Tagline Badges (Visionary, Professional, Innovator) */}
+          {/* 3 Tagline Badges (Web Developer, Student, AI Explainer) */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex flex-wrap items-center gap-2.5 sm:gap-3 mb-6"
           >
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/90 shadow-sm text-xs font-semibold text-amber-300">
-              <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-              <span>{language === 'NE' ? 'दूरदर्शी' : 'Visionary'}</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/90 shadow-sm text-xs font-semibold text-blue-300">
+              <Code className="w-3.5 h-3.5 text-blue-400" />
+              <span>{language === 'NE' ? 'वेबसाइट डेभलपर' : 'Website Developer'}</span>
             </div>
 
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/90 shadow-sm text-xs font-semibold text-blue-300">
-              <Shield className="w-3.5 h-3.5 text-blue-400" />
-              <span>{language === 'NE' ? 'व्यावसायिक' : 'Professional'}</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/90 shadow-sm text-xs font-semibold text-amber-300">
+              <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+              <span>{language === 'NE' ? 'विद्यार्थी' : 'Student'}</span>
             </div>
 
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/90 shadow-sm text-xs font-semibold text-purple-300">
-              <Code className="w-3.5 h-3.5 text-purple-400" />
-              <span>{language === 'NE' ? 'अन्वेषक' : 'Innovator'}</span>
+              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+              <span>{language === 'NE' ? 'एआई व्याख्याकर्ता' : 'AI Explainer'}</span>
             </div>
           </motion.div>
 
@@ -165,21 +165,23 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex flex-wrap items-center gap-3 sm:gap-4 w-full sm:w-auto mb-8"
           >
             <a
-              href="#journey"
+              href="#contact"
               id="btn-hero-primary-cta"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-xl shadow-blue-600/35 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              <span>{language === 'NE' ? profile.ctaPrimaryNe || 'दृश्य यात्रा अन्वेषण गर्नुहोस्' : profile.ctaPrimaryEn || 'View Photo Journey'}</span>
+              <span>{language === 'NE' ? profile.ctaPrimaryNe || 'वेबसाइट बनाउन सम्पर्क गर्नुहोस्' : profile.ctaPrimaryEn || 'Make a Website / Contact Me'}</span>
               <ArrowRight className="w-4 h-4" />
             </a>
 
             <a
-              href="#contact"
+              href="https://wa.me/9779816689232?text=Hello%20Rajababu,%20I%20want%20to%20build%20a%20website"
+              target="_blank"
+              rel="noopener noreferrer"
               id="btn-hero-secondary-cta"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900/85 hover:bg-slate-800 backdrop-blur-md border border-slate-700/80 hover:border-slate-600 text-slate-200 font-medium text-sm transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-700/80 hover:bg-emerald-600 backdrop-blur-md border border-emerald-500/50 text-white font-medium text-sm transition-all shadow-lg"
             >
-              <Send className="w-4 h-4 text-slate-400" />
-              <span>{language === 'NE' ? profile.ctaSecondaryNe || 'सम्पर्क गर्नुहोस्' : profile.ctaSecondaryEn || 'Get in Touch'}</span>
+              <Send className="w-4 h-4 text-emerald-200" />
+              <span>WhatsApp: 9816689232</span>
             </a>
           </motion.div>
 

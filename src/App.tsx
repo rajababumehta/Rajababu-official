@@ -84,6 +84,15 @@ export default function App() {
           contact: {
             ...DEFAULT_SYSTEM_SETTINGS.contact,
             ...parsed.contact,
+            headingEn: "Let's Collaborate & Build Something Visionary",
+            headingNe: 'सहकार्य गरौं र केही दूरदर्शी निर्माण गरौं',
+            email: 'rajababum426@gmail.com',
+            phone: '9816689232',
+            locationEn: 'Birgunj, Nepal',
+            locationNe: 'वीरगञ्ज, नेपाल',
+            facebookUrl: 'https://www.facebook.com/share/18hGohd9z5/',
+            instagramUrl: 'https://www.instagram.com/mr.rajababumehta',
+            whatsappNumber: '9816689232',
           },
           autoLikes: {
             ...DEFAULT_SYSTEM_SETTINGS.autoLikes,
@@ -179,8 +188,8 @@ export default function App() {
     localStorage.setItem(STORAGE_KEYS.LANGUAGE, language);
     document.title =
       language === 'NE'
-        ? 'राजाबाबु मेहता | आधिकारिक वेबसाइट - युवा सशक्तिकरण अधिवक्ता'
-        : 'Rajababu Mehta | Official Website - Youth Empowerment Advocate';
+        ? 'राजाबाबु मेहता | वेबसाइट डेभलपर, विद्यार्थी तथा एआई व्याख्याकर्ता - वीरगञ्ज'
+        : 'Rajababu Mehta | Website Developer, Student & AI Explainer - Birgunj, Nepal';
   }, [language]);
 
   useEffect(() => {

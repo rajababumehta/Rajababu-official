@@ -64,18 +64,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                     : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
                 }`}
               >
-                {language === 'NE' ? 'सबै सीपहरू' : 'All Domains'}
-              </button>
-              <button
-                onClick={() => setActiveCategory('leadership')}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                  activeCategory === 'leadership'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
-                }`}
-              >
-                <Users className="w-3.5 h-3.5" />
-                <span>{language === 'NE' ? 'नेतृत्व' : 'Leadership'}</span>
+                {language === 'NE' ? 'सबै सीपहरू' : 'All Skills'}
               </button>
               <button
                 onClick={() => setActiveCategory('technical')}
@@ -86,7 +75,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                 }`}
               >
                 <Cpu className="w-3.5 h-3.5" />
-                <span>{language === 'NE' ? 'प्राविधिक' : 'Technical'}</span>
+                <span>{language === 'NE' ? 'वेब डेभलपमेन्ट' : 'Web Development'}</span>
               </button>
               <button
                 onClick={() => setActiveCategory('strategy')}
@@ -97,7 +86,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                 }`}
               >
                 <Compass className="w-3.5 h-3.5" />
-                <span>{language === 'NE' ? 'रणनीति' : 'Strategy'}</span>
+                <span>{language === 'NE' ? 'एआई तथा प्राविधिक' : 'AI & Tech Tools'}</span>
               </button>
             </div>
 

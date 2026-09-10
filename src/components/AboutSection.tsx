@@ -1,16 +1,11 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import {
-  Rocket,
-  Users,
-  HeartHandshake,
-  Award,
   Compass,
   Cpu,
   ShieldCheck,
   Sparkles,
   Quote,
-  CheckCircle,
 } from 'lucide-react';
 import { AboutSettings, Language } from '../types';
 
@@ -20,21 +15,6 @@ interface AboutSectionProps {
 }
 
 export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) => {
-  const getStatIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'Rocket':
-        return <Rocket className="w-5 h-5 text-blue-400" />;
-      case 'Users':
-        return <Users className="w-5 h-5 text-indigo-400" />;
-      case 'HeartHandshake':
-        return <HeartHandshake className="w-5 h-5 text-pink-400" />;
-      case 'Award':
-        return <Award className="w-5 h-5 text-amber-400" />;
-      default:
-        return <Rocket className="w-5 h-5 text-blue-400" />;
-    }
-  };
-
   const getValueIcon = (iconName: string) => {
     switch (iconName) {
       case 'Compass':
@@ -65,12 +45,11 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) =
           </h2>
         </div>
 
-        {/* Narrative & Executive Bio Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-16">
-          {/* Executive Narrative */}
-          <div className="lg:col-span-7 flex flex-col justify-between p-8 sm:p-10 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm shadow-xl">
+        {/* Narrative & Executive Bio */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <div className="p-8 sm:p-12 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm shadow-xl">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-4">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>
                   {language === 'NE'
@@ -78,10 +57,10 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) =
                     : 'Official Personal Website of Rajababu Mehta'}
                 </span>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-100 font-heading mb-4">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100 font-heading mb-4">
                 {language === 'NE'
-                  ? 'युवा सशक्तिकरण, अन्वेषण र दिगो नेतृत्वको यात्रा'
-                  : 'Youth Empowerment, Innovation & Purpose-Driven Leadership'}
+                  ? 'वेबसाइट निर्माण, विद्यार्थी यात्रा तथा एआई प्रविधि अन्वेषण'
+                  : 'Web Development, Academic Growth & Practical AI Innovation'}
               </h3>
               <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-6">
                 {language === 'NE' ? about.bioParagraph1Ne : about.bioParagraph1En}
@@ -98,36 +77,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) =
                 {language === 'NE' ? about.mottoNe : about.mottoEn}
               </p>
             </div>
-          </div>
-
-          {/* 4 Interactive Metric Counter Cards */}
-          <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {about.stats.map((stat, idx) => (
-              <motion.div
-                key={stat.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800/90 hover:border-blue-500/40 hover:bg-slate-900 transition-all flex flex-col justify-between group"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 group-hover:scale-110 transition-transform">
-                    {getStatIcon(stat.icon)}
-                  </div>
-                  <CheckCircle className="w-4 h-4 text-slate-600 group-hover:text-emerald-400 transition-colors" />
-                </div>
-                <div>
-                  <div className="text-3xl sm:text-4xl font-black text-slate-100 font-heading tracking-tight mb-1">
-                    {stat.value}
-                    <span className="text-blue-400">{stat.suffix}</span>
-                  </div>
-                  <div className="text-xs sm:text-sm font-medium text-slate-400 leading-snug">
-                    {language === 'NE' ? stat.labelNe : stat.labelEn}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
           </div>
         </div>
 

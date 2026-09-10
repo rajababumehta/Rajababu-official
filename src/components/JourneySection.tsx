@@ -117,12 +117,12 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
               <span>{language === 'NE' ? 'दृश्य यात्रा तथा संस्मरण' : 'Visual Journey & Moments'}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 font-heading tracking-tight">
-              {language === 'NE' ? 'जीवनका महत्वपूर्ण क्षणहरू' : 'Moments of Impact & Leadership'}
+              {language === 'NE' ? 'जीवन तथा सिकाइका महत्वपूर्ण क्षणहरू' : 'Moments of Growth & Exploration'}
             </h2>
             <p className="text-sm sm:text-base text-slate-400 mt-2 max-w-xl">
               {language === 'NE'
-                ? 'राष्ट्रिय सम्मेलनहरू, सामुदायिक कार्यशालाहरू र रणनीतिक पहलहरूका वास्तविक तस्बिरहरू।'
-                : 'A curated visual archive of milestones, community youth drives, leadership roundtables, and personal journeys.'}
+                ? 'वेब विकास यात्रा, प्राविधिक अन्वेषण र शैक्षिक गतिविधिका वास्तविक क्षणहरू।'
+                : 'A visual archive of web projects, tech workshops, student experiences, and personal milestones.'}
             </p>
           </div>
 
