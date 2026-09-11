@@ -23,7 +23,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) =
       : 'यदि तपाईँलाई व्यक्तिगत पोर्टफोलियो, व्यवसायिक पोर्टल, ल्यान्डिङ पेज वा कुनै पनि किसिमको आधुनिक वेबसाइट बनाउन परेमा, अथवा एआई प्रविधिको व्यवहारिक प्रयोगबारे बुझ्न चाहेमा राजाबाबु मेहतासँग सिधै सम्पर्क गर्न सक्नुहुन्छ। जुनसुकै प्रकारको वेबसाइट बनाउन परेमा इमेल वा ह्वाट्सएप (९८१६६८९२३२) मार्फत तुरुन्त सम्पर्क गर्नुहोस्।';
 
   return (
-    <section id="about" className="py-20 sm:py-28 bg-slate-950/60 border-t border-slate-900 relative">
+    <section id="about" className="py-20 sm:py-28 bg-slate-950/60 border-t border-slate-900 relative scroll-mt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}

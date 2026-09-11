@@ -1,7 +1,6 @@
 import React from 'react';
 import { Sparkles, ArrowUp } from 'lucide-react';
 import { Language, ProfileSettings } from '../types';
-import { NewsletterSignup } from './NewsletterSignup';
 
 interface FooterProps {
   language: Language;
@@ -17,12 +16,9 @@ export const Footer: React.FC<FooterProps> = ({
   };
 
   return (
-    <footer className="bg-slate-950 border-t border-slate-900 pt-16 pb-12 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        {/* Newsletter Signup Component */}
-        <NewsletterSignup language={language} />
-
-        <div className="pt-8 border-t border-slate-900/80 flex flex-col sm:flex-row items-center justify-between gap-6">
+    <footer className="bg-slate-950 border-t border-slate-900 py-10 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           
           {/* Brand Info */}
           <div className="flex items-center gap-3">

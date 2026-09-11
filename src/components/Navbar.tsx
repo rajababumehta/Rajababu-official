@@ -20,10 +20,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Exact menu items requested: Home, About, Skills, Projects, Services, Contact
   const navItems = [
+    { href: '#home', labelEn: 'Home', labelNe: 'गृहपृष्ठ' },
     { href: '#about', labelEn: 'About', labelNe: 'बारेमा' },
-    { href: '#journey', labelEn: 'Visual Journey', labelNe: 'दृश्य यात्रा' },
-    { href: '#experience', labelEn: 'Experience', labelNe: 'अनुभव' },
+    { href: '#skills', labelEn: 'Skills', labelNe: 'सीपहरू' },
+    { href: '#projects', labelEn: 'Projects', labelNe: 'परियोजनाहरू' },
+    { href: '#services', labelEn: 'Services', labelNe: 'सेवाहरू' },
     { href: '#contact', labelEn: 'Contact', labelNe: 'सम्पर्क' },
   ];
 
@@ -32,118 +35,123 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80 transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Brand Logo & Profile Avatar (Circle Shape) */}
-          <a
-            href="#"
-            id="nav-brand-logo"
-            className="flex items-center gap-3.5 group focus:outline-none"
-          >
-            <div className="relative flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 p-[2px] shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all duration-300 group-hover:scale-105">
-              <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center ring-1 ring-white/20">
-                <img
-                  src="/brand-avatar.png"
-                  alt={profile.name}
-                  className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-110"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-heading font-bold text-base sm:text-lg text-slate-100 tracking-tight flex items-center gap-1.5 group-hover:text-blue-400 transition-colors">
-                {profile.name}
-              </span>
-              <span className="text-[11px] text-slate-400 font-medium tracking-wide">
-                {language === 'NE' ? 'एआई वेबसाइट डेभलपर • एआई व्याख्याकर्ता • विद्यार्थी' : 'AI Website Developer • AI Explainer • Student'}
-              </span>
-            </div>
-          </a>
-
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900/80 transition-all"
-              >
-                {language === 'NE' ? item.labelNe : item.labelEn}
-              </a>
-            ))}
-          </nav>
-
-          {/* Right Action Controls */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Language Switcher Pill */}
-            <button
-              id="btn-language-toggle-desktop"
-              onClick={onToggleLanguage}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition-all shadow-inner"
-              title={language === 'EN' ? 'नेपालीमा हेर्नुहोस्' : 'Switch to English'}
-              aria-label="Switch Language"
+    <header className="sticky top-3 sm:top-4 z-50 w-full px-3 sm:px-6 lg:px-8 pointer-events-none transition-all">
+      <div className="max-w-6xl mx-auto flex flex-col items-center">
+        {/* Floating Capsule / Pill Container (border-radius: 9999px) */}
+        <div className="pointer-events-auto w-full rounded-full bg-slate-950/85 backdrop-blur-xl border border-slate-700/60 shadow-2xl shadow-blue-950/30 px-3 sm:px-5 py-2 transition-all hover:border-slate-600/70">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            
+            {/* Brand Logo & Profile Avatar (Circle shape photo) */}
+            <a
+              href="#home"
+              id="nav-brand-logo"
+              className="flex items-center gap-2.5 sm:gap-3 group focus:outline-none shrink-0"
             >
-              <Languages className="w-3.5 h-3.5 text-blue-400" />
-              <div className="flex items-center gap-1">
-                <span className={language === 'EN' ? 'text-blue-400 font-bold' : 'text-slate-500'}>
-                  EN
+              <div className="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 p-[1.5px] shadow-md shadow-blue-500/30 group-hover:shadow-blue-500/60 transition-all duration-300 group-hover:scale-105">
+                <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center ring-1 ring-white/20">
+                  <img
+                    src="/brand-avatar.png"
+                    alt={profile.name}
+                    className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-110"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-heading font-bold text-sm sm:text-base text-slate-100 tracking-tight flex items-center gap-1 group-hover:text-blue-400 transition-colors whitespace-nowrap">
+                  {profile.name}
                 </span>
-                <span className="text-slate-600">/</span>
-                <span className={language === 'NE' ? 'text-blue-400 font-bold' : 'text-slate-500'}>
-                  नेपाली
+                <span className="text-[10px] text-slate-400 font-medium tracking-wide hidden lg:inline-block">
+                  {language === 'NE' ? 'एआई वेबसाइट डेभलपर' : 'AI Website Developer'}
                 </span>
               </div>
-            </button>
-          </div>
+            </a>
 
-          {/* Mobile Menu Button */}
-          <div className="flex items-center gap-2 md:hidden">
-            {/* Mobile Language Switcher */}
-            <button
-              id="btn-language-toggle-mobile"
-              onClick={onToggleLanguage}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-bold text-blue-400"
-              aria-label="Toggle language"
-            >
-              {language === 'EN' ? 'नेपाली' : 'EN'}
-            </button>
-
-            <button
-              id="btn-mobile-menu-toggle"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-900 border border-slate-800 focus:outline-none"
-              aria-label="Toggle navigation menu"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Drawer */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-b border-slate-800 bg-slate-950/95 backdrop-blur-xl px-4 pt-2 pb-6 flex flex-col gap-3"
-          >
-            <nav className="flex flex-col gap-1">
+            {/* Desktop Centered Menu Items (Pill capsule styled buttons) */}
+            <nav className="hidden md:flex items-center justify-center gap-0.5 lg:gap-1.5 flex-1 px-2">
               {navItems.map((item) => (
                 <a
                   key={item.href}
                   href={item.href}
-                  onClick={handleNavClick}
-                  className="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900 transition-colors"
+                  className="px-3 py-1.5 rounded-full text-xs lg:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/80 transition-all whitespace-nowrap"
                 >
                   {language === 'NE' ? item.labelNe : item.labelEn}
                 </a>
               ))}
             </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+            {/* Right Action Controls: Language Switcher Pill */}
+            <div className="hidden md:flex items-center gap-2 shrink-0">
+              <button
+                id="btn-language-toggle-desktop"
+                onClick={onToggleLanguage}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 hover:border-slate-600 text-xs font-semibold text-slate-300 hover:text-white transition-all shadow-inner"
+                title={language === 'EN' ? 'नेपालीमा हेर्नुहोस्' : 'Switch to English'}
+                aria-label="Switch Language"
+              >
+                <Languages className="w-3.5 h-3.5 text-blue-400" />
+                <div className="flex items-center gap-1">
+                  <span className={language === 'EN' ? 'text-blue-400 font-bold' : 'text-slate-500'}>
+                    EN
+                  </span>
+                  <span className="text-slate-600">/</span>
+                  <span className={language === 'NE' ? 'text-blue-400 font-bold' : 'text-slate-500'}>
+                    नेपाली
+                  </span>
+                </div>
+              </button>
+            </div>
+
+            {/* Mobile Controls */}
+            <div className="flex items-center gap-1.5 md:hidden">
+              <button
+                id="btn-language-toggle-mobile"
+                onClick={onToggleLanguage}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] font-bold text-blue-400"
+                aria-label="Toggle language"
+              >
+                {language === 'EN' ? 'नेपाली' : 'EN'}
+              </button>
+
+              <button
+                id="btn-mobile-menu-toggle"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-900 border border-slate-800 focus:outline-none"
+                aria-label="Toggle navigation menu"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Mobile Dropdown Pill/Sheet */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className="pointer-events-auto md:hidden w-full mt-2 p-3 rounded-3xl border border-slate-800 bg-slate-950/95 backdrop-blur-2xl shadow-2xl flex flex-col gap-1"
+            >
+              <nav className="flex flex-col gap-1">
+                {navItems.map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    onClick={handleNavClick}
+                    className="px-4 py-2 rounded-2xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900/90 transition-colors flex items-center justify-between"
+                  >
+                    <span>{language === 'NE' ? item.labelNe : item.labelEn}</span>
+                  </a>
+                ))}
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </header>
   );
 };
+

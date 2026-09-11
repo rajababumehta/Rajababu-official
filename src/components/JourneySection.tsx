@@ -106,8 +106,8 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
   };
 
   return (
-    <section id="journey" className="py-20 sm:py-28 bg-slate-950 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="projects" className="py-20 sm:py-28 bg-slate-950 relative scroll-mt-24">
+      <div id="journey" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Heading & Global Boost Bar */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">

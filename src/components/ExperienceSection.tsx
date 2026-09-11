@@ -28,8 +28,8 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     : experience.skills.filter((s) => s.category === activeCategory);
 
   return (
-    <section id="experience" className="py-20 sm:py-28 bg-slate-950/70 border-t border-slate-900 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="skills" className="py-20 sm:py-28 bg-slate-950/70 border-t border-slate-900 relative scroll-mt-24">
+      <div id="experience" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Heading */}
         <div className="flex flex-col items-center text-center mb-16">

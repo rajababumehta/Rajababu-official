@@ -13,9 +13,7 @@ import {
   Sparkles,
   Code,
   Globe,
-  ShoppingBag,
   Zap,
-  GraduationCap,
   MessageCircle,
   ShieldCheck,
   HelpCircle,
@@ -23,8 +21,6 @@ import {
   Layers,
   ArrowRight,
   Smartphone,
-  Sliders,
-  CheckSquare,
   FileCode,
 } from 'lucide-react';
 import { ContactSettings, Language } from '../types';
@@ -35,16 +31,6 @@ interface ContactSectionProps {
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
 }
 
-type ProjectType = 'portfolio' | 'business' | 'ecommerce' | 'landing' | 'ai-consulting';
-type ProjectTimeline = 'urgent' | 'standard' | 'flexible';
-
-interface FeatureAddon {
-  id: string;
-  labelEn: string;
-  labelNe: string;
-  icon: React.ElementType;
-}
-
 export const ContactSection: React.FC<ContactSectionProps> = ({
   language,
   contact,
@@ -53,19 +39,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   // Navigation / View Tabs
   const [activeTab, setActiveTab] = useState<'planner' | 'deliverables' | 'faq'>('planner');
 
-  // Interactive Project Planner States
-  const [selectedProjectType, setSelectedProjectType] = useState<ProjectType>('portfolio');
-  const [selectedTimeline, setSelectedTimeline] = useState<ProjectTimeline>('standard');
-  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([
-    'responsive',
-    'whatsapp',
-    'seo',
-  ]);
-
   // Form State
   const [senderName, setSenderName] = useState('');
   const [senderEmail, setSenderEmail] = useState('');
-  const [senderPhone, setSenderPhone] = useState('');
+  const [senderSubject, setSenderSubject] = useState('');
   const [senderMessage, setSenderMessage] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -100,118 +77,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   // Expanded FAQ items
   const [expandedFaq, setExpandedFaq] = useState<number | null>(0);
 
-  const featureAddons: FeatureAddon[] = [
-    {
-      id: 'responsive',
-      labelEn: '100% Mobile Responsive UI',
-      labelNe: 'पूर्ण मोबाइल-मैत्री डिजाइन',
-      icon: Smartphone,
-    },
-    {
-      id: 'whatsapp',
-      labelEn: 'Direct WhatsApp Chat Button',
-      labelNe: 'ह्वाट्सएप सिधा च्याट बटन',
-      icon: MessageCircle,
-    },
-    {
-      id: 'seo',
-      labelEn: 'SEO Meta Tags & Social Previews',
-      labelNe: 'एसईओ तथा सामाजिक सञ्जाल प्रिभ्यु',
-      icon: Globe,
-    },
-    {
-      id: 'domain',
-      labelEn: 'Custom Domain & Cloud Hosting Setup',
-      labelNe: 'कस्टम डोमेन र क्लाउड होस्टिङ सेटअप',
-      icon: Layers,
-    },
-    {
-      id: 'bilingual',
-      labelEn: 'Nepali & English Bilingual Switcher',
-      labelNe: 'नेपाली र अंग्रेजी दोहोरो भाषा प्रणाली',
-      icon: Sparkles,
-    },
-    {
-      id: 'contact-form',
-      labelEn: 'Custom Inquiry & Lead Form',
-      labelNe: 'सम्पर्क तथा सोधपुछ फारम',
-      icon: Mail,
-    },
-  ];
-
-  const projectTypes = [
-    {
-      id: 'portfolio' as ProjectType,
-      titleEn: 'Personal Portfolio / CV',
-      titleNe: 'व्यक्तिगत पोर्टफोलियो / बायोडाटा',
-      descEn: 'Clean, elegant personal showcase for students, creators & professionals.',
-      descNe: 'विद्यार्थी, सिर्जनाकर्ता र पेशाकर्मीहरूका लागि आकर्षक व्यक्तिगत वेबसाइट।',
-      icon: GraduationCap,
-    },
-    {
-      id: 'business' as ProjectType,
-      titleEn: 'Business & Corporate Portal',
-      titleNe: 'व्यवसायिक तथा कम्पनी वेबसाइट',
-      descEn: 'Authoritative company site establishing instant credibility & customer trust.',
-      descNe: 'कम्पनीको विश्वास बढाउने र ग्राहक आकर्षित गर्ने आधुनिक व्यवसायिक साइट।',
-      icon: Globe,
-    },
-    {
-      id: 'ecommerce' as ProjectType,
-      titleEn: 'E-Commerce / Online Store',
-      titleNe: 'ई-कमर्स / अनलाइन पसल',
-      descEn: 'Product catalogue, order dispatch, and direct customer WhatsApp checkout.',
-      descNe: 'सामान प्रदर्शन, अर्डर व्यवस्थापन र ह्वाट्सएप मार्फत सिधै अर्डर लिने सुविधा।',
-      icon: ShoppingBag,
-    },
-    {
-      id: 'landing' as ProjectType,
-      titleEn: 'Landing Page & Product Launch',
-      titleNe: 'ल्यान्डिङ पेज तथा उत्पादन लन्च',
-      descEn: 'High-conversion single-page site designed for rapid leads and signups.',
-      descNe: 'नयाँ उत्पादन वा सेवा छिटो प्रवर्द्धन गर्न उच्च-रूपान्तरण ल्यान्डिङ पेज।',
-      icon: Zap,
-    },
-    {
-      id: 'ai-consulting' as ProjectType,
-      titleEn: 'AI Explainer & Tech Workshop',
-      titleNe: 'एआई प्रविधि व्याख्या तथा कार्यशाला',
-      descEn: 'Practical guidance on AI tools, prompt workflows, and student digital skills.',
-      descNe: 'एआई उपकरणहरूको व्यवहारिक प्रयोग, प्रम्प्ट गाइड र विद्यार्थी प्रविधि सीप।',
-      icon: Sparkles,
-    },
-  ];
-
-  const timelines = [
-    {
-      id: 'urgent' as ProjectTimeline,
-      labelEn: '⚡ Express Track (< 1 Week)',
-      labelNe: '⚡ द्रुत गति (१ हप्ता भन्दा कम)',
-      hintEn: 'Fast turnaround priority',
-      hintNe: 'छिटो सम्पन्न गर्नुपर्ने प्राथमिकता',
-    },
-    {
-      id: 'standard' as ProjectTimeline,
-      labelEn: '📅 Standard (1 - 3 Weeks)',
-      labelNe: '📅 सामान्य (१ - ३ हप्ता)',
-      hintEn: 'Ideal for thorough refinement',
-      hintNe: 'विस्तृत डिजाइन र परीक्षणको लागि',
-    },
-    {
-      id: 'flexible' as ProjectTimeline,
-      labelEn: '🕒 Flexible Schedule',
-      labelNe: '🕒 लचिलो समय',
-      hintEn: 'Planning ahead / phased',
-      hintNe: 'दीर्घकालीन योजना वा चरणबद्ध कार्य',
-    },
-  ];
-
-  const toggleFeature = (id: string) => {
-    setSelectedFeatures((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
   const handleCopy = (text: string, type: 'email' | 'phone' | 'location') => {
     try {
       if (navigator?.clipboard?.writeText) {
@@ -228,32 +93,20 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     setTimeout(() => setCopiedType(null), 2500);
   };
 
-  // Compile WhatsApp pre-filled message based on selections
+  // Compile WhatsApp pre-filled message based on contact inputs
   const generateWhatsAppMessage = () => {
-    const selectedTypeObj = projectTypes.find((p) => p.id === selectedProjectType);
-    const selectedTimeObj = timelines.find((t) => t.id === selectedTimeline);
-    const selectedAddonLabels = selectedFeatures
-      .map((fId) => featureAddons.find((f) => f.id === fId)?.labelEn)
-      .filter(Boolean)
-      .join(', ');
-
-    const projectTypeName = language === 'NE' ? selectedTypeObj?.titleNe : selectedTypeObj?.titleEn;
-    const timelineName = language === 'NE' ? selectedTimeObj?.labelNe : selectedTimeObj?.labelEn;
-
-    let text = `Hello Rajababu Mehta,\nI would like to discuss a project from your official website (rajababumehta.com.np):\n\n`;
+    let text = `Hello Rajababu Mehta,\nI am contacting you from your official website (rajababumehta.com.np):\n\n`;
     if (senderName.trim()) {
       text += `• Name: ${senderName.trim()}\n`;
     }
-    if (senderPhone.trim()) {
-      text += `• Phone: ${senderPhone.trim()}\n`;
+    if (senderEmail.trim()) {
+      text += `• Contact: ${senderEmail.trim()}\n`;
     }
-    text += `• Project Type: ${projectTypeName}\n`;
-    text += `• Timeline: ${timelineName}\n`;
-    if (selectedAddonLabels) {
-      text += `• Desired Features: ${selectedAddonLabels}\n`;
+    if (senderSubject.trim()) {
+      text += `• Subject: ${senderSubject.trim()}\n`;
     }
     if (senderMessage.trim()) {
-      text += `• Project Notes: ${senderMessage.trim()}\n`;
+      text += `• Message: ${senderMessage.trim()}\n`;
     }
 
     return encodeURIComponent(text);
@@ -342,7 +195,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   ];
 
   return (
-    <section id="contact" className="py-20 sm:py-28 bg-slate-950 relative border-t border-slate-900 overflow-hidden">
+    <section id="services" className="py-20 sm:py-28 bg-slate-950 relative border-t border-slate-900 overflow-hidden scroll-mt-24">
+      <div id="contact" className="absolute -top-24" />
       {/* Subtle Background Glow Elements */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-[400px] h-[250px] bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
@@ -424,8 +278,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <Sliders className="w-4 h-4" />
-              <span>{language === 'NE' ? 'परियोजना योजनाकार तथा सम्पर्क' : 'Interactive Project Planner'}</span>
+              <Mail className="w-4 h-4" />
+              <span>{language === 'NE' ? 'सम्पर्क तथा सन्देश' : 'Contact & Inquiry'}</span>
             </button>
 
             <button
@@ -642,181 +496,70 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     </div>
                   </motion.div>
                 ) : (
-                  <form onSubmit={handleFormSubmit} className="space-y-6">
-                    
-                    {/* Step 1: Project Type Selection */}
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <label className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                          <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold">1</span>
-                          <span>{language === 'NE' ? 'परियोजनाको प्रकार छान्नुहोस्' : 'Select Project Category'} *</span>
+                  <form onSubmit={handleFormSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                          {language === 'NE' ? 'तपाईँको नाम' : 'Your Name'} *
                         </label>
-                        <span className="text-[11px] text-slate-500">
-                          {language === 'NE' ? 'आवश्यकता अनुसार' : 'Tailored stack'}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        {projectTypes.map((type) => {
-                          const IconComponent = type.icon;
-                          const isSelected = selectedProjectType === type.id;
-                          return (
-                            <button
-                              key={type.id}
-                              type="button"
-                              onClick={() => setSelectedProjectType(type.id)}
-                              className={`p-3.5 rounded-2xl text-left border transition-all flex items-start gap-3 ${
-                                isSelected
-                                  ? 'bg-blue-600/15 border-blue-500 text-white shadow-md shadow-blue-500/10'
-                                  : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                              }`}
-                            >
-                              <div
-                                className={`p-2 rounded-xl mt-0.5 ${
-                                  isSelected ? 'bg-blue-500 text-white' : 'bg-slate-900 text-slate-400 border border-slate-800'
-                                }`}
-                              >
-                                <IconComponent className="w-4 h-4" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className={`text-xs font-bold ${isSelected ? 'text-blue-300' : 'text-slate-200'}`}>
-                                  {language === 'NE' ? type.titleNe : type.titleEn}
-                                </div>
-                                <div className="text-[11px] text-slate-400 mt-0.5 line-clamp-2">
-                                  {language === 'NE' ? type.descNe : type.descEn}
-                                </div>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Step 2: Desired Features / Scope Checkboxes */}
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <label className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                          <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold">2</span>
-                          <span>{language === 'NE' ? 'समावेश गर्नुपर्ने सुविधाहरू' : 'Target Features & Add-ons'}</span>
-                        </label>
-                        <span className="text-[11px] text-slate-500">
-                          {selectedFeatures.length} {language === 'NE' ? 'छानिएका' : 'selected'}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {featureAddons.map((feature) => {
-                          const IconComp = feature.icon;
-                          const isChecked = selectedFeatures.includes(feature.id);
-                          return (
-                            <div
-                              key={feature.id}
-                              onClick={() => toggleFeature(feature.id)}
-                              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border cursor-pointer select-none transition-all ${
-                                isChecked
-                                  ? 'bg-blue-950/30 border-blue-500/50 text-slate-200'
-                                  : 'bg-slate-950/40 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:text-slate-300'
-                              }`}
-                            >
-                              <div
-                                className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
-                                  isChecked
-                                    ? 'bg-blue-600 border-blue-500 text-white'
-                                    : 'border-slate-700 bg-slate-900'
-                                }`}
-                              >
-                                {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
-                              </div>
-                              <IconComp className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                              <span className="text-xs font-medium truncate">
-                                {language === 'NE' ? feature.labelNe : feature.labelEn}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Step 3: Timeline Selector */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-200 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold">3</span>
-                        <span>{language === 'NE' ? 'अपेक्षित समयावधि' : 'Expected Timeline'}</span>
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                        {timelines.map((timeline) => {
-                          const isSelected = selectedTimeline === timeline.id;
-                          return (
-                            <button
-                              key={timeline.id}
-                              type="button"
-                              onClick={() => setSelectedTimeline(timeline.id)}
-                              className={`p-3 rounded-xl text-left border transition-all ${
-                                isSelected
-                                  ? 'bg-blue-600/15 border-blue-500 text-white shadow-sm'
-                                  : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
-                              }`}
-                            >
-                              <div className={`text-xs font-bold ${isSelected ? 'text-blue-300' : 'text-slate-200'}`}>
-                                {language === 'NE' ? timeline.labelNe : timeline.labelEn}
-                              </div>
-                              <div className="text-[10px] text-slate-500 mt-0.5">
-                                {language === 'NE' ? timeline.hintNe : timeline.hintEn}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Step 4: Contact Details & Message */}
-                    <div className="space-y-4 pt-2 border-t border-slate-800/80">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                            {language === 'NE' ? 'तपाईँको नाम' : 'Your Name'} *
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder={language === 'NE' ? 'उदा. रोशन अधिकारी' : 'e.g. Roshan Sharma'}
-                            value={senderName}
-                            onChange={(e) => setSenderName(e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                            {language === 'NE' ? 'इमेल वा ह्वाट्सएप नम्बर' : 'Email or Phone Number'} *
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            placeholder="you@email.com or 98XXXXXXXX"
-                            value={senderEmail}
-                            onChange={(e) => setSenderEmail(e.target.value)}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors"
-                          />
-                        </div>
+                        <input
+                          type="text"
+                          required
+                          placeholder={language === 'NE' ? 'उदा. रोशन अधिकारी' : 'e.g. Roshan Sharma'}
+                          value={senderName}
+                          onChange={(e) => setSenderName(e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors"
+                        />
                       </div>
 
                       <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                          {language === 'NE' ? 'परियोजना वा सन्देश विवरण' : 'Project Details & Goals'}
+                          {language === 'NE' ? 'इमेल वा फोन नम्बर' : 'Email or Phone Number'} *
                         </label>
-                        <textarea
-                          rows={3}
-                          placeholder={
-                            language === 'NE'
-                              ? 'तपाईँलाई कस्तो वेबसाइट बनाउनु छ, कुनै सन्दर्भ वेबसाइट वा आवश्यकता लेख्नुहोस्...'
-                              : 'Tell Rajababu about your brand, pages required, inspiration links, or specific features...'
-                          }
-                          value={senderMessage}
-                          onChange={(e) => setSenderMessage(e.target.value)}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                        <input
+                          type="text"
+                          required
+                          placeholder="you@email.com or 98XXXXXXXX"
+                          value={senderEmail}
+                          onChange={(e) => setSenderEmail(e.target.value)}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors"
                         />
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        {language === 'NE' ? 'विषय' : 'Subject'}
+                      </label>
+                      <input
+                        type="text"
+                        placeholder={
+                          language === 'NE'
+                            ? 'उदा. नयाँ वेबसाइट, एआई परामर्श, वा अन्य'
+                            : 'e.g. New Website, AI Inquiry, Collaboration'
+                        }
+                        value={senderSubject}
+                        onChange={(e) => setSenderSubject(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        {language === 'NE' ? 'सन्देश वा परियोजना विवरण' : 'Message or Project Details'} *
+                      </label>
+                      <textarea
+                        rows={4}
+                        required
+                        placeholder={
+                          language === 'NE'
+                            ? 'तपाईँको सन्देश वा परियोजनाको आवश्यकता यहाँ लेख्नुहोस्...'
+                            : 'Tell Rajababu about your website idea, requirements, questions, or timeline...'
+                        }
+                        value={senderMessage}
+                        onChange={(e) => setSenderMessage(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                      />
                     </div>
 
                     {/* Dual Action Dispatch Bar */}
@@ -827,7 +570,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-xl shadow-blue-600/30 transition-all hover:scale-[1.01] active:scale-[0.99]"
                       >
                         <Send className="w-4 h-4" />
-                        <span>{language === 'NE' ? 'अनलाइन सन्देश पठाउनुहोस्' : 'Submit Project Inquiry'}</span>
+                        <span>{language === 'NE' ? 'अनलाइन सन्देश पठाउनुहोस्' : 'Send Message'}</span>
                       </button>
 
                       <button
@@ -835,7 +578,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         onClick={handleDirectWhatsAppClick}
                         id="btn-contact-whatsapp-instant"
                         className="flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition-all shadow-lg shadow-emerald-700/20 hover:scale-[1.01]"
-                        title="Send this blueprint directly into WhatsApp"
+                        title="Send this message directly to WhatsApp"
                       >
                         <MessageCircle className="w-4 h-4 text-emerald-200" />
                         <span>{language === 'NE' ? 'ह्वाट्सएपमा सिधै पठाउनुहोस्' : 'Send via WhatsApp'}</span>
