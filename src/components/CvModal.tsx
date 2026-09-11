@@ -21,7 +21,7 @@ import {
   Loader2,
   Image as ImageIcon,
 } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
 import { RAJABABU_CV_DATA } from '../data/cvData';
 import { Language } from '../types';
@@ -161,12 +161,7 @@ export const CvModal: React.FC<CvModalProps> = ({
         },
       });
 
-      // Save directly to user device as PNG using Blob (no print popup)
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          throw new Error('Canvas blob generation failed');
-        }
-        const url = URL.createObjectURL(blob);
+      const triggerDownload = (url: string) => {
         const link = document.createElement('a');
         link.href = url;
         link.download = 'Rajababu_Mehta_CV.png';
@@ -174,7 +169,6 @@ export const CvModal: React.FC<CvModalProps> = ({
         link.click();
         setTimeout(() => {
           document.body.removeChild(link);
-          URL.revokeObjectURL(url);
         }, 1500);
 
         onShowToast(
@@ -183,7 +177,23 @@ export const CvModal: React.FC<CvModalProps> = ({
             : 'CV Image (PNG) downloaded directly to your device!',
           'success'
         );
-      }, 'image/png');
+      };
+
+      if (canvas.toBlob) {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            triggerDownload(url);
+            setTimeout(() => URL.revokeObjectURL(url), 3000);
+          } else {
+            const dataUrl = canvas.toDataURL('image/png');
+            triggerDownload(dataUrl);
+          }
+        }, 'image/png');
+      } else {
+        const dataUrl = canvas.toDataURL('image/png');
+        triggerDownload(dataUrl);
+      }
     } catch (err) {
       console.error('Image download error:', err);
       onShowToast(
