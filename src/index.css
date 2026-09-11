@@ -32,3 +32,58 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #334155;
 }
+
+/* Professional Print Styles for CV / PDF Download */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Hide entire page interactive elements, navigation, footers, headers, modals overlay */
+  header,
+  nav,
+  footer,
+  section,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Expose printable CV container */
+  #printable-cv-document {
+    display: block !important;
+    position: relative !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  #printable-cv-document * {
+    color: #0f172a !important;
+    background: transparent !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  #printable-cv-document h1 {
+    color: #020617 !important;
+  }
+
+  #printable-cv-document h2 {
+    color: #1e293b !important;
+  }
+
+  #printable-cv-document p,
+  #printable-cv-document span {
+    color: #334155 !important;
+  }
+
+  @page {
+    margin: 12mm 15mm;
+    size: A4 portrait;
+  }
+}
+

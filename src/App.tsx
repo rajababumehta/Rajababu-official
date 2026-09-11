@@ -12,6 +12,7 @@ import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { ToastContainer, ToastMessage } from './components/Toast';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
+import { CvModal } from './components/CvModal';
 
 import { Language, Moment, Comment, SystemSettings, ClipzoneImage } from './types';
 import {
@@ -181,6 +182,11 @@ export default function App() {
 
   // 6. Toast Notifications
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // 7. CV Modal State
+  const [isCvOpen, setIsCvOpen] = useState(false);
+  const handleOpenCv = () => setIsCvOpen(true);
+  const handleCloseCv = () => setIsCvOpen(false);
 
   const showToast = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
@@ -356,6 +362,7 @@ export default function App() {
         language={language}
         onToggleLanguage={handleToggleLanguage}
         profile={systemSettings.profile}
+        onOpenCv={handleOpenCv}
       />
 
       {/* Main Page Content */}
@@ -390,6 +397,14 @@ export default function App() {
       <Footer
         language={language}
         profile={systemSettings.profile}
+      />
+
+      {/* Official Verified CV Modal & PDF Downloader */}
+      <CvModal
+        isOpen={isCvOpen}
+        onClose={handleCloseCv}
+        language={language}
+        onShowToast={showToast}
       />
 
       {/* Floating Circle WhatsApp Button in Bottom Right */}

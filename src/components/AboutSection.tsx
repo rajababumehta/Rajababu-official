@@ -11,7 +11,10 @@ interface AboutSectionProps {
   about: AboutSettings;
 }
 
-export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) => {
+export const AboutSection: React.FC<AboutSectionProps> = ({
+  language,
+  about,
+}) => {
   const cleanBio1Ne =
     about.bioParagraph1Ne && !about.bioParagraph1Ne.includes('नेता')
       ? about.bioParagraph1Ne
@@ -76,3 +79,4 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) =
     </section>
   );
 };
+
