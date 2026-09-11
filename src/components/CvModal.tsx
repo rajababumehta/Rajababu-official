@@ -97,18 +97,18 @@ export const CvModal: React.FC<CvModalProps> = ({
     setIsDownloading(true);
     onShowToast(
       language === 'NE'
-        ? '१-पेज आधिकारिक PDF तयार गरिँदैछ...'
-        : 'Generating verified 1-page PDF...',
+        ? '१-पेज आधिकारिक सेतो PDF तयार गरिँदैछ...'
+        : 'Generating verified 1-page white PDF...',
       'info'
     );
 
     try {
-      // High-resolution canvas snapshot (scale 2.2 for crisp typography & photo)
+      // High-resolution canvas snapshot on 100% pure white background
       const canvas = await html2canvas(element, {
-        scale: 2.2,
+        scale: 2.5,
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#090d16',
+        backgroundColor: '#ffffff',
         logging: false,
         scrollX: 0,
         scrollY: 0,
@@ -122,19 +122,26 @@ export const CvModal: React.FC<CvModalProps> = ({
         compress: true,
       });
 
-      const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
-      const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+      const pageWidth = 210; // mm
+      const pageHeight = 297; // mm
 
-      // Standard single-page margins
-      const marginX = 6;
-      const marginY = 6;
-      const contentWidth = pageWidth - marginX * 2;
-      const contentHeight = (canvas.height * contentWidth) / canvas.width;
+      // Full A4 page rendering with clean 100% white background (no dark borders)
+      pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight, undefined, 'FAST');
 
-      const finalHeight = Math.min(contentHeight, pageHeight - marginY * 2);
-      const yPos = marginY + (pageHeight - marginY * 2 - finalHeight) / 2;
+      // Make all blue links interactive and clickable in the PDF
+      const docRect = element.getBoundingClientRect();
+      const linkElements = element.querySelectorAll<HTMLAnchorElement>('a[href]');
+      linkElements.forEach((anchor) => {
+        const aRect = anchor.getBoundingClientRect();
+        if (aRect.width > 0 && aRect.height > 0 && anchor.href) {
+          const x = ((aRect.left - docRect.left) / docRect.width) * pageWidth;
+          const y = ((aRect.top - docRect.top) / docRect.height) * pageHeight;
+          const w = (aRect.width / docRect.width) * pageWidth;
+          const h = (aRect.height / docRect.height) * pageHeight;
+          pdf.link(x, y, w, h, { url: anchor.href });
+        }
+      });
 
-      pdf.addImage(imgData, 'JPEG', marginX, yPos, contentWidth, finalHeight);
       pdf.save('Rajababu_Mehta_CV.pdf');
 
       onShowToast(
@@ -312,20 +319,21 @@ ${cv.name} · ${cv.website}
             {/* Scrollable CV Document Viewport */}
             <div className="overflow-y-auto p-3 sm:p-6 bg-slate-900/90 text-slate-200">
               
-              {/* 1-PAGE PRINTABLE CV DOCUMENT TARGET */}
+              {/* 1-PAGE PRINTABLE CV DOCUMENT TARGET - Pure White Paper Sheet */}
               <div
                 id="printable-cv-document"
-                className="bg-[#090d16] border border-slate-800 rounded-2xl p-5 sm:p-7 shadow-2xl space-y-4 max-w-3xl mx-auto"
+                className="bg-white text-slate-900 border border-slate-200 rounded-xl p-5 sm:p-7 shadow-2xl space-y-4 max-w-3xl mx-auto font-sans"
+                style={{ backgroundColor: '#ffffff', color: '#0f172a' }}
               >
                 {/* 1. CV HEADER: Avatar, Name, Title, Institution, and Contact Matrix */}
-                <div className="pb-4 border-b border-slate-800/90">
+                <div className="pb-4 border-b border-slate-200">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     
                     {/* Left: Avatar & Identity */}
                     <div className="flex items-center gap-3.5 sm:gap-4">
                       {/* High-Resolution Clear Avatar Photo */}
-                      <div className="cv-avatar-box shrink-0 w-[72px] h-[72px] sm:w-[76px] sm:h-[76px] rounded-full p-[2px] bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 shadow-md">
-                        <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center">
+                      <div className="cv-avatar-box shrink-0 w-[72px] h-[72px] sm:w-[76px] sm:h-[76px] rounded-full p-[2px] bg-blue-600 shadow-sm border border-blue-200">
+                        <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
                           <img
                             src={avatarDataUrl}
                             alt={cv.name}
@@ -338,46 +346,46 @@ ${cv.name} · ${cv.website}
                       </div>
 
                       <div>
-                        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-100 tracking-tight font-heading uppercase">
+                        <h1 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight font-heading uppercase">
                           {cv.name}
                         </h1>
-                        <p className="text-xs sm:text-sm font-semibold text-blue-400 mt-0.5 flex items-center gap-1.5">
-                          <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                        <p className="text-xs sm:text-sm font-bold text-blue-600 mt-0.5 flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 shrink-0 text-blue-600" />
                           <span>{cv.role}</span>
                         </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5 font-medium">
+                        <p className="text-[11px] text-slate-600 mt-0.5 font-medium">
                           {cv.education[0].institution}
                         </p>
                       </div>
                     </div>
 
-                    {/* Right: Quick Contact Chips */}
-                    <div className="flex flex-col sm:items-end gap-1 text-[11px] text-slate-300">
-                      <div className="flex items-center gap-1.5">
-                        <MapPin className="w-3 h-3 text-rose-400 shrink-0" />
+                    {/* Right: Quick Contact Chips (Prominent Blue Links) */}
+                    <div className="flex flex-col sm:items-end gap-1 text-[11px]">
+                      <div className="flex items-center gap-1.5 text-slate-700 font-medium">
+                        <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
                         <span>{cv.location}</span>
                       </div>
                       <a
                         href={`tel:${cv.phone}`}
-                        className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors"
+                        className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors"
                       >
-                        <Phone className="w-3 h-3 text-emerald-400 shrink-0" />
+                        <Phone className="w-3 h-3 text-blue-600 shrink-0" />
                         <span>{cv.phone}</span>
                       </a>
                       <a
                         href={`mailto:${cv.email}`}
-                        className="flex items-center gap-1.5 hover:text-blue-400 transition-colors"
+                        className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors"
                       >
-                        <Mail className="w-3 h-3 text-blue-400 shrink-0" />
+                        <Mail className="w-3 h-3 text-blue-600 shrink-0" />
                         <span>{cv.email}</span>
                       </a>
                       <a
                         href={cv.website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 hover:text-purple-400 transition-colors"
+                        className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors"
                       >
-                        <Globe className="w-3 h-3 text-purple-400 shrink-0" />
+                        <Globe className="w-3 h-3 text-blue-600 shrink-0" />
                         <span className="font-mono text-[10.5px]">rajababumehta.com.np</span>
                       </a>
                     </div>
@@ -389,27 +397,31 @@ ${cv.name} · ${cv.website}
                 <div className="cv-columns-grid grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-5">
                   
                   {/* LEFT COLUMN (42% width) */}
-                  <div className="md:col-span-5 space-y-3.5">
+                  <div className="md:col-span-5 space-y-3">
                     
                     {/* Education */}
-                    <div className="space-y-2">
-                      <h2 className="text-[11px] font-bold tracking-wider text-slate-300 uppercase flex items-center gap-1.5">
-                        <GraduationCap className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <div className="space-y-1.5">
+                      <h2 className="text-[11px] font-extrabold tracking-wider text-slate-900 uppercase flex items-center gap-1.5 pb-1 border-b border-slate-200">
+                        <GraduationCap className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                         <span>{language === 'NE' ? 'शैक्षिक योग्यता (Education)' : 'Education'}</span>
                       </h2>
                       <div className="space-y-1.5">
                         {cv.education.map((edu, idx) => (
                           <div
                             key={idx}
-                            className="cv-card-bg p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px]"
+                            className="cv-card-bg p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px]"
                           >
                             <div className="flex items-center justify-between gap-1 mb-0.5">
-                              <span className="font-bold text-slate-100">{edu.degree}</span>
-                              <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[9.5px] font-semibold">
+                              <span className="font-bold text-slate-900">{edu.degree}</span>
+                              <span className={`px-1.5 py-0.5 rounded text-[9.5px] font-bold border ${
+                                idx === 0
+                                  ? 'bg-blue-100 text-blue-700 border-blue-200'
+                                  : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                              }`}>
                                 {edu.status}
                               </span>
                             </div>
-                            <p className="text-[10.5px] text-slate-400 leading-tight">{edu.institution}</p>
+                            <p className="text-[10.5px] text-slate-600 leading-tight">{edu.institution}</p>
                           </div>
                         ))}
                       </div>
@@ -417,15 +429,15 @@ ${cv.name} · ${cv.website}
 
                     {/* Technical Skills */}
                     <div className="space-y-1.5">
-                      <h2 className="text-[11px] font-bold tracking-wider text-slate-300 uppercase flex items-center gap-1.5">
-                        <Code2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <h2 className="text-[11px] font-extrabold tracking-wider text-slate-900 uppercase flex items-center gap-1.5 pb-1 border-b border-slate-200">
+                        <Code2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                         <span>{language === 'NE' ? 'प्राविधिक सीप (Skills)' : 'Technical Skills'}</span>
                       </h2>
                       <div className="flex flex-wrap gap-1.5">
                         {cv.technicalSkills.map((skill, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded-lg bg-slate-900/90 border border-slate-800 text-[10.5px] text-slate-200 font-medium"
+                            className="px-2 py-0.5 rounded-md bg-blue-50/80 border border-blue-200 text-[10.5px] text-slate-800 font-semibold"
                           >
                             {skill}
                           </span>
@@ -434,56 +446,56 @@ ${cv.name} · ${cv.website}
                     </div>
 
                     {/* Languages */}
-                    <div className="space-y-1.5">
-                      <h2 className="text-[11px] font-bold tracking-wider text-slate-300 uppercase flex items-center gap-1.5">
-                        <LanguagesIcon className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                    <div className="space-y-1">
+                      <h2 className="text-[11px] font-extrabold tracking-wider text-slate-900 uppercase flex items-center gap-1.5 pb-1 border-b border-slate-200">
+                        <LanguagesIcon className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                         <span>{language === 'NE' ? 'भाषाहरू (Languages)' : 'Languages'}</span>
                       </h2>
-                      <p className="text-[11px] text-slate-300">
+                      <p className="text-[11px] text-slate-700 font-medium">
                         {cv.languages.join(' · ')}
                       </p>
                     </div>
 
                     {/* Personal Details */}
-                    <div className="space-y-1.5">
-                      <h2 className="text-[11px] font-bold tracking-wider text-slate-300 uppercase flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                    <div className="space-y-1">
+                      <h2 className="text-[11px] font-extrabold tracking-wider text-slate-900 uppercase flex items-center gap-1.5 pb-1 border-b border-slate-200">
+                        <Calendar className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                         <span>{language === 'NE' ? 'व्यक्तिगत विवरण (Personal)' : 'Personal Details'}</span>
                       </h2>
-                      <div className="text-[10.5px] text-slate-300 space-y-0.5">
+                      <div className="text-[10.5px] text-slate-700 space-y-0.5 font-medium">
                         <p>
-                          <strong className="text-slate-400">DOB:</strong> {cv.personalDetails.dobBs} ({cv.personalDetails.dobAd})
+                          <strong className="text-slate-900">DOB:</strong> {cv.personalDetails.dobBs} ({cv.personalDetails.dobAd})
                         </p>
                         <p>
-                          <strong className="text-slate-400">Location:</strong> {cv.personalDetails.location}
+                          <strong className="text-slate-900">Location:</strong> {cv.personalDetails.location}
                         </p>
                       </div>
                     </div>
 
-                    {/* Social Profiles */}
-                    <div className="space-y-1.5 pt-1">
-                      <h2 className="text-[11px] font-bold tracking-wider text-slate-300 uppercase flex items-center gap-1.5">
-                        <Share2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                        <span>{language === 'NE' ? 'सामाजिक सञ्जाल' : 'Social Profiles'}</span>
+                    {/* Social Profiles (Prominent Blue Links) */}
+                    <div className="space-y-1.5 pt-0.5">
+                      <h2 className="text-[11px] font-extrabold tracking-wider text-slate-900 uppercase flex items-center gap-1.5 pb-1 border-b border-slate-200">
+                        <Share2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        <span>{language === 'NE' ? 'सामाजिक सञ्जाल (Social Profiles)' : 'Social Profiles'}</span>
                       </h2>
                       <div className="space-y-1 text-[10.5px]">
                         <a
                           href={cv.socialMedia[0].url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center justify-between p-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:text-blue-400 transition-colors"
+                          className="flex items-center justify-between p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors"
                         >
                           <span><strong>Facebook:</strong> Rajababu Mehta</span>
-                          <ExternalLink className="w-3 h-3 text-slate-500 no-print" />
+                          <ExternalLink className="w-3 h-3 text-blue-600 no-print" />
                         </a>
                         <a
                           href={cv.socialMedia[1].url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center justify-between p-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300 hover:text-pink-400 transition-colors"
+                          className="flex items-center justify-between p-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors"
                         >
                           <span><strong>Instagram:</strong> @mr.rajababumehta</span>
-                          <ExternalLink className="w-3 h-3 text-slate-500 no-print" />
+                          <ExternalLink className="w-3 h-3 text-blue-600 no-print" />
                         </a>
                       </div>
                     </div>
@@ -491,72 +503,72 @@ ${cv.name} · ${cv.website}
                   </div>
 
                   {/* RIGHT COLUMN (58% width) */}
-                  <div className="md:col-span-7 space-y-3.5">
+                  <div className="md:col-span-7 space-y-3">
                     
                     {/* Professional Summary */}
                     <div className="space-y-1">
-                      <h2 className="text-[11px] font-bold tracking-wider text-slate-300 uppercase flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                      <h2 className="text-[11px] font-extrabold tracking-wider text-slate-900 uppercase flex items-center gap-1.5 pb-1 border-b border-slate-200">
+                        <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" />
                         <span>{language === 'NE' ? 'व्यावसायिक सारांश (Summary)' : 'Professional Summary'}</span>
                       </h2>
-                      <p className="text-[11px] text-slate-300 leading-relaxed pl-3 border-l-2 border-blue-500/40">
+                      <p className="text-[11px] text-slate-700 leading-relaxed pl-3 border-l-2 border-blue-600 font-normal">
                         {cv.summary}
                       </p>
                     </div>
 
                     {/* Career Objective */}
                     <div className="space-y-1">
-                      <h2 className="text-[11px] font-bold tracking-wider text-slate-300 uppercase flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+                      <h2 className="text-[11px] font-extrabold tracking-wider text-slate-900 uppercase flex items-center gap-1.5 pb-1 border-b border-slate-200">
+                        <span className="w-2 h-2 rounded-full bg-indigo-600 shrink-0" />
                         <span>{language === 'NE' ? 'करियर उद्देश्य (Objective)' : 'Career Objective'}</span>
                       </h2>
-                      <p className="text-[11px] text-slate-300 leading-relaxed pl-3 border-l-2 border-indigo-500/40">
+                      <p className="text-[11px] text-slate-700 leading-relaxed pl-3 border-l-2 border-indigo-600 font-normal">
                         {cv.objective}
                       </p>
                     </div>
 
                     {/* Experience */}
                     <div className="space-y-1.5">
-                      <h2 className="text-[11px] font-bold tracking-wider text-slate-300 uppercase flex items-center gap-1.5">
-                        <Briefcase className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <h2 className="text-[11px] font-extrabold tracking-wider text-slate-900 uppercase flex items-center gap-1.5 pb-1 border-b border-slate-200">
+                        <Briefcase className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                         <span>{language === 'NE' ? 'कार्य अनुभव (Experience)' : 'Experience'}</span>
                       </h2>
-                      <div className="cv-card-bg p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] space-y-1">
+                      <div className="cv-card-bg p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] space-y-1">
                         <div className="flex items-center justify-between gap-1">
-                          <h3 className="font-bold text-slate-100">{cv.experience.title}</h3>
-                          <span className="px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 text-[9.5px] font-semibold">
+                          <h3 className="font-bold text-slate-900">{cv.experience.title}</h3>
+                          <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-200 text-[9.5px] font-bold">
                             {cv.experience.duration}
                           </span>
                         </div>
-                        <p className="text-[10.5px] text-slate-300 leading-relaxed">
+                        <p className="text-[10.5px] text-slate-700 leading-relaxed">
                           {cv.experience.description}
                         </p>
                       </div>
                     </div>
 
-                    {/* Key Project */}
+                    {/* Key Project (Prominent Blue Link) */}
                     <div className="space-y-1.5">
-                      <h2 className="text-[11px] font-bold tracking-wider text-slate-300 uppercase flex items-center gap-1.5">
-                        <Globe className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                      <h2 className="text-[11px] font-extrabold tracking-wider text-slate-900 uppercase flex items-center gap-1.5 pb-1 border-b border-slate-200">
+                        <Globe className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                         <span>{language === 'NE' ? 'प्रमुख परियोजना (Key Project)' : 'Key Project'}</span>
                       </h2>
-                      <div className="cv-card-bg p-3 rounded-xl bg-slate-900/80 border border-purple-500/20 text-[11px] space-y-1">
+                      <div className="cv-card-bg p-2.5 rounded-lg bg-slate-50 border border-blue-200 text-[11px] space-y-1">
                         <div className="flex items-center justify-between gap-1">
-                          <h3 className="font-bold text-slate-100">{cv.projects[0].title}</h3>
+                          <h3 className="font-bold text-slate-900">{cv.projects[0].title}</h3>
                           <a
                             href={cv.projects[0].url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[10.5px] font-bold text-purple-400 hover:text-purple-300"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline"
                           >
                             <span>aiclipzone.vercel.app</span>
-                            <ExternalLink className="w-3 h-3 no-print" />
+                            <ExternalLink className="w-3 h-3 text-blue-600 no-print" />
                           </a>
                         </div>
-                        <p className="text-[10.5px] text-purple-300/80 font-medium">
+                        <p className="text-[10.5px] text-blue-800 font-semibold">
                           {cv.projects[0].type}
                         </p>
-                        <p className="text-[10.5px] text-slate-400 leading-relaxed">
+                        <p className="text-[10.5px] text-slate-700 leading-relaxed">
                           {cv.projects[0].description}
                         </p>
                       </div>
@@ -567,11 +579,16 @@ ${cv.name} · ${cv.website}
                 </div>
 
                 {/* 3. FOOTER SIGNATURE BAR */}
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[10.5px] text-slate-500">
-                  <span className="font-semibold text-slate-400">
+                <div className="pt-2.5 border-t border-slate-200 flex items-center justify-between text-[10.5px] text-slate-600 font-medium">
+                  <a
+                    href={cv.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-blue-600 hover:text-blue-800 hover:underline"
+                  >
                     Official Portfolio: rajababumehta.com.np
-                  </span>
-                  <span>Verified Student & AI Web Developer</span>
+                  </a>
+                  <span className="text-slate-500">Verified Student & AI Web Developer</span>
                 </div>
 
               </div>

@@ -37,7 +37,7 @@
 @media print {
   @page {
     size: A4 portrait;
-    margin: 6mm 8mm; /* Clean compact margins so all content fits on 1 single page! */
+    margin: 8mm 10mm; /* Clean professional margins */
   }
 
   html, body {
@@ -87,16 +87,15 @@
     margin: 0 !important;
   }
 
-  /* 1-Page Printable CV Container */
+  /* 1-Page Printable CV Container - Pure White Page */
   #printable-cv-document {
     display: block !important;
     position: relative !important;
     background: #ffffff !important;
     color: #0f172a !important;
-    border: 1.5px solid #cbd5e1 !important;
-    border-radius: 8px !important;
+    border: none !important;
     box-shadow: none !important;
-    padding: 14px 18px !important;
+    padding: 0 !important;
     margin: 0 auto !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -119,10 +118,10 @@
 
   /* Ultra-clear Avatar image display in print */
   #printable-cv-document .cv-avatar-box {
-    width: 68px !important;
-    height: 68px !important;
-    min-width: 68px !important;
-    min-height: 68px !important;
+    width: 70px !important;
+    height: 70px !important;
+    min-width: 70px !important;
+    min-height: 70px !important;
     border-radius: 50% !important;
     border: 2px solid #2563eb !important;
     overflow: hidden !important;
@@ -144,16 +143,16 @@
     image-rendering: crisp-edges !important;
   }
 
-  /* Typography & element contrast for paper printing */
+  /* Typography & element contrast for pure white paper printing */
   #printable-cv-document h1 {
-    color: #020617 !important;
-    font-size: 19px !important;
+    color: #090d16 !important;
+    font-size: 20px !important;
     line-height: 1.2 !important;
   }
 
   #printable-cv-document h2 {
     color: #1e293b !important;
-    font-size: 10.5px !important;
+    font-size: 11px !important;
     font-weight: 700 !important;
   }
 
@@ -163,10 +162,13 @@
     color: #334155 !important;
   }
 
-  #printable-cv-document .text-blue-400,
-  #printable-cv-document .text-blue-500,
-  #printable-cv-document .text-blue-600 {
+  /* Links MUST be prominent Blue in print */
+  #printable-cv-document a,
+  #printable-cv-document .cv-link,
+  #printable-cv-document .text-blue-600,
+  #printable-cv-document .text-blue-700 {
     color: #2563eb !important;
+    text-decoration: underline !important;
   }
 
   #printable-cv-document .cv-card-bg {
