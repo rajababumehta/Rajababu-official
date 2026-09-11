@@ -365,8 +365,6 @@ export default function App() {
         <Header
           language={language}
           profile={systemSettings.profile}
-          totalMoments={totalMoments}
-          totalLikes={totalLikes}
         />
 
         {/* About Section */}

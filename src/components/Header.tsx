@@ -2,9 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Sparkles,
-  Layers,
-  Heart,
-  Award,
   Lightbulb,
   Code,
   ChevronDown,
@@ -14,15 +11,13 @@ import { Language, ProfileSettings } from '../types';
 interface HeaderProps {
   language: Language;
   profile: ProfileSettings;
-  totalMoments: number;
-  totalLikes: number;
+  totalMoments?: number;
+  totalLikes?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   language,
   profile,
-  totalMoments,
-  totalLikes,
 }) => {
   const heroImageSrc =
     profile.heroImage ||
@@ -133,48 +128,10 @@ export const Header: React.FC<HeaderProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="text-sm sm:text-base lg:text-lg text-slate-300/95 max-w-2xl leading-relaxed mb-8 drop-shadow-md"
+            className="text-sm sm:text-base lg:text-lg text-slate-300/95 max-w-2xl leading-relaxed mb-4 drop-shadow-md"
           >
             {language === 'NE' ? profile.taglineNe : profile.taglineEn}
           </motion.p>
-
-          {/* Floating Snapshot Counter Badges */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.45, duration: 0.6 }}
-            className="flex flex-wrap items-center gap-4 sm:gap-6 pt-4 border-t border-slate-800/80 text-xs text-slate-400"
-          >
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
-                <Layers className="w-3.5 h-3.5" />
-              </div>
-              <span>
-                <strong className="text-slate-200 font-mono font-bold">{totalMoments}</strong>{' '}
-                {language === 'NE' ? 'ग्यालरी तस्बिर' : 'Moments'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-pink-500/10 text-pink-400">
-                <Heart className="w-3.5 h-3.5 fill-pink-500/40 text-pink-400" />
-              </div>
-              <span>
-                <strong className="text-slate-200 font-mono font-bold">
-                  {totalLikes >= 1000 ? `${(totalLikes / 1000).toFixed(1)}k` : totalLikes}
-                </strong>{' '}
-                {language === 'NE' ? 'प्रतिक्रिया' : 'Likes'}
-              </span>
-            </div>
-
-            <div className="hidden sm:flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
-                <Award className="w-3.5 h-3.5" />
-              </div>
-              <span>{language === 'NE' ? 'वेबसाइट परियोजनाका लागि उपलब्ध' : 'Available for Website Projects'}</span>
-            </div>
-          </motion.div>
-
         </div>
       </div>
 
