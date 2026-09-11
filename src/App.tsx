@@ -7,7 +7,6 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Header } from './components/Header';
 import { AboutSection } from './components/AboutSection';
-import { JourneySection } from './components/JourneySection';
 import { ExperienceSection } from './components/ExperienceSection';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
@@ -371,18 +370,6 @@ export default function App() {
         <AboutSection
           language={language}
           about={systemSettings.about}
-        />
-
-        {/* Visual Journey & Uncropped Photo Gallery */}
-        <JourneySection
-          language={language}
-          moments={moments}
-          onLikeMoment={handleLikeMoment}
-          userLikedMoments={userLikedMoments}
-          onAutoBoostAllLikes={handleAutoBoostAllLikes}
-          commentsMap={commentsMap}
-          onAddComment={handleAddComment}
-          onShowToast={showToast}
         />
 
         {/* Experience & Competencies Section */}

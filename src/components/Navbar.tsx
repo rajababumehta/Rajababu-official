@@ -20,12 +20,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Exact menu items requested: Home, About, Skills, Projects, Services, Contact
+  // Menu items: Home, About, Skills, Services, Contact
   const navItems = [
     { href: '#home', labelEn: 'Home', labelNe: 'गृहपृष्ठ' },
     { href: '#about', labelEn: 'About', labelNe: 'बारेमा' },
     { href: '#skills', labelEn: 'Skills', labelNe: 'सीपहरू' },
-    { href: '#projects', labelEn: 'Projects', labelNe: 'परियोजनाहरू' },
     { href: '#services', labelEn: 'Services', labelNe: 'सेवाहरू' },
     { href: '#contact', labelEn: 'Contact', labelNe: 'सम्पर्क' },
   ];
