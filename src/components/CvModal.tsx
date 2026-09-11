@@ -210,35 +210,48 @@ ${cv.role}
                 id="printable-cv-document"
                 className="bg-slate-950/60 sm:bg-slate-950/80 border border-slate-800 rounded-2xl p-6 sm:p-10 shadow-lg space-y-8"
               >
-                {/* CV Header: Identity & Contact Info */}
+                {/* CV Header: Identity, Avatar & Contact Info */}
                 <div className="border-b border-slate-800 pb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-100 tracking-tight font-heading uppercase">
-                        {cv.name}
-                      </h1>
-                      <p className="text-sm sm:text-base font-semibold text-blue-400 mt-1 flex items-center gap-2">
-                        <Sparkles className="w-4 h-4" />
-                        <span>{cv.role}</span>
-                      </p>
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                    <div className="flex items-center gap-4 sm:gap-5">
+                      {/* Avatar Image from top navigation bar */}
+                      <div className="relative shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 p-[2px] shadow-xl shadow-blue-500/20">
+                        <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center ring-2 ring-white/20">
+                          <img
+                            src="/brand-avatar.png"
+                            alt={cv.name}
+                            className="w-full h-full object-cover object-center"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-100 tracking-tight font-heading uppercase">
+                          {cv.name}
+                        </h1>
+                        <p className="text-sm sm:text-base font-semibold text-blue-400 mt-1 flex items-center gap-2">
+                          <Sparkles className="w-4 h-4" />
+                          <span>{cv.role}</span>
+                        </p>
+                      </div>
                     </div>
 
                     {/* Quick Contact Chips */}
-                    <div className="flex flex-wrap gap-2 text-xs text-slate-300">
-                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800">
+                    <div className="flex flex-wrap md:flex-col gap-2 text-xs text-slate-300 md:items-end">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
                         <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                         <span>{cv.location}</span>
                       </div>
                       <a
                         href={`mailto:${cv.email}`}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:text-blue-400 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:text-blue-400 transition-colors"
                       >
                         <Mail className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                         <span>{cv.email}</span>
                       </a>
                       <a
                         href={`tel:${cv.phone}`}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 hover:text-emerald-400 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:text-emerald-400 transition-colors"
                       >
                         <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                         <span>{cv.phone}</span>
