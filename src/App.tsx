@@ -12,6 +12,7 @@ import { ExperienceSection } from './components/ExperienceSection';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { ToastContainer, ToastMessage } from './components/Toast';
+import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
 
 import { Language, Moment, Comment, SystemSettings, ClipzoneImage } from './types';
 import {
@@ -404,6 +405,12 @@ export default function App() {
       <Footer
         language={language}
         profile={systemSettings.profile}
+      />
+
+      {/* Floating Circle WhatsApp Button in Bottom Right */}
+      <WhatsAppFloatingButton
+        language={language}
+        whatsappNumber={systemSettings.contact.whatsappNumber}
       />
     </div>
   );
