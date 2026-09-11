@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
   Download,
-  Printer,
   Copy,
   Check,
   ExternalLink,
@@ -20,6 +19,7 @@ import {
   Share2,
   FileText,
   Loader2,
+  Image as ImageIcon,
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -40,7 +40,8 @@ export const CvModal: React.FC<CvModalProps> = ({
   onShowToast,
 }) => {
   const [copied, setCopied] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloadingImage, setIsDownloadingImage] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [avatarDataUrl, setAvatarDataUrl] = useState<string>('/brand-avatar.png');
   const cv = RAJABABU_CV_DATA;
 
@@ -89,12 +90,119 @@ export const CvModal: React.FC<CvModalProps> = ({
     };
   }, [isOpen]);
 
-  // Direct 1-Page PDF Download
+  // Standardize cloned DOM for crystal-clear 1-Page capture across mobile and desktop
+  const setupClonedCvDocument = (clonedDoc: Document) => {
+    const doc = clonedDoc.getElementById('printable-cv-document');
+    if (doc) {
+      doc.style.width = '794px';
+      doc.style.maxWidth = '794px';
+      doc.style.minWidth = '794px';
+      doc.style.margin = '0 auto';
+      doc.style.padding = '22px 26px';
+      doc.style.backgroundColor = '#ffffff';
+      doc.style.color = '#0f172a';
+      doc.style.borderRadius = '0px';
+      doc.style.border = 'none';
+      doc.style.boxShadow = 'none';
+
+      const header = doc.querySelector('.cv-header-flex') as HTMLElement;
+      if (header) {
+        header.style.display = 'flex';
+        header.style.flexDirection = 'row';
+        header.style.alignItems = 'center';
+        header.style.justifyContent = 'space-between';
+        header.style.gap = '16px';
+      }
+
+      const grid = doc.querySelector('.cv-columns-grid') as HTMLElement;
+      if (grid) {
+        grid.style.display = 'grid';
+        grid.style.gridTemplateColumns = '5fr 7fr';
+        grid.style.gap = '18px';
+      }
+
+      const leftCol = doc.querySelector('.cv-left-col') as HTMLElement;
+      if (leftCol) {
+        leftCol.style.width = '100%';
+      }
+
+      const rightCol = doc.querySelector('.cv-right-col') as HTMLElement;
+      if (rightCol) {
+        rightCol.style.width = '100%';
+      }
+    }
+  };
+
+  // Direct 1-Page High-Definition IMAGE Download (No print dialog, direct PNG file saved)
+  const handleDownloadImage = async () => {
+    const element = document.getElementById('printable-cv-document');
+    if (!element) return;
+
+    setIsDownloadingImage(true);
+    onShowToast(
+      language === 'NE'
+        ? '१-पेज उच्च गुणस्तरको CV तस्बिर (Image) तयार हुँदैछ...'
+        : 'Preparing crisp 1-page CV Image...',
+      'info'
+    );
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2.8,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 1024,
+        onclone: (clonedDoc) => {
+          setupClonedCvDocument(clonedDoc);
+        },
+      });
+
+      // Save directly to user device as PNG using Blob (no print popup)
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          throw new Error('Canvas blob generation failed');
+        }
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'Rajababu_Mehta_CV.png';
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }, 1500);
+
+        onShowToast(
+          language === 'NE'
+            ? 'CV इमेज (PNG) सिधै तपाईंको डिभाइसमा डाउनलोड भयो!'
+            : 'CV Image (PNG) downloaded directly to your device!',
+          'success'
+        );
+      }, 'image/png');
+    } catch (err) {
+      console.error('Image download error:', err);
+      onShowToast(
+        language === 'NE'
+          ? 'इमेज डाउनलोड गर्दा समस्या आयो, कृपया पुनः प्रयास गर्नुहोस्।'
+          : 'Failed to download image, please try again.',
+        'error'
+      );
+    } finally {
+      setIsDownloadingImage(false);
+    }
+  };
+
+  // Direct 1-Page PDF Download (No print dialog fallback!)
   const handleDownloadPdf = async () => {
     const element = document.getElementById('printable-cv-document');
     if (!element) return;
 
-    setIsDownloading(true);
+    setIsDownloadingPdf(true);
     onShowToast(
       language === 'NE'
         ? '१-पेज आधिकारिक सेतो PDF तयार गरिँदैछ...'
@@ -103,7 +211,6 @@ export const CvModal: React.FC<CvModalProps> = ({
     );
 
     try {
-      // High-resolution canvas snapshot on 100% pure white background
       const canvas = await html2canvas(element, {
         scale: 2.5,
         useCORS: true,
@@ -112,6 +219,10 @@ export const CvModal: React.FC<CvModalProps> = ({
         logging: false,
         scrollX: 0,
         scrollY: 0,
+        windowWidth: 1024,
+        onclone: (clonedDoc) => {
+          setupClonedCvDocument(clonedDoc);
+        },
       });
 
       const imgData = canvas.toDataURL('image/jpeg', 0.98);
@@ -125,7 +236,7 @@ export const CvModal: React.FC<CvModalProps> = ({
       const pageWidth = 210; // mm
       const pageHeight = 297; // mm
 
-      // Full A4 page rendering with clean 100% white background (no dark borders)
+      // Full A4 page rendering with clean 100% white background
       pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight, undefined, 'FAST');
 
       // Make all blue links interactive and clickable in the PDF
@@ -146,29 +257,21 @@ export const CvModal: React.FC<CvModalProps> = ({
 
       onShowToast(
         language === 'NE'
-          ? 'CV सफलतापूर्वक १ पेजमा डाउनलोड भयो!'
-          : 'CV downloaded successfully on 1 page!',
+          ? 'CV PDF सफलतापूर्वक डाउनलोड भयो!'
+          : 'CV PDF downloaded successfully!',
         'success'
       );
     } catch (err) {
-      console.error('PDF error, falling back to print dialog:', err);
-      window.print();
+      console.error('PDF error:', err);
+      onShowToast(
+        language === 'NE'
+          ? 'PDF डाउनलोड हुन सकेन, कृपया Image डाउनलोड गर्नुहोस्।'
+          : 'PDF download failed, please try Image download.',
+        'error'
+      );
     } finally {
-      setIsDownloading(false);
+      setIsDownloadingPdf(false);
     }
-  };
-
-  // System Print / Save as PDF
-  const handlePrint = () => {
-    onShowToast(
-      language === 'NE'
-        ? 'प्रिन्ट / PDF विन्डो खुल्दैछ...'
-        : 'Opening print / save as PDF window...',
-      'info'
-    );
-    setTimeout(() => {
-      window.print();
-    }, 150);
   };
 
   const handleCopyText = () => {
@@ -263,7 +366,7 @@ ${cv.name} · ${cv.website}
                   <h3 className="text-xs sm:text-sm font-bold text-slate-100 flex items-center gap-2">
                     <span>{language === 'NE' ? 'राजाबाबु मेहताको आधिकारिक CV' : 'Official Curriculum Vitae (CV)'}</span>
                     <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold">
-                      1-Page PDF
+                      1-Page CV
                     </span>
                   </h3>
                 </div>
@@ -271,29 +374,36 @@ ${cv.name} · ${cv.website}
 
               {/* Action Buttons */}
               <div className="flex items-center gap-2">
-                {/* 1-Click Direct PDF Download */}
+                {/* 1-Click Direct IMAGE Download (Primary Action - No print popup!) */}
                 <button
-                  onClick={handleDownloadPdf}
-                  disabled={isDownloading}
-                  className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/30 active:scale-95 cursor-pointer"
-                  title={language === 'NE' ? '१-पेज PDF सिधै डाउनलोड गर्नुहोस्' : 'Download Verified 1-Page PDF'}
+                  id="btn-download-cv-image"
+                  onClick={handleDownloadImage}
+                  disabled={isDownloadingImage}
+                  className="flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/30 active:scale-95 cursor-pointer"
+                  title={language === 'NE' ? '१-पेज CV तस्बिर (Image) सिधै डाउनलोड गर्नुहोस्' : 'Download 1-Page CV Image'}
                 >
-                  {isDownloading ? (
+                  {isDownloadingImage ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   ) : (
                     <Download className="w-3.5 h-3.5" />
                   )}
-                  <span>{language === 'NE' ? 'डाउनलोड PDF (1 Page)' : 'Download PDF (1 Page)'}</span>
+                  <span>{language === 'NE' ? 'डाउनलोड Image' : 'Download Image'}</span>
                 </button>
 
-                {/* Print / System Dialog */}
+                {/* Direct PDF Download (Secondary - No print popup!) */}
                 <button
-                  onClick={handlePrint}
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-all active:scale-95 cursor-pointer"
-                  title={language === 'NE' ? 'प्रिन्ट गर्नुहोस्' : 'Print / Save as PDF'}
+                  id="btn-download-cv-pdf"
+                  onClick={handleDownloadPdf}
+                  disabled={isDownloadingPdf}
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 text-xs font-semibold border border-slate-700 transition-all active:scale-95 cursor-pointer"
+                  title={language === 'NE' ? 'PDF डाउनलोड गर्नुहोस्' : 'Download PDF'}
                 >
-                  <Printer className="w-3.5 h-3.5 text-blue-400" />
-                  <span>{language === 'NE' ? 'प्रिन्ट' : 'Print'}</span>
+                  {isDownloadingPdf ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <FileText className="w-3.5 h-3.5 text-blue-400" />
+                  )}
+                  <span>PDF</span>
                 </button>
 
                 {/* Copy Text */}
@@ -308,7 +418,7 @@ ${cv.name} · ${cv.website}
 
                 <button
                   onClick={onClose}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all focus:outline-none"
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all focus:outline-none cursor-pointer"
                   aria-label="Close CV"
                 >
                   <X className="w-5 h-5" />
@@ -327,7 +437,7 @@ ${cv.name} · ${cv.website}
               >
                 {/* 1. CV HEADER: Avatar, Name, Title, Institution, and Contact Matrix */}
                 <div className="pb-4 border-b border-slate-200">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="cv-header-flex flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     
                     {/* Left: Avatar & Identity */}
                     <div className="flex items-center gap-3.5 sm:gap-4">
@@ -397,7 +507,7 @@ ${cv.name} · ${cv.website}
                 <div className="cv-columns-grid grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-5">
                   
                   {/* LEFT COLUMN (42% width) */}
-                  <div className="md:col-span-5 space-y-3">
+                  <div className="cv-left-col md:col-span-5 space-y-3">
                     
                     {/* Education */}
                     <div className="space-y-1.5">
@@ -503,7 +613,7 @@ ${cv.name} · ${cv.website}
                   </div>
 
                   {/* RIGHT COLUMN (58% width) */}
-                  <div className="md:col-span-7 space-y-3">
+                  <div className="cv-right-col md:col-span-7 space-y-3">
                     
                     {/* Professional Summary */}
                     <div className="space-y-1">
@@ -593,22 +703,40 @@ ${cv.name} · ${cv.website}
 
               </div>
 
-              {/* Modal Bottom Guidance (hidden on print) */}
-              <div className="max-w-3xl mx-auto pt-3 flex items-center justify-between text-xs text-slate-400 no-print">
+              {/* Modal Bottom Guidance (Direct File Download - No Print Popup) */}
+              <div className="max-w-3xl mx-auto pt-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400 no-print">
                 <span>
                   {language === 'NE'
-                    ? '✨ १-पेज उच्च-गुणस्तरको PDF तयार छ।'
-                    : '✨ Single-page high-definition PDF ready.'}
+                    ? '✨ १-पेज उच्च-गुणस्तरको CV (Image तथा PDF) सिधै डाउनलोड गर्नुहोस्।'
+                    : '✨ Direct 1-page high-definition CV (Image & PDF) download.'}
                 </span>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={handleDownloadPdf}
-                    disabled={isDownloading}
-                    className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-all active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-1"
+                    onClick={handleDownloadImage}
+                    disabled={isDownloadingImage}
+                    className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-all active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-blue-600/30"
                   >
-                    <Download className="w-3 h-3" />
-                    <span>{language === 'NE' ? 'डाउनलोड PDF' : 'Download PDF'}</span>
+                    {isDownloadingImage ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Download className="w-3.5 h-3.5" />
+                    )}
+                    <span>{language === 'NE' ? 'डाउनलोड Image' : 'Download Image'}</span>
                   </button>
+
+                  <button
+                    onClick={handleDownloadPdf}
+                    disabled={isDownloadingPdf}
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1"
+                  >
+                    {isDownloadingPdf ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <FileText className="w-3.5 h-3.5 text-blue-400" />
+                    )}
+                    <span>PDF</span>
+                  </button>
+
                   <button
                     onClick={onClose}
                     className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors cursor-pointer"
