@@ -207,7 +207,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                     {/* Main Uncropped Photo */}
                     <img
                       src={moment.imgUrl}
-                      alt={`Rajababu Mehta - ${moment.titleEn || 'Moments of Impact & Leadership'}`}
+                      alt={`Rajababu Mehta - ${moment.titleEn || 'Moments & Tech Journey'}`}
                       referrerPolicy="no-referrer"
                       className="relative z-10 max-h-full max-w-full object-contain rounded-xl drop-shadow-[0_15px_25px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-[1.02]"
                       loading="lazy"
@@ -321,7 +321,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
               <div className="lg:col-span-7 bg-slate-950 flex items-center justify-center p-4 sm:p-6 relative min-h-[300px] lg:min-h-[500px]">
                 <img
                   src={activeLightboxMoment.imgUrl}
-                  alt={`Rajababu Mehta - ${activeLightboxMoment.titleEn || 'Moments of Impact & Leadership'}`}
+                  alt={`Rajababu Mehta - ${activeLightboxMoment.titleEn || 'Moments & Tech Journey'}`}
                   referrerPolicy="no-referrer"
                   className="max-h-[70vh] w-auto max-w-full object-contain rounded-2xl drop-shadow-2xl"
                 />

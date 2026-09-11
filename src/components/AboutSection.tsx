@@ -1,9 +1,6 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import {
   Compass,
-  Cpu,
-  ShieldCheck,
   Sparkles,
   Quote,
 } from 'lucide-react';
@@ -15,20 +12,15 @@ interface AboutSectionProps {
 }
 
 export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) => {
-  const getValueIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'Compass':
-        return <Compass className="w-6 h-6 text-blue-400" />;
-      case 'Cpu':
-        return <Cpu className="w-6 h-6 text-cyan-400" />;
-      case 'ShieldCheck':
-        return <ShieldCheck className="w-6 h-6 text-emerald-400" />;
-      case 'Sparkles':
-        return <Sparkles className="w-6 h-6 text-purple-400" />;
-      default:
-        return <Sparkles className="w-6 h-6 text-blue-400" />;
-    }
-  };
+  const cleanBio1Ne =
+    about.bioParagraph1Ne && !about.bioParagraph1Ne.includes('नेता')
+      ? about.bioParagraph1Ne
+      : 'राजाबाबु मेहता वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर (AI Website Developer), विद्यार्थी (Student) तथा एआई व्याख्याकर्ता (AI Explainer) हुनुहुन्छ। आधुनिक वेब प्रविधिहरू तथा उदीयमान आर्टिफिसियल इन्टेलिजेन्स (एआई) का उपकरणहरूमा गहिरो रुचि राख्दै, उहाँले व्यवसाय, व्यक्तिगत ब्रान्ड तथा संस्थाहरूका लागि छिटो, सुरक्षित, आकर्षक र आधुनिक वेबसाइटहरू निर्माण गर्दै आउनुभएको छ।';
+
+  const cleanBio2Ne =
+    about.bioParagraph2Ne && !about.bioParagraph2Ne.includes('नेता')
+      ? about.bioParagraph2Ne
+      : 'यदि तपाईँलाई व्यक्तिगत पोर्टफोलियो, व्यवसायिक पोर्टल, ल्यान्डिङ पेज वा कुनै पनि किसिमको आधुनिक वेबसाइट बनाउन परेमा, अथवा एआई प्रविधिको व्यवहारिक प्रयोगबारे बुझ्न चाहेमा राजाबाबु मेहतासँग सिधै सम्पर्क गर्न सक्नुहुन्छ। जुनसुकै प्रकारको वेबसाइट बनाउन परेमा इमेल वा ह्वाट्सएप (९८१६६८९२३२) मार्फत तुरुन्त सम्पर्क गर्नुहोस्।';
 
   return (
     <section id="about" className="py-20 sm:py-28 bg-slate-950/60 border-t border-slate-900 relative">
@@ -46,7 +38,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) =
         </div>
 
         {/* Narrative & Executive Bio */}
-        <div className="max-w-4xl mx-auto mb-16">
+        <div className="max-w-4xl mx-auto">
           <div className="p-8 sm:p-12 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm shadow-xl">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-4">
@@ -59,14 +51,14 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) =
               </div>
               <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100 font-heading mb-4">
                 {language === 'NE'
-                  ? 'वेबसाइट निर्माण, विद्यार्थी यात्रा तथा एआई प्रविधि अन्वेषण'
-                  : 'Web Development, Academic Growth & Practical AI Innovation'}
+                  ? 'एआई वेबसाइट निर्माण, विद्यार्थी यात्रा तथा एआई प्रविधि अन्वेषण'
+                  : 'AI Web Development, Student Learning & Practical AI Insights'}
               </h3>
               <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-6">
-                {language === 'NE' ? about.bioParagraph1Ne : about.bioParagraph1En}
+                {language === 'NE' ? cleanBio1Ne : about.bioParagraph1En}
               </p>
               <p className="text-slate-400 text-sm sm:text-base leading-relaxed mb-8">
-                {language === 'NE' ? about.bioParagraph2Ne : about.bioParagraph2En}
+                {language === 'NE' ? cleanBio2Ne : about.bioParagraph2En}
               </p>
             </div>
 
@@ -77,38 +69,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ language, about }) =
                 {language === 'NE' ? about.mottoNe : about.mottoEn}
               </p>
             </div>
-          </div>
-        </div>
-
-        {/* Core Values & Pillars */}
-        <div>
-          <div className="text-center mb-8">
-            <h4 className="text-xl font-bold text-slate-200 font-heading">
-              {language === 'NE' ? 'मार्गदर्शक सिद्धान्त तथा स्तम्भहरू' : 'Core Pillars & Guiding Principles'}
-            </h4>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {about.values.map((val, idx) => (
-              <motion.div
-                key={val.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/80 transition-all flex flex-col items-start"
-              >
-                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 mb-4">
-                  {getValueIcon(val.icon)}
-                </div>
-                <h5 className="text-base font-bold text-slate-100 font-heading mb-2">
-                  {language === 'NE' ? val.titleNe : val.titleEn}
-                </h5>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  {language === 'NE' ? val.descNe : val.descEn}
-                </p>
-              </motion.div>
-            ))}
           </div>
         </div>
 

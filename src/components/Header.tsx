@@ -32,17 +32,17 @@ export const Header: React.FC<HeaderProps> = ({
     'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg';
 
   const rolesEn = [
-    'Website Developer',
-    'Student & Tech Explorer',
+    'AI Website Developer',
     'AI Explainer',
-    'Custom Website Creator',
+    'Student',
+    'Modern Web Creator',
   ];
 
   const rolesNe = [
-    'वेबसाइट डेभलपर',
-    'विद्यार्थी तथा प्रविधि अन्वेषक',
+    'एआई वेबसाइट डेभलपर',
     'एआई व्याख्याकर्ता',
-    'कस्टम वेबसाइट निर्माता',
+    'विद्यार्थी',
+    'आधुनिक वेब सिर्जनाकर्ता',
   ];
 
   const roles = language === 'NE' ? rolesNe : rolesEn;
@@ -124,7 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
             </AnimatePresence>
           </div>
 
-          {/* 3 Tagline Badges (Web Developer, Student, AI Explainer) */}
+          {/* 3 Tagline Badges (AI Web Developer, AI Explainer, Student) */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -133,17 +133,17 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/90 shadow-sm text-xs font-semibold text-blue-300">
               <Code className="w-3.5 h-3.5 text-blue-400" />
-              <span>{language === 'NE' ? 'वेबसाइट डेभलपर' : 'Website Developer'}</span>
-            </div>
-
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/90 shadow-sm text-xs font-semibold text-amber-300">
-              <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-              <span>{language === 'NE' ? 'विद्यार्थी' : 'Student'}</span>
+              <span>{language === 'NE' ? 'एआई वेबसाइट डेभलपर' : 'AI Website Developer'}</span>
             </div>
 
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/90 shadow-sm text-xs font-semibold text-purple-300">
               <Sparkles className="w-3.5 h-3.5 text-purple-400" />
               <span>{language === 'NE' ? 'एआई व्याख्याकर्ता' : 'AI Explainer'}</span>
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/90 shadow-sm text-xs font-semibold text-amber-300">
+              <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+              <span>{language === 'NE' ? 'विद्यार्थी' : 'Student'}</span>
             </div>
           </motion.div>
 
@@ -218,7 +218,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
                 <Award className="w-3.5 h-3.5" />
               </div>
-              <span>{language === 'NE' ? 'सक्रिय सहकार्य उपलब्ध' : 'Open for Strategic Collaborations'}</span>
+              <span>{language === 'NE' ? 'वेबसाइट परियोजनाका लागि उपलब्ध' : 'Available for Website Projects'}</span>
             </div>
           </motion.div>
 

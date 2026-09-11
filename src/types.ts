@@ -46,7 +46,7 @@ export interface SkillItem {
   nameEn: string;
   nameNe: string;
   level: number;
-  category: 'technical' | 'leadership' | 'strategy';
+  category: 'technical' | 'strategy';
   descEn: string;
   descNe: string;
 }
@@ -172,5 +172,13 @@ export interface AdminUser {
   displayName: string | null;
   isAnonymous?: boolean;
   photoURL?: string | null;
+}
+
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  subscribedAt: string;
+  source?: string;
+  active: boolean;
 }
 

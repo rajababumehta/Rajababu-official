@@ -8,15 +8,16 @@ export const STORAGE_KEYS = {
   COMMENTS_MAP: 'rajababu_portfolio_comments_map',
   USER_LIKED_MOMENTS: 'rajababu_portfolio_user_liked_moments',
   LANGUAGE: 'rajababu_portfolio_language',
+  NEWSLETTER_SUBSCRIBERS: 'rajababu_portfolio_newsletter_subscribers',
 } as const;
 
 export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   profile: {
     name: 'Rajababu Mehta',
-    titleEn: 'Website Developer • Student • AI Explainer',
-    titleNe: 'वेबसाइट डेभलपर • विद्यार्थी • एआई व्याख्याकर्ता',
-    taglineEn: 'Passionate Website Developer, Student, and AI Explainer based in Birgunj, Nepal. Need a custom, modern website for your brand or business? Let’s connect!',
-    taglineNe: 'वीरगञ्ज, नेपालका वेबसाइट डेभलपर, विद्यार्थी तथा एआई व्याख्याकर्ता। कुनै पनि प्रकारको आकर्षक तथा आधुनिक वेबसाइट बनाउन परेमा आजै मलाई सम्पर्क गर्नुहोस्!',
+    titleEn: 'AI Website Developer • AI Explainer • Student',
+    titleNe: 'एआई वेबसाइट डेभलपर • एआई व्याख्याकर्ता • विद्यार्थी',
+    taglineEn: 'Passionate AI Website Developer, AI Explainer, and Student based in Birgunj, Nepal. Building high-performance, modern websites and practical AI solutions.',
+    taglineNe: 'वीरगञ्ज, नेपालका एआई वेबसाइट डेभलपर, एआई व्याख्याकर्ता तथा विद्यार्थी। आधुनिक, सुरक्षित र आकर्षक वेबसाइट निर्माण तथा एआई प्रविधि अन्वेषण।',
     welcomeBadgeEn: 'Available for Custom Website Projects',
     welcomeBadgeNe: 'वेबसाइट निर्माण तथा विकासका लागि उपलब्ध',
     heroImage: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg',
@@ -28,12 +29,12 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   about: {
     badgeEn: 'About Rajababu Mehta',
     badgeNe: 'राजाबाबु मेहताको परिचय',
-    headingEn: 'Website Developer, Student & AI Explainer from Birgunj, Nepal',
-    headingNe: 'वीरगञ्ज, नेपालका वेबसाइट डेभलपर, विद्यार्थी तथा एआई व्याख्याकर्ता',
-    bioParagraph1En: 'Rajababu Mehta is a dedicated Website Developer, Student, and AI Explainer based in Birgunj, Nepal. Passionate about modern web technologies and emerging artificial intelligence tools, he crafts fast, responsive, and aesthetically pleasing websites for individuals, businesses, and organizations.',
-    bioParagraph1Ne: 'राजाबाबु मेहता वीरगञ्ज, नेपालका एक समर्पित वेबसाइट डेभलपर, विद्यार्थी तथा एआई व्याख्याकर्ता हुनुहुन्छ। आधुनिक वेब प्रविधिहरू तथा उदीयमान आर्टिफिसियल इन्टेलिजेन्स (एआई) का उपकरणहरूमा रुचि राख्दै, उहाँले व्यवसाय, व्यक्तिगत ब्रान्ड तथा संस्थाहरूका लागि छिटो, आकर्षक र आधुनिक वेबसाइटहरू निर्माण गर्दै आउनुभएको छ।',
-    bioParagraph2En: 'Anyone looking to build a new website, create a personal portfolio, launch a business landing page, or understand practical AI tools can reach out directly. Based in Birgunj, Rajababu is actively open for freelance web development projects and student tech collaborations. Get in touch directly via Email, WhatsApp, Facebook, or Instagram.',
-    bioParagraph2Ne: 'यदि तपाईँलाई आफ्नो व्यवसाय, व्यक्तिगत ब्रान्ड वा संस्थाका लागि नयाँ तथा आधुनिक वेबसाइट निर्माण गर्नु छ, अथवा एआई प्रविधिको प्रयोगबारे बुझ्न चाहनुहुन्छ भने राजाबाबु मेहतासँग सिधै सहकार्य गर्न सक्नुहुन्छ। जुनसुकै प्रकारको वेबसाइट बनाउन परेमा इमेल, ह्वाट्सएप, फेसबुक वा इन्स्टाग्राम मार्फत तुरुन्त सम्पर्क गर्नुहोस्।',
+    headingEn: 'AI Website Developer, Student & AI Explainer from Birgunj, Nepal',
+    headingNe: 'वीरगञ्ज, नेपालका एआई वेबसाइट डेभलपर, विद्यार्थी तथा एआई व्याख्याकर्ता',
+    bioParagraph1En: 'Rajababu Mehta is an AI Website Developer, Student, and AI Explainer based in Birgunj, Nepal. He is strictly focused on modern web development, emerging Artificial Intelligence tools, and academic learning—crafting fast, responsive, and modern websites for individuals and businesses.',
+    bioParagraph1Ne: 'राजाबाबु मेहता वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर (AI Website Developer), विद्यार्थी (Student) तथा एआई व्याख्याकर्ता (AI Explainer) हुनुहुन्छ। आधुनिक वेब प्रविधिहरू तथा उदीयमान आर्टिफिसियल इन्टेलिजेन्स (एआई) का उपकरणहरूमा गहिरो रुचि राख्दै, उहाँले व्यवसाय, व्यक्तिगत ब्रान्ड तथा संस्थाहरूका लागि छिटो, सुरक्षित, आकर्षक र आधुनिक वेबसाइटहरू निर्माण गर्दै आउनुभएको छ।',
+    bioParagraph2En: 'Anyone looking to build a modern website, personal portfolio, or business landing page, or understand practical AI tools, can connect directly with Rajababu. Open for custom web development projects and student tech collaborations via WhatsApp, Email, or Social Media.',
+    bioParagraph2Ne: 'यदि तपाईँलाई व्यक्तिगत पोर्टफोलियो, व्यवसायिक पोर्टल, ल्यान्डिङ पेज वा कुनै पनि किसिमको आधुनिक वेबसाइट बनाउन परेमा, अथवा एआई प्रविधिको व्यवहारिक प्रयोगबारे बुझ्न चाहेमा राजाबाबु मेहतासँग सिधै सम्पर्क गर्न सक्नुहुन्छ। जुनसुकै प्रकारको वेबसाइट बनाउन परेमा इमेल वा ह्वाट्सएप (९८१६६८९२३२) मार्फत तुरुन्त सम्पर्क गर्नुहोस्।',
     mottoEn: '"Empowering ideas through clean code, modern web design, and simplified artificial intelligence." — Rajababu Mehta',
     mottoNe: '"सफा कोड, आधुनिक वेब डिजाइन र सरल एआई प्रविधि मार्फत विचारहरूलाई साकार पार्दै।" — राजाबाबु मेहता',
     stats: [
@@ -161,8 +162,8 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
       {
         id: 'mile-1',
         year: '2024 - Present',
-        titleEn: 'Website Developer & AI Explainer',
-        titleNe: 'वेबसाइट डेभलपर तथा एआई व्याख्याकर्ता',
+        titleEn: 'AI Website Developer & AI Explainer',
+        titleNe: 'एआई वेबसाइट डेभलपर तथा एआई व्याख्याकर्ता',
         orgEn: 'Freelance & Tech Services, Birgunj, Nepal',
         orgNe: 'स्वतन्त्र प्रविधि सेवा, वीरगञ्ज, नेपाल',
         descEn: 'Creating custom modern websites for businesses, students, and professionals while explaining AI advancements to peers and clients.',
@@ -199,8 +200,8 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   contact: {
     badgeEn: 'Project Inquiry & Collaboration',
     badgeNe: 'परियोजना सोधपुछ तथा सहकार्य',
-    headingEn: "Let's Collaborate & Build Something Visionary",
-    headingNe: 'सहकार्य गरौं र केही दूरदर्शी निर्माण गरौं',
+    headingEn: '',
+    headingNe: '',
     subheadingEn: 'Ready to launch a high-performance website or explore practical AI solutions? Customize your project requirements below or connect directly with Rajababu Mehta in Birgunj, Nepal.',
     subheadingNe: 'आधुनिक वेबसाइट निर्माण, नयाँ प्रविधि अन्वेषण वा एआई परामर्शको लागि तल आफ्नो आवश्यकता रोज्नुहोस् वा वीरगञ्ज, नेपालका राजाबाबु मेहतासँग सिधै सम्पर्क गर्नुहोस्।',
     email: 'rajababum426@gmail.com',

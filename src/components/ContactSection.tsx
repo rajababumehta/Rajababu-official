@@ -374,9 +374,15 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             )}
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 font-heading tracking-tight max-w-3xl mb-4">
-            {language === 'NE' ? contact.headingNe : contact.headingEn}
-          </h2>
+          {Boolean(
+            (language === 'NE' ? contact.headingNe : contact.headingEn) &&
+            !contact.headingEn?.includes('Visionary') &&
+            !contact.headingEn?.includes('Collaborate')
+          ) && (
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 font-heading tracking-tight max-w-3xl mb-4">
+              {language === 'NE' ? contact.headingNe : contact.headingEn}
+            </h2>
+          )}
           
           <p className="text-slate-400 text-sm sm:text-base max-w-2xl leading-relaxed">
             {language === 'NE' ? contact.subheadingNe : contact.subheadingEn}

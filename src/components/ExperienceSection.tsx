@@ -21,7 +21,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   language,
   experience,
 }) => {
-  const [activeCategory, setActiveCategory] = useState<'all' | 'technical' | 'leadership' | 'strategy'>('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'technical' | 'strategy'>('all');
 
   const filteredSkills = activeCategory === 'all'
     ? experience.skills

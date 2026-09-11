@@ -51,65 +51,76 @@ export default function App() {
     return saved === 'NE' || saved === 'EN' ? saved : 'EN';
   });
 
+  // Helper to ensure profile and about settings strictly reflect developer/student/AI explainer status
+  const sanitizeSettings = (raw: any): SystemSettings => {
+    return {
+      ...DEFAULT_SYSTEM_SETTINGS,
+      ...(raw || {}),
+      profile: {
+        ...DEFAULT_SYSTEM_SETTINGS.profile,
+        ...(raw?.profile || {}),
+        name: 'Rajababu Mehta',
+        titleEn: DEFAULT_SYSTEM_SETTINGS.profile.titleEn,
+        titleNe: DEFAULT_SYSTEM_SETTINGS.profile.titleNe,
+        taglineEn: DEFAULT_SYSTEM_SETTINGS.profile.taglineEn,
+        taglineNe: DEFAULT_SYSTEM_SETTINGS.profile.taglineNe,
+        welcomeBadgeEn: DEFAULT_SYSTEM_SETTINGS.profile.welcomeBadgeEn,
+        welcomeBadgeNe: DEFAULT_SYSTEM_SETTINGS.profile.welcomeBadgeNe,
+        heroImage: FIXED_HERO_IMAGE,
+      },
+      about: {
+        ...DEFAULT_SYSTEM_SETTINGS.about,
+        ...(raw?.about || {}),
+        headingEn: DEFAULT_SYSTEM_SETTINGS.about.headingEn,
+        headingNe: DEFAULT_SYSTEM_SETTINGS.about.headingNe,
+        badgeEn: DEFAULT_SYSTEM_SETTINGS.about.badgeEn,
+        badgeNe: DEFAULT_SYSTEM_SETTINGS.about.badgeNe,
+        bioParagraph1En: DEFAULT_SYSTEM_SETTINGS.about.bioParagraph1En,
+        bioParagraph1Ne: DEFAULT_SYSTEM_SETTINGS.about.bioParagraph1Ne,
+        bioParagraph2En: DEFAULT_SYSTEM_SETTINGS.about.bioParagraph2En,
+        bioParagraph2Ne: DEFAULT_SYSTEM_SETTINGS.about.bioParagraph2Ne,
+        mottoEn: DEFAULT_SYSTEM_SETTINGS.about.mottoEn,
+        mottoNe: DEFAULT_SYSTEM_SETTINGS.about.mottoNe,
+        values: DEFAULT_SYSTEM_SETTINGS.about.values,
+      },
+      experience: {
+        ...DEFAULT_SYSTEM_SETTINGS.experience,
+        ...(raw?.experience || {}),
+      },
+      contact: {
+        ...DEFAULT_SYSTEM_SETTINGS.contact,
+        ...(raw?.contact || {}),
+        headingEn: '',
+        headingNe: '',
+        email: 'rajababum426@gmail.com',
+        phone: '9816689232',
+        locationEn: 'Birgunj, Nepal',
+        locationNe: 'वीरगञ्ज, नेपाल',
+        facebookUrl: 'https://www.facebook.com/share/18hGohd9z5/',
+        instagramUrl: 'https://www.instagram.com/mr.rajababumehta',
+        whatsappNumber: '9816689232',
+      },
+      autoLikes: {
+        ...DEFAULT_SYSTEM_SETTINGS.autoLikes,
+        ...(raw?.autoLikes || {}),
+      },
+    };
+  };
+
   // 2. System Settings State (Profile, About, Experience, Contact, AutoLikes)
   const [systemSettings, setSystemSettings] = useState<SystemSettings>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.SYSTEM_SETTINGS);
       if (saved) {
         const parsed = JSON.parse(saved);
-        return {
-          ...DEFAULT_SYSTEM_SETTINGS,
-          ...parsed,
-          profile: {
-            ...DEFAULT_SYSTEM_SETTINGS.profile,
-            ...parsed.profile,
-            name: 'Rajababu Mehta',
-            titleEn: DEFAULT_SYSTEM_SETTINGS.profile.titleEn,
-            taglineEn: DEFAULT_SYSTEM_SETTINGS.profile.taglineEn,
-            welcomeBadgeEn: DEFAULT_SYSTEM_SETTINGS.profile.welcomeBadgeEn,
-            heroImage: FIXED_HERO_IMAGE,
-          },
-          about: {
-            ...DEFAULT_SYSTEM_SETTINGS.about,
-            ...parsed.about,
-            headingEn: DEFAULT_SYSTEM_SETTINGS.about.headingEn,
-            bioParagraph1En: DEFAULT_SYSTEM_SETTINGS.about.bioParagraph1En,
-            bioParagraph2En: DEFAULT_SYSTEM_SETTINGS.about.bioParagraph2En,
-            mottoEn: DEFAULT_SYSTEM_SETTINGS.about.mottoEn,
-          },
-          experience: {
-            ...DEFAULT_SYSTEM_SETTINGS.experience,
-            ...parsed.experience,
-          },
-          contact: {
-            ...DEFAULT_SYSTEM_SETTINGS.contact,
-            ...parsed.contact,
-            headingEn: "Let's Collaborate & Build Something Visionary",
-            headingNe: 'सहकार्य गरौं र केही दूरदर्शी निर्माण गरौं',
-            email: 'rajababum426@gmail.com',
-            phone: '9816689232',
-            locationEn: 'Birgunj, Nepal',
-            locationNe: 'वीरगञ्ज, नेपाल',
-            facebookUrl: 'https://www.facebook.com/share/18hGohd9z5/',
-            instagramUrl: 'https://www.instagram.com/mr.rajababumehta',
-            whatsappNumber: '9816689232',
-          },
-          autoLikes: {
-            ...DEFAULT_SYSTEM_SETTINGS.autoLikes,
-            ...parsed.autoLikes,
-          },
-        };
+        const cleaned = sanitizeSettings(parsed);
+        localStorage.setItem(STORAGE_KEYS.SYSTEM_SETTINGS, JSON.stringify(cleaned));
+        return cleaned;
       }
     } catch (e) {
       console.error('Failed to load system settings from localStorage', e);
     }
-    return {
-      ...DEFAULT_SYSTEM_SETTINGS,
-      profile: {
-        ...DEFAULT_SYSTEM_SETTINGS.profile,
-        heroImage: FIXED_HERO_IMAGE,
-      },
-    };
+    return DEFAULT_SYSTEM_SETTINGS;
   });
 
   // 3. Moments Gallery State
@@ -228,15 +239,13 @@ export default function App() {
   useEffect(() => {
     const unsubscribeSettings = subscribeToSystemSettings((remoteSettings) => {
       if (remoteSettings) {
-        setSystemSettings((prev) => ({
-          ...prev,
-          ...remoteSettings,
-          profile: {
-            ...prev.profile,
-            ...(remoteSettings.profile || {}),
-            heroImage: FIXED_HERO_IMAGE,
-          },
-        }));
+        setSystemSettings((prev) => {
+          const merged = sanitizeSettings({
+            ...prev,
+            ...remoteSettings,
+          });
+          return merged;
+        });
       }
     });
     return () => unsubscribeSettings();
