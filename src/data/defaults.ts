@@ -208,7 +208,7 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
     phone: '9816689232',
     locationEn: 'Birgunj, Nepal',
     locationNe: 'वीरगञ्ज, नेपाल',
-    facebookUrl: 'https://www.facebook.com/share/18hGohd9z5/',
+    facebookUrl: 'https://www.facebook.com/share/19PZ6HWQdk/',
     linkedinUrl: '',
     githubUrl: '',
     instagramUrl: 'https://www.instagram.com/mr.rajababumehta',

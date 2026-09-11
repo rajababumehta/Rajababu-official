@@ -27,7 +27,8 @@ export interface CvData {
   languages: string[];
   socialMedia: Array<{
     platform: string;
-    status: string;
+    handle: string;
+    url: string;
   }>;
   personalDetails: {
     dobBs: string;
@@ -51,7 +52,7 @@ export const RAJABABU_CV_DATA: CvData = {
     {
       degree: '+2 Management',
       status: 'Currently Studying',
-      institution: 'Nepal Education Board (NEB)',
+      institution: 'Decimal College, Birgunj (Nepal Education Board - NEB)',
     },
     {
       degree: 'Secondary Education',
@@ -82,8 +83,16 @@ export const RAJABABU_CV_DATA: CvData = {
   },
   languages: ['Nepali', 'Bhojpuri', 'Hindi', 'English'],
   socialMedia: [
-    { platform: 'Facebook', status: 'Available on request' },
-    { platform: 'Instagram', status: 'Available on request' },
+    {
+      platform: 'Facebook',
+      handle: 'Rajababu Mehta',
+      url: 'https://www.facebook.com/share/19PZ6HWQdk/',
+    },
+    {
+      platform: 'Instagram',
+      handle: 'mr.rajababumehta',
+      url: 'https://www.instagram.com/mr.rajababumehta',
+    },
   ],
   personalDetails: {
     dobBs: '2066/12/08 BS',

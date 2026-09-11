@@ -112,8 +112,8 @@ ${cv.experience.description}
 ${cv.languages.join(', ')}
 
 --- SOCIAL MEDIA ---
-• Facebook: Available on request
-• Instagram: Available on request
+• Facebook: ${cv.socialMedia[0].url}
+• Instagram: @${cv.socialMedia[1].handle} (${cv.socialMedia[1].url})
 
 --- PERSONAL DETAILS ---
 Date of Birth: ${cv.personalDetails.dobBs} (${cv.personalDetails.dobAd})
@@ -420,18 +420,39 @@ ${cv.role}
                 </div>
 
                 {/* Section 9: Social Media */}
-                <div className="space-y-2 pt-2 border-t border-slate-800/80">
+                <div className="space-y-3 pt-2 border-t border-slate-800/80">
                   <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase flex items-center gap-2">
                     <Share2 className="w-3.5 h-3.5 text-indigo-400" />
                     <span>{language === 'NE' ? 'सामाजिक सञ्जाल (Social Media)' : 'Social Media'}</span>
                   </h2>
-                  <div className="flex flex-wrap gap-4 text-xs text-slate-400">
-                    <div>
-                      <strong className="text-slate-300">Facebook:</strong> Available on request
-                    </div>
-                    <div>
-                      <strong className="text-slate-300">Instagram:</strong> Available on request
-                    </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <a
+                      href={cv.socialMedia[0].url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-900/90 transition-all text-slate-300 hover:text-blue-400 group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-blue-500 group-hover:scale-125 transition-transform" />
+                        <strong className="text-slate-200">Facebook:</strong>
+                        <span className="text-slate-400 group-hover:text-blue-400">Rajababu Mehta</span>
+                      </div>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400 no-print" />
+                    </a>
+
+                    <a
+                      href={cv.socialMedia[1].url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-pink-500/50 hover:bg-slate-900/90 transition-all text-slate-300 hover:text-pink-400 group"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-pink-500 group-hover:scale-125 transition-transform" />
+                        <strong className="text-slate-200">Instagram:</strong>
+                        <span className="text-slate-400 group-hover:text-pink-400 font-mono">@mr.rajababumehta</span>
+                      </div>
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-pink-400 no-print" />
+                    </a>
                   </div>
                 </div>
 
