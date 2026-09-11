@@ -79,27 +79,11 @@ export const Header: React.FC<HeaderProps> = ({
       {/* 3. HERO FOREGROUND CONTAINER (Deeply anchored at bottom, never blocks face) */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-auto">
         <div className="max-w-4xl">
-          
-          {/* Welcome Pill Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 backdrop-blur-md border border-slate-700/80 shadow-lg text-xs sm:text-sm font-medium text-blue-300 mb-4 sm:mb-6"
-          >
-            <Sparkles className="w-4 h-4 text-blue-400 animate-pulse" />
-            <span>
-              {language === 'NE'
-                ? profile.welcomeBadgeNe || 'वेबसाइट बनाउन मलाई सम्पर्क गर्नुहोस्'
-                : profile.welcomeBadgeEn || 'Available for Custom Website Projects'}
-            </span>
-          </motion.div>
-
           {/* Name Title */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            transition={{ duration: 0.6 }}
             className="text-4xl sm:text-6xl lg:text-7xl font-black text-white drop-shadow-2xl font-heading tracking-tight leading-[1.08] mb-3"
           >
             {profile.name || 'Rajababu Mehta'}
