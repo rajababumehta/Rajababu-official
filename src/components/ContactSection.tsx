@@ -45,6 +45,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   const [senderSubject, setSenderSubject] = useState('');
   const [senderMessage, setSenderMessage] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [lastGmailUrl, setLastGmailUrl] = useState('');
+  const [lastMailtoUrl, setLastMailtoUrl] = useState('');
 
   // Copied states
   const [copiedType, setCopiedType] = useState<'email' | 'phone' | 'location' | null>(null);
@@ -127,11 +129,45 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const recipientEmail = (contact.email || 'rajababum426@gmail.com').trim();
+    const cleanSubject = senderSubject.trim()
+      ? `${senderSubject.trim()} - Inquiry from ${senderName.trim()}`
+      : `Website Inquiry from ${senderName.trim()}`;
+
+    const cleanBody = `Hello Rajababu Mehta,
+
+You have received a new inquiry from your official portfolio website (https://rajababumehta.com.np):
+
+• Name: ${senderName.trim()}
+• Contact (Email / Phone): ${senderEmail.trim()}
+• Subject: ${senderSubject.trim() || 'General Inquiry / Website Project'}
+
+--- Message / Project Requirements ---
+${senderMessage.trim()}
+
+---
+Recipient: ${recipientEmail}
+Sent from portfolio website contact form`;
+
+    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(recipientEmail)}&su=${encodeURIComponent(cleanSubject)}&body=${encodeURIComponent(cleanBody)}`;
+    const standardMailto = `mailto:${encodeURIComponent(recipientEmail)}?subject=${encodeURIComponent(cleanSubject)}&body=${encodeURIComponent(cleanBody)}`;
+
+    setLastGmailUrl(gmailComposeUrl);
+    setLastMailtoUrl(standardMailto);
+
+    // Attempt to open Gmail compose directly in a new tab
+    const newWindow = window.open(gmailComposeUrl, '_blank');
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      // Fallback for pop-up blockers or native email clients
+      window.location.href = standardMailto;
+    }
+
     setIsSubmitted(true);
     onShowToast(
       language === 'NE'
-        ? 'सन्देश सफलतापूर्वक प्राप्त भयो! राजाबाबु मेहताले चाँडै सम्पर्क गर्नुहुनेछ।'
-        : 'Inquiry received! Rajababu Mehta will review your specifications and reply promptly.',
+        ? `जिमेल खुल्दैछ! तपाईँको सन्देश ${recipientEmail} मा पठाउन तयार छ।`
+        : `Opening Gmail to send your message to ${recipientEmail}!`,
       'success'
     );
   };
@@ -467,31 +503,61 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     animate={{ opacity: 1, scale: 1 }}
                     className="py-12 flex flex-col items-center text-center"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
-                      <CheckCircle2 className="w-8 h-8" />
+                    <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
+                      <Mail className="w-8 h-8" />
                     </div>
                     <h4 className="text-2xl font-bold text-slate-100 mb-2 font-heading">
-                      {language === 'NE' ? 'सन्देश तथा विवरण प्राप्त भयो!' : 'Project Blueprint Received!'}
+                      {language === 'NE' ? 'जिमेलमा सन्देश तयार भएको छ!' : 'Message Ready in Gmail!'}
                     </h4>
-                    <p className="text-sm text-slate-400 max-w-md mb-6 leading-relaxed">
+                    <p className="text-sm text-slate-300 max-w-md mb-2 leading-relaxed">
                       {language === 'NE'
-                        ? 'तपाईँको परियोजना विवरण सफलतापूर्वक सुरक्षित गरिएको छ। राजाबाबु मेहताले छिट्टै इमेल वा ह्वाट्सएप मार्फत सम्पर्क गर्नुहुनेछ।'
-                        : 'Thank you for reaching out! Rajababu Mehta has received your project specifications and will review the timeline and requirements promptly.'}
+                        ? `तपाईँको सन्देश राजाबाबु मेहता (${contact.email || 'rajababum426@gmail.com'}) को लागि जिमेलमा खोलिएको छ।`
+                        : `Your message has been pre-filled in Gmail addressed to ${contact.email || 'rajababum426@gmail.com'}.`}
+                    </p>
+                    <p className="text-xs text-slate-400 max-w-md mb-6 leading-relaxed">
+                      {language === 'NE'
+                        ? 'यदि जिमेल स्वचालित रूपमा नयाँ ट्याबमा खुलेन भने तलको "जिमेलमा खोल्नुहोस्" बटन थिच्नुहोस्:'
+                        : 'If Gmail did not open in a new tab automatically, click the button below to send your message:'}
                     </p>
                     
                     <div className="flex flex-wrap gap-3 justify-center">
+                      {lastGmailUrl && (
+                        <a
+                          href={lastGmailUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/30 hover:scale-[1.02]"
+                        >
+                          <Mail className="w-4 h-4" />
+                          <span>{language === 'NE' ? 'जिमेलमा खोल्नुहोस्' : 'Open in Gmail'}</span>
+                        </a>
+                      )}
+                      {lastMailtoUrl && (
+                        <a
+                          href={lastMailtoUrl}
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all border border-slate-700"
+                        >
+                          <span>{language === 'NE' ? 'अन्य इमेल एप' : 'Other Email App'}</span>
+                        </a>
+                      )}
                       <button
                         onClick={handleDirectWhatsAppClick}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/30"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition-all shadow-md shadow-emerald-700/20 hover:scale-[1.02]"
                       >
                         <MessageCircle className="w-4 h-4" />
-                        <span>{language === 'NE' ? 'ह्वाट्सएपमा पनि पठाउनुहोस्' : 'Also Send on WhatsApp for Faster Reply'}</span>
+                        <span>{language === 'NE' ? 'ह्वाट्सएपमा पठाउनुहोस्' : 'Send via WhatsApp'}</span>
                       </button>
                       <button
-                        onClick={() => setIsSubmitted(false)}
-                        className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                        onClick={() => {
+                          setIsSubmitted(false);
+                          setSenderName('');
+                          setSenderEmail('');
+                          setSenderSubject('');
+                          setSenderMessage('');
+                        }}
+                        className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-xs font-medium border border-slate-800 transition-colors"
                       >
-                        {language === 'NE' ? 'नयाँ फारम खोल्नुहोस्' : 'Create Another Inquiry'}
+                        {language === 'NE' ? 'नयाँ सन्देश लेख्नुहोस्' : 'Write Another Message'}
                       </button>
                     </div>
                   </motion.div>
@@ -569,8 +635,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         id="btn-contact-submit"
                         className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-xl shadow-blue-600/30 transition-all hover:scale-[1.01] active:scale-[0.99]"
                       >
-                        <Send className="w-4 h-4" />
-                        <span>{language === 'NE' ? 'अनलाइन सन्देश पठाउनुहोस्' : 'Send Message'}</span>
+                        <Mail className="w-4 h-4" />
+                        <span>{language === 'NE' ? 'सन्देश पठाउनुहोस् (Gmail)' : 'Send Message'}</span>
                       </button>
 
                       <button
