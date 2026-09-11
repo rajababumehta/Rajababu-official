@@ -26,10 +26,10 @@ export const Footer: React.FC<FooterProps> = ({
           
           {/* Brand Info */}
           <div className="flex items-center gap-3">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-[1.5px] shadow-md shadow-blue-500/20">
-              <div className="w-full h-full rounded-[10px] overflow-hidden bg-slate-950 flex items-center justify-center">
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 p-[1.5px] shadow-md shadow-blue-500/20">
+              <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center ring-1 ring-white/20">
                 <img
-                  src="/brand-logo.png"
+                  src="/brand-avatar.png"
                   alt={profile.name}
                   className="w-full h-full object-cover object-center"
                 />

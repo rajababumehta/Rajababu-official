@@ -35,16 +35,16 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80 transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Brand Logo & Profile Avatar */}
+          {/* Brand Logo & Profile Avatar (Circle Shape) */}
           <a
             href="#"
             id="nav-brand-logo"
             className="flex items-center gap-3.5 group focus:outline-none"
           >
-            <div className="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 p-[2px] shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/50 transition-all duration-300 group-hover:scale-105">
-              <div className="w-full h-full rounded-[14px] overflow-hidden bg-slate-950 flex items-center justify-center">
+            <div className="relative flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 p-[2px] shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all duration-300 group-hover:scale-105">
+              <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center ring-1 ring-white/20">
                 <img
-                  src="/brand-logo.png"
+                  src="/brand-avatar.png"
                   alt={profile.name}
                   className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-110"
                 />
