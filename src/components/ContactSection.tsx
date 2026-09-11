@@ -401,8 +401,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             </div>
             <span className="text-slate-700">•</span>
             <div className="flex items-center gap-1.5">
-              <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{language === 'NE' ? 'ह्वाट्सएपमा सिधा कुराकानी' : 'Direct WhatsApp Access'}</span>
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{language === 'NE' ? 'द्रुत प्रतिक्रिया' : 'Fast Response'}</span>
             </div>
             <span className="text-slate-700">•</span>
             <div className="flex items-center gap-1.5">
@@ -465,7 +465,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
               
               {/* WhatsApp VIP Direct Action Card */}
               <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900/90 border border-emerald-500/30 shadow-2xl relative overflow-hidden group">
-                <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
                 
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -993,15 +992,18 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
               </h4>
               <p className="text-xs text-slate-400 mb-4">
                 {language === 'NE'
-                  ? 'राजाबाबु मेहतासँग ह्वाट्सएपमा सिधै कुराकानी गर्न सक्नुहुन्छ।'
-                  : 'Chat directly with Rajababu Mehta on WhatsApp for quick, honest advice.'}
+                  ? 'राजाबाबु मेहतालाई सिधै सम्पर्क गर्न सक्नुहुन्छ।'
+                  : 'Reach out directly to Rajababu Mehta for quick, honest advice.'}
               </p>
               <button
-                onClick={handleDirectWhatsAppClick}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md shadow-emerald-600/20"
+                onClick={() => {
+                  setActiveTab('planner');
+                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/20"
               >
-                <MessageCircle className="w-4 h-4" />
-                <span>WhatsApp: 9816689232</span>
+                <Send className="w-4 h-4" />
+                <span>{language === 'NE' ? 'सम्पर्क फारममा जानुहोस्' : 'Send Project Inquiry'}</span>
               </button>
             </div>
           </motion.div>

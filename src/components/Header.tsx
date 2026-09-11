@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Sparkles,
-  ArrowRight,
-  Send,
   Layers,
   Heart,
   Award,
   Lightbulb,
-  Shield,
   Code,
   ChevronDown,
 } from 'lucide-react';
@@ -156,34 +153,6 @@ export const Header: React.FC<HeaderProps> = ({
           >
             {language === 'NE' ? profile.taglineNe : profile.taglineEn}
           </motion.p>
-
-          {/* Call-to-Action Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-wrap items-center gap-3 sm:gap-4 w-full sm:w-auto mb-8"
-          >
-            <a
-              href="#contact"
-              id="btn-hero-primary-cta"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-xl shadow-blue-600/35 transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <span>{language === 'NE' ? profile.ctaPrimaryNe || 'वेबसाइट बनाउन सम्पर्क गर्नुहोस्' : profile.ctaPrimaryEn || 'Make a Website / Contact Me'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
-
-            <a
-              href="https://wa.me/9779816689232?text=Hello%20Rajababu,%20I%20want%20to%20build%20a%20website"
-              target="_blank"
-              rel="noopener noreferrer"
-              id="btn-hero-secondary-cta"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-700/80 hover:bg-emerald-600 backdrop-blur-md border border-emerald-500/50 text-white font-medium text-sm transition-all shadow-lg"
-            >
-              <Send className="w-4 h-4 text-emerald-200" />
-              <span>WhatsApp: 9816689232</span>
-            </a>
-          </motion.div>
 
           {/* Floating Snapshot Counter Badges */}
           <motion.div
