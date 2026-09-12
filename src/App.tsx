@@ -13,6 +13,7 @@ import { Footer } from './components/Footer';
 import { ToastContainer, ToastMessage } from './components/Toast';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
 import { CvModal } from './components/CvModal';
+import { AdminModal } from './components/AdminModal';
 
 import { Language, Moment, Comment, SystemSettings, ClipzoneImage } from './types';
 import {
@@ -187,6 +188,23 @@ export default function App() {
   const [isCvOpen, setIsCvOpen] = useState(false);
   const handleOpenCv = () => setIsCvOpen(true);
   const handleCloseCv = () => setIsCvOpen(false);
+
+  // 8. Firebase Admin Modal State
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const handleOpenAdmin = () => setIsAdminOpen(true);
+  const handleCloseAdmin = () => setIsAdminOpen(false);
+
+  // Global keyboard shortcut to open Admin panel: Ctrl+Shift+A or Cmd+Shift+A
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        setIsAdminOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const showToast = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
@@ -397,6 +415,7 @@ export default function App() {
       <Footer
         language={language}
         profile={systemSettings.profile}
+        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Official Verified CV Modal & PDF Downloader */}
@@ -404,6 +423,15 @@ export default function App() {
         isOpen={isCvOpen}
         onClose={handleCloseCv}
         language={language}
+        onShowToast={showToast}
+      />
+
+      {/* Firebase Admin & Media Upload Portal */}
+      <AdminModal
+        isOpen={isAdminOpen}
+        onClose={handleCloseAdmin}
+        language={language}
+        systemSettings={systemSettings}
         onShowToast={showToast}
       />
 

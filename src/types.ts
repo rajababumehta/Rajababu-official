@@ -172,6 +172,7 @@ export interface AdminUser {
   displayName: string | null;
   isAnonymous?: boolean;
   photoURL?: string | null;
+  isLocalFallback?: boolean;
 }
 
 export interface NewsletterSubscriber {
