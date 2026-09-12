@@ -8,6 +8,8 @@ import { Navbar } from './components/Navbar';
 import { Header } from './components/Header';
 import { AboutSection } from './components/AboutSection';
 import { ExperienceSection } from './components/ExperienceSection';
+import { DeliverablesSection } from './components/DeliverablesSection';
+import { FaqSection } from './components/FaqSection';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { ToastContainer, ToastMessage } from './components/Toast';
@@ -403,7 +405,19 @@ export default function App() {
           experience={systemSettings.experience}
         />
 
-        {/* Contact Section */}
+        {/* Web Deliverables & Technical Standards Section */}
+        <DeliverablesSection
+          language={language}
+          contact={systemSettings.contact}
+        />
+
+        {/* FAQ & Process Section */}
+        <FaqSection
+          language={language}
+          contact={systemSettings.contact}
+        />
+
+        {/* Contact & Inquiry Section */}
         <ContactSection
           language={language}
           contact={systemSettings.contact}

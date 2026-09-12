@@ -22,13 +22,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Menu items: Home, About (original scroll to section), About Me (new - opens CV), Skills, Services, Contact
+  // Menu items: Home, About, About Me (opens CV), Skills, Services / Deliverables, FAQ, Contact
   const navItems = [
     { href: '#home', labelEn: 'Home', labelNe: 'गृहपृष्ठ', isCv: false },
     { href: '#about', labelEn: 'About', labelNe: 'बारेमा', isCv: false },
     { href: '#about-me', labelEn: 'About Me', labelNe: 'About Me', isCv: true },
     { href: '#skills', labelEn: 'Skills', labelNe: 'सीपहरू', isCv: false },
     { href: '#services', labelEn: 'Services', labelNe: 'सेवाहरू', isCv: false },
+    { href: '#faq', labelEn: 'FAQ', labelNe: 'प्रश्नोत्तर', isCv: false },
     { href: '#contact', labelEn: 'Contact', labelNe: 'सम्पर्क', isCv: false },
   ];
 
