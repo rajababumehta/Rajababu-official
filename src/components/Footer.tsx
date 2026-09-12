@@ -1,17 +1,15 @@
 import React from 'react';
-import { Sparkles, ArrowUp, Flame } from 'lucide-react';
+import { Sparkles, ArrowUp } from 'lucide-react';
 import { Language, ProfileSettings } from '../types';
 
 interface FooterProps {
   language: Language;
   profile: ProfileSettings;
-  onOpenAdmin?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   language,
   profile,
-  onOpenAdmin,
 }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -54,27 +52,14 @@ export const Footer: React.FC<FooterProps> = ({
             </div>
           </div>
 
-          {/* Action buttons (Admin & Scroll to top) */}
-          <div className="flex items-center gap-2">
-            {onOpenAdmin && (
-              <button
-                onClick={onOpenAdmin}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-amber-400 text-xs font-semibold transition-colors"
-                title="Firebase Admin Portal & Image Upload"
-                aria-label="Open Firebase Admin Portal"
-              >
-                <Flame className="w-3.5 h-3.5 text-amber-400" />
-                <span>{language === 'NE' ? 'एडमिन' : 'Admin'}</span>
-              </button>
-            )}
-            <button
-              onClick={scrollToTop}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition-colors"
-            >
-              <span>{language === 'NE' ? 'माथि जानुहोस्' : 'Back to top'}</span>
-              <ArrowUp className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          {/* Scroll to top button */}
+          <button
+            onClick={scrollToTop}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition-colors"
+          >
+            <span>{language === 'NE' ? 'माथि जानुहोस्' : 'Back to top'}</span>
+            <ArrowUp className="w-3.5 h-3.5" />
+          </button>
 
         </div>
       </div>

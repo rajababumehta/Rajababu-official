@@ -346,6 +346,27 @@ export const registerAdmin = async (email: string, pass: string): Promise<AdminU
   return adminUser;
 };
 
+export const getCurrentAdminUser = (): AdminUser | null => {
+  const { auth } = getFirebaseInstances();
+  if (auth?.currentUser) {
+    return {
+      uid: auth.currentUser.uid,
+      email: auth.currentUser.email,
+      displayName: auth.currentUser.displayName || (auth.currentUser.email ? auth.currentUser.email.split('@')[0] : 'Admin'),
+      photoURL: auth.currentUser.photoURL,
+    };
+  }
+  const local = localStorage.getItem(LOCAL_ADMIN_STORAGE_KEY);
+  if (local) {
+    try {
+      return JSON.parse(local);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
 export const loginAsLocalAdmin = (email = 'rajababum426@gmail.com'): AdminUser => {
   const adminUser: AdminUser = {
     uid: `admin-${email.replace(/[^a-zA-Z0-9]/g, '_')}`,
@@ -356,6 +377,9 @@ export const loginAsLocalAdmin = (email = 'rajababum426@gmail.com'): AdminUser =
     isLocalFallback: true,
   };
   localStorage.setItem(LOCAL_ADMIN_STORAGE_KEY, JSON.stringify(adminUser));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('admin-auth-changed', { detail: adminUser }));
+  }
   return adminUser;
 };
 
@@ -369,13 +393,26 @@ export const logoutAdmin = async (): Promise<void> => {
     }
   }
   localStorage.removeItem(LOCAL_ADMIN_STORAGE_KEY);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('admin-auth-changed', { detail: null }));
+  }
 };
 
 export const subscribeToAuth = (callback: (user: AdminUser | null) => void) => {
   const { auth } = getFirebaseInstances();
 
+  // Listen to custom window event for local state changes
+  const handleCustomAuthChange = (e: any) => {
+    callback(e.detail);
+  };
+  if (typeof window !== 'undefined') {
+    window.addEventListener('admin-auth-changed', handleCustomAuthChange);
+  }
+
+  let unsubFb = () => {};
+
   if (auth) {
-    return onAuthStateChanged(auth, (fbUser: FirebaseUser | null) => {
+    unsubFb = onAuthStateChanged(auth, (fbUser: FirebaseUser | null) => {
       if (fbUser) {
         const adminUser: AdminUser = {
           uid: fbUser.uid,
@@ -398,22 +435,26 @@ export const subscribeToAuth = (callback: (user: AdminUser | null) => void) => {
         }
       }
     });
-  }
-
-  // If no Firebase Auth instance, check localStorage
-  const local = localStorage.getItem(LOCAL_ADMIN_STORAGE_KEY);
-  if (local) {
-    try {
-      callback(JSON.parse(local));
-    } catch {
+  } else {
+    // If no Firebase Auth instance, check localStorage
+    const local = localStorage.getItem(LOCAL_ADMIN_STORAGE_KEY);
+    if (local) {
+      try {
+        callback(JSON.parse(local));
+      } catch {
+        callback(null);
+      }
+    } else {
       callback(null);
     }
-  } else {
-    callback(null);
   }
 
-  // Return unsubscribe dummy
-  return () => {};
+  return () => {
+    unsubFb();
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('admin-auth-changed', handleCustomAuthChange);
+    }
+  };
 };
 
 export const sendResetEmail = async (email: string): Promise<void> => {

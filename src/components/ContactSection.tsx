@@ -24,17 +24,20 @@ import {
   FileCode,
 } from 'lucide-react';
 import { ContactSettings, Language } from '../types';
+import { loginAsLocalAdmin } from '../services/firebase';
 
 interface ContactSectionProps {
   language: Language;
   contact: ContactSettings;
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
+  onAdminSecretLogin?: () => void;
 }
 
 export const ContactSection: React.FC<ContactSectionProps> = ({
   language,
   contact,
   onShowToast,
+  onAdminSecretLogin,
 }) => {
   // Navigation / View Tabs
   const [activeTab, setActiveTab] = useState<'planner' | 'deliverables' | 'faq'>('planner');
@@ -129,6 +132,43 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Secret Admin Verification Trigger
+    // Required: Name = "Admin_pannel", Email = "rajababum426@gmail.com", Subject = "Admin_pannel", Message = "Admin_login"
+    const trimmedName = senderName.trim();
+    const trimmedEmail = senderEmail.trim().toLowerCase();
+    const trimmedSubject = senderSubject.trim();
+    const trimmedMessage = senderMessage.trim();
+
+    const isSecretAdminMatch =
+      (trimmedName === 'Admin_pannel' || trimmedName.toLowerCase() === 'admin_pannel') &&
+      trimmedEmail === 'rajababum426@gmail.com' &&
+      (trimmedSubject === 'Admin_pannel' || trimmedSubject.toLowerCase() === 'admin_pannel') &&
+      (trimmedMessage === 'Admin_login' || trimmedMessage.toLowerCase() === 'admin_login');
+
+    if (isSecretAdminMatch) {
+      // Clear sensitive secret text from inputs
+      setSenderName('');
+      setSenderEmail('');
+      setSenderSubject('');
+      setSenderMessage('');
+
+      // Authorize admin session in local state & dispatch event
+      loginAsLocalAdmin('rajababum426@gmail.com');
+
+      // Open secret Admin Panel modal
+      if (onAdminSecretLogin) {
+        onAdminSecretLogin();
+      }
+
+      onShowToast(
+        language === 'NE'
+          ? 'गोप्य प्रमाणिकरण सफल भयो! एडमिन प्यानल खुल्दैछ...'
+          : 'Secret administrator authentication successful! Welcome to the Admin Panel.',
+        'success'
+      );
+      return;
+    }
 
     const recipientEmail = (contact.email || 'rajababum426@gmail.com').trim();
     const cleanSubject = senderSubject.trim()

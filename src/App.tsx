@@ -408,6 +408,7 @@ export default function App() {
           language={language}
           contact={systemSettings.contact}
           onShowToast={showToast}
+          onAdminSecretLogin={handleOpenAdmin}
         />
       </main>
 
@@ -415,7 +416,6 @@ export default function App() {
       <Footer
         language={language}
         profile={systemSettings.profile}
-        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Official Verified CV Modal & PDF Downloader */}

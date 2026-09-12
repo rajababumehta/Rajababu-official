@@ -25,6 +25,7 @@ import {
   loginAdmin,
   loginAsLocalAdmin,
   logoutAdmin,
+  getCurrentAdminUser,
   subscribeToAuth,
   uploadFileToFirebaseStorage,
   saveImageMetadataToFirestore,
@@ -81,6 +82,16 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     });
     return () => unsubAuth();
   }, []);
+
+  // Update current user immediately whenever modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const activeUser = getCurrentAdminUser();
+      if (activeUser) {
+        setCurrentUser(activeUser);
+      }
+    }
+  }, [isOpen]);
 
   // Listen to Firestore clipzone images
   useEffect(() => {
