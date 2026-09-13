@@ -10,7 +10,9 @@ import {
   User as FirebaseUser,
 } from 'firebase/auth';
 import {
+  initializeFirestore,
   getFirestore,
+  setLogLevel,
   collection,
   addDoc,
   setDoc,
@@ -60,9 +62,32 @@ export const DEFAULT_FIREBASE_CONFIG = firebaseConfig;
 export const app: FirebaseApp =
   getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
+// Silence benign connection retry logs when offline or negotiating transports
+try {
+  setLogLevel('silent');
+} catch {
+  // ignore
+}
+
+// Helper to initialize Firestore with auto-detect long polling for sandbox/proxy compatibility
+export const createConfiguredFirestore = (targetApp: FirebaseApp): Firestore => {
+  try {
+    setLogLevel('silent');
+  } catch {
+    // ignore
+  }
+  try {
+    return initializeFirestore(targetApp, {
+      experimentalAutoDetectLongPolling: true,
+    });
+  } catch {
+    return getFirestore(targetApp);
+  }
+};
+
 // Initialize Firebase Auth, Firestore, and Storage
 export const auth: Auth = getAuth(app);
-export const firestore: Firestore = getFirestore(app);
+export const firestore: Firestore = createConfiguredFirestore(app);
 export const db: Firestore = firestore; // Alias for convenience
 export const storage: FirebaseStorage = getStorage(app);
 
@@ -137,7 +162,7 @@ export const initializeFirebaseServices = (configOverride?: FirebaseConfig) => {
     }
 
     authInstance = getAuth(appInstance);
-    firestoreInstance = getFirestore(appInstance);
+    firestoreInstance = createConfiguredFirestore(appInstance);
     storageInstance = getStorage(appInstance);
 
     if (typeof window !== 'undefined') {
@@ -603,15 +628,45 @@ export const subscribeToClipzoneImages = (
           };
         });
 
+        // Persist local copy for offline availability
+        try {
+          if (images.length > 0) {
+            localStorage.setItem(LOCAL_IMAGES_STORAGE_KEY, JSON.stringify(images));
+          }
+        } catch {
+          // ignore localStorage error
+        }
+
         onImagesUpdate(images);
       },
       (err) => {
-        console.warn('Firestore subscription notice (fallback will handle if offline):', err.message);
+        // Fall back gracefully to cached images when offline or reconnecting
+        try {
+          const cached = localStorage.getItem(LOCAL_IMAGES_STORAGE_KEY);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              onImagesUpdate(parsed);
+            }
+          }
+        } catch {
+          // ignore
+        }
         if (onError) onError(err);
       }
     );
   } catch (e: any) {
-    console.warn('Error setting up Firestore snapshot listener:', e);
+    try {
+      const cached = localStorage.getItem(LOCAL_IMAGES_STORAGE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          onImagesUpdate(parsed);
+        }
+      }
+    } catch {
+      // ignore
+    }
     return () => {};
   }
 };
@@ -760,11 +815,11 @@ export const subscribeToSystemSettings = (
           }
         },
         (error) => {
-          console.warn('System settings listener warning:', error);
+          // Graceful fallback when operating offline or before database is created
         }
       );
     } catch (e) {
-      console.warn('Could not attach system settings listener:', e);
+      // Graceful fallback
     }
   }
   return () => {};
@@ -820,7 +875,7 @@ export const testFirebaseLiveConnection = async (configToTest?: FirebaseConfig) 
     }
 
     const testAuth = getAuth(testApp);
-    const testFirestore = getFirestore(testApp);
+    const testFirestore = createConfiguredFirestore(testApp);
     const testStorage = getStorage(testApp);
 
     // Ping Firestore

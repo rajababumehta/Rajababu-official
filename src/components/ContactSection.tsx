@@ -10,9 +10,7 @@ import {
   Clock,
   Sparkles,
   Zap,
-  MessageCircle,
   ShieldCheck,
-  Smartphone,
 } from 'lucide-react';
 import { ContactSettings, Language } from '../types';
 import { loginAsLocalAdmin } from '../services/firebase';
@@ -81,38 +79,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       'success'
     );
     setTimeout(() => setCopiedType(null), 2500);
-  };
-
-  // Compile WhatsApp pre-filled message based on contact inputs
-  const generateWhatsAppMessage = () => {
-    let text = `Hello Rajababu Mehta,\nI am contacting you from your official website (rajababumehta.com.np):\n\n`;
-    if (senderName.trim()) {
-      text += `• Name: ${senderName.trim()}\n`;
-    }
-    if (senderEmail.trim()) {
-      text += `• Contact: ${senderEmail.trim()}\n`;
-    }
-    if (senderSubject.trim()) {
-      text += `• Subject: ${senderSubject.trim()}\n`;
-    }
-    if (senderMessage.trim()) {
-      text += `• Message: ${senderMessage.trim()}\n`;
-    }
-
-    return encodeURIComponent(text);
-  };
-
-  const handleDirectWhatsAppClick = () => {
-    const message = generateWhatsAppMessage();
-    const cleanNumber = contact.whatsappNumber.replace(/[^0-9]/g, '');
-    const url = `https://wa.me/977${cleanNumber}?text=${message}`;
-    window.open(url, '_blank');
-    onShowToast(
-      language === 'NE'
-        ? 'ह्वाट्सएप खुल्दैछ... तपाईँको विवरण स्वचालित रूपमा भरिएको छ!'
-        : 'Launching WhatsApp with your pre-filled project blueprint!',
-      'info'
-    );
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -252,8 +218,8 @@ Sent from rajababumehta.com.np`;
           
           <p className="text-slate-400 text-sm sm:text-base max-w-2xl leading-relaxed">
             {language === 'NE'
-              ? 'नयाँ वेबसाइट, व्यापारिक सोधपुछ वा एआई परामर्शका लागि सन्देश पठाउनुहोस् वा सिधै ह्वाट्सएपमा जोडिनुहोस्।'
-              : 'Ready to take your business or personal brand online? Send a direct inquiry below or start a live conversation on WhatsApp.'}
+              ? 'नयाँ वेबसाइट, व्यापारिक सोधपुछ वा एआई परामर्शका लागि तलको फारम भरेर सन्देश पठाउनुहोस्।'
+              : 'Ready to take your business or personal brand online? Send a direct inquiry below to discuss your project.'}
           </p>
 
           {/* Value Props Pill Strip */}
@@ -264,8 +230,8 @@ Sent from rajababumehta.com.np`;
             </div>
             <span className="text-slate-700">•</span>
             <div className="flex items-center gap-1.5">
-              <Smartphone className="w-3.5 h-3.5 text-blue-400" />
-              <span>{language === 'NE' ? 'ह्वाट्सएप सहायता' : 'WhatsApp Support'}</span>
+              <Mail className="w-3.5 h-3.5 text-blue-400" />
+              <span>{language === 'NE' ? 'आधिकारिक इमेल' : 'Official Email'}</span>
             </div>
             <span className="text-slate-700">•</span>
             <div className="flex items-center gap-1.5">
@@ -286,66 +252,55 @@ Sent from rajababumehta.com.np`;
           {/* Left Column: Direct Contact Hub & Instant Connect Cards */}
           <div className="lg:col-span-5 space-y-5">
             
-            {/* WhatsApp VIP Direct Action Card */}
-            <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900/90 border border-emerald-500/30 shadow-2xl relative overflow-hidden group">
-              
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                    <MessageCircle className="w-6 h-6" />
+            {/* Phone / Voice Call Card */}
+            <div
+              onClick={() => handleCopy(contact.phone, 'phone')}
+              className="p-5 sm:p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/40 hover:bg-slate-900 transition-all cursor-pointer group shadow-xl"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 group-hover:scale-105 transition-transform">
+                    <Phone className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
-                      {language === 'NE' ? 'द्रुत प्रतिक्रिया' : 'Fastest Response'}
+                    <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
+                      {language === 'NE' ? 'फोन सम्पर्क' : 'Direct Phone'}
+                    </div>
+                    <div className="text-sm sm:text-base font-bold text-slate-100 group-hover:text-blue-400 transition-colors">
+                      {contact.phone}
+                    </div>
+                    <span className="text-[11px] text-slate-500">
+                      {language === 'NE' ? 'प्रत्यक्ष कुराकानी वा सोधपुछ' : 'Voice Call & Direct Inquiry'}
                     </span>
-                    <h4 className="text-base sm:text-lg font-bold text-slate-100 font-heading">
-                      {language === 'NE' ? 'ह्वाट्सएप सिधा च्याट' : 'WhatsApp Direct Chat'}
-                    </h4>
                   </div>
                 </div>
-                <button
-                  onClick={() => handleCopy(contact.phone, 'phone')}
-                  className="p-2 rounded-xl bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800"
-                  title="Copy WhatsApp number"
-                >
-                  {copiedType === 'phone' ? (
-                    <Check className="w-4 h-4 text-emerald-400" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-
-              <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                {language === 'NE'
-                  ? 'कुनै पनि सोधपुछ वा वेबसाइट छलफलका लागि ९८१६६८९२३२ मा सिधै ह्वाट्सएप सन्देश पठाउनुहोस्।'
-                  : 'Chat directly on WhatsApp to discuss your website scope, pricing, or ideas with zero wait time.'}
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-2.5">
-                <button
-                  onClick={handleDirectWhatsAppClick}
-                  id="btn-whatsapp-blueprint"
-                  className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-600/30 hover:scale-[1.01]"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>{language === 'NE' ? 'ह्वाट्सएपमा सिधै च्याट गर्नुहोस्' : 'Chat on WhatsApp (9816689232)'}</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </button>
-                <a
-                  href={`tel:+977${contact.phone.replace(/[^0-9]/g, '')}`}
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-850 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-semibold transition-all"
-                >
-                  <Phone className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>{contact.phone}</span>
-                </a>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`tel:+977${contact.phone.replace(/[^0-9]/g, '')}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="p-2 rounded-xl bg-slate-950 text-blue-400 hover:text-blue-300 border border-slate-800 hover:border-blue-500/50 transition-colors"
+                    title={language === 'NE' ? 'कल गर्नुहोस्' : 'Make Call'}
+                  >
+                    <Phone className="w-4 h-4" />
+                  </a>
+                  <button
+                    className="p-2 rounded-xl bg-slate-950 text-slate-400 group-hover:text-slate-200 border border-slate-800"
+                    title="Copy phone"
+                  >
+                    {copiedType === 'phone' ? (
+                      <Check className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Email Card */}
             <div
               onClick={() => handleCopy(contact.email, 'email')}
-              className="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/40 hover:bg-slate-900 transition-all cursor-pointer group shadow-xl"
+              className="p-5 sm:p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/40 hover:bg-slate-900 transition-all cursor-pointer group shadow-xl"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3.5">
@@ -354,11 +309,14 @@ Sent from rajababumehta.com.np`;
                   </div>
                   <div>
                     <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
-                      {language === 'NE' ? 'इमेल सम्पर्क' : 'Email Address'}
+                      {language === 'NE' ? 'आधिकारिक इमेल' : 'Email Address'}
                     </div>
                     <div className="text-sm sm:text-base font-bold text-slate-100 group-hover:text-blue-400 transition-colors">
                       {contact.email}
                     </div>
+                    <span className="text-[11px] text-slate-500">
+                      {language === 'NE' ? 'परियोजना सोधपुछ तथा सन्देश' : 'Official Inquiries & Proposals'}
+                    </span>
                   </div>
                 </div>
                 <button className="p-2 rounded-xl bg-slate-950 text-slate-400 group-hover:text-slate-200 border border-slate-800">
@@ -478,13 +436,6 @@ Sent from rajababumehta.com.np`;
                       </a>
                     )}
                     <button
-                      onClick={handleDirectWhatsAppClick}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition-all shadow-md shadow-emerald-700/20 hover:scale-[1.02]"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      <span>{language === 'NE' ? 'ह्वाट्सएपमा पठाउनुहोस्' : 'Send via WhatsApp'}</span>
-                    </button>
-                    <button
                       onClick={() => {
                         setIsSubmitted(false);
                         setSenderName('');
@@ -565,26 +516,15 @@ Sent from rajababumehta.com.np`;
                     />
                   </div>
 
-                  {/* Dual Action Dispatch Bar */}
-                  <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                  {/* Action Dispatch Bar */}
+                  <div className="pt-2">
                     <button
                       type="submit"
                       id="btn-contact-submit"
-                      className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-xl shadow-blue-600/30 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                      className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-xl shadow-blue-600/30 transition-all hover:scale-[1.01] active:scale-[0.99]"
                     >
                       <Mail className="w-4 h-4" />
-                      <span>{language === 'NE' ? 'सन्देश पठाउनुहोस् (Gmail)' : 'Send Message'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleDirectWhatsAppClick}
-                      id="btn-contact-whatsapp-instant"
-                      className="flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs transition-all shadow-lg shadow-emerald-700/20 hover:scale-[1.01]"
-                      title="Send this message directly to WhatsApp"
-                    >
-                      <MessageCircle className="w-4 h-4 text-emerald-200" />
-                      <span>{language === 'NE' ? 'ह्वाट्सएपमा सिधै पठाउनुहोस्' : 'Send via WhatsApp'}</span>
+                      <span>{language === 'NE' ? 'सन्देश पठाउनुहोस् (Send Message)' : 'Send Message'}</span>
                     </button>
                   </div>
 

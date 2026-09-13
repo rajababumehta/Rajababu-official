@@ -10,18 +10,16 @@ import {
   Zap,
   Sparkles,
   Layers,
-  MessageCircle,
 } from 'lucide-react';
 import { Language, ContactSettings } from '../types';
 
 interface DeliverablesSectionProps {
   language: Language;
-  contact: ContactSettings;
+  contact?: ContactSettings;
 }
 
 export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
   language,
-  contact,
 }) => {
   const deliverablesList = [
     {
@@ -71,8 +69,8 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
       step: '01',
       titleEn: 'Requirement & Concept',
       titleNe: 'आवश्यकता र अवधारणा',
-      descEn: 'Connect on WhatsApp (9816689232) to finalize pages, brand colors, and core objectives.',
-      descNe: 'ह्वाट्सएपमा कुराकानी गरी पृष्ठ संख्या, ब्रान्ड र लक्ष्य निर्धारण गरिन्छ।',
+      descEn: 'Submit your requirements in the contact section below to finalize pages, brand colors, and core objectives.',
+      descNe: 'सम्पर्क फारममा जानकारी पठाएर पृष्ठ संख्या, ब्रान्ड र लक्ष्य निर्धारण गरिन्छ।',
     },
     {
       step: '02',
@@ -96,14 +94,6 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
       descNe: 'कस्टम डोमेन लिङ्क गरी गुगल सर्चमा देखिने गरी वेबसाइट प्रत्यक्ष अनलाइन गरिन्छ।',
     },
   ];
-
-  const handleWhatsAppContact = () => {
-    const cleanNumber = contact.whatsappNumber.replace(/[^0-9]/g, '');
-    const message = encodeURIComponent(
-      'Namaste Rajababu! I am interested in building a high-quality modern website for my business/project.'
-    );
-    window.open(`https://wa.me/977${cleanNumber}?text=${message}`, '_blank');
-  };
 
   return (
     <section
@@ -247,22 +237,14 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
             ))}
           </div>
 
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="mt-10 flex items-center justify-center">
             <a
               href="#contact"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-blue-600/25 hover:scale-[1.02]"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-blue-600/25 hover:scale-[1.02]"
             >
               <span>{language === 'NE' ? 'सम्पर्क गरी सुरु गर्नुहोस्' : 'Start Your Project Now'}</span>
               <ArrowRight className="w-4 h-4" />
             </a>
-            <button
-              type="button"
-              onClick={handleWhatsAppContact}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs sm:text-sm font-bold transition-all"
-            >
-              <MessageCircle className="w-4 h-4 text-emerald-400" />
-              <span>{language === 'NE' ? 'ह्वाट्सएपमा सोधपुछ (९८१६६८९२३२)' : 'WhatsApp Inquiry (9816689232)'}</span>
-            </button>
           </div>
         </div>
 

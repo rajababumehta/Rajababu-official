@@ -3,21 +3,16 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   HelpCircle,
   ChevronDown,
-  MessageCircle,
-  Mail,
-  ArrowRight,
-  Sparkles,
 } from 'lucide-react';
 import { Language, ContactSettings } from '../types';
 
 interface FaqSectionProps {
   language: Language;
-  contact: ContactSettings;
+  contact?: ContactSettings;
 }
 
 export const FaqSection: React.FC<FaqSectionProps> = ({
   language,
-  contact,
 }) => {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(0);
 
@@ -26,19 +21,19 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
       questionEn: 'How do we start a website project together?',
       questionNe: 'हामी सँगै वेबसाइट निर्माण कार्य कसरी सुरु गर्छौं?',
       answerEn:
-        'Simply drop a message in the Contact form below or connect directly on WhatsApp (9816689232). Share your business requirements, logo, or rough ideas. Rajababu will understand your vision, propose a clean design plan, and once approved, build and deploy the complete website.',
+        'Simply drop a message in the Contact form below with your requirements, logo, or rough ideas. Rajababu will understand your vision, propose a clean design plan, and once approved, build and deploy the complete website.',
       answerNe:
-        'तपाईँ तलको सम्पर्क फारम भरेर वा सिधै ह्वाट्सएप (९८१६६८९२३२) मा सम्पर्क गर्न सक्नुहुन्छ। आफ्नो व्यवसायको आवश्यकता, लोगो वा विचार सुनाउनुहोस्। तपाईँको आवश्यकता अनुसार डिजाइन तयार गरी पूर्ण वेबसाइट अनलाइन गरिनेछ।',
+        'तपाईँ तलको सम्पर्क फारम भरेर आफ्नो व्यवसायको आवश्यकता, लोगो वा विचार पठाउन सक्नुहुन्छ। तपाईँको आवश्यकता अनुसार डिजाइन तयार गरी पूर्ण वेबसाइट अनलाइन गरिनेछ।',
       categoryEn: 'Getting Started',
       categoryNe: 'सुरुवात',
     },
     {
-      questionEn: 'Can I request custom features like Nepali language or WhatsApp checkout?',
-      questionNe: 'के नेपाली भाषा वा ह्वाट्सएप अर्डर प्रणाली थप्न सकिन्छ?',
+      questionEn: 'Can I request custom features like Nepali language or online inquiry forms?',
+      questionNe: 'के नेपाली भाषा वा अनलाइन सोधपुछ फारम प्रणाली थप्न सकिन्छ?',
       answerEn:
-        'Yes, absolutely! Every website is custom-crafted to your specific goals. You can request bilingual Nepali/English switches, direct WhatsApp lead buttons, image galleries, Google Maps directions, and custom contact forms tailored to your customers.',
+        'Yes, absolutely! Every website is custom-crafted to your specific goals. You can request bilingual Nepali/English switches, direct lead inquiry buttons, image galleries, Google Maps directions, and custom contact forms tailored to your customers.',
       answerNe:
-        'अवश्य सकिन्छ! तपाईँको आवश्यकता अनुसार नेपाली र अंग्रेजी दुवै भाषा, ह्वाट्सएप सिधा अर्डर, तस्बिर ग्यालरी, गुगल म्याप र ग्राहक सोधपुछ फारमहरू समावेश गर्न सकिन्छ।',
+        'अवश्य सकिन्छ! तपाईँको आवश्यकता अनुसार नेपाली र अंग्रेजी दुवै भाषा, सोधपुछ प्रणाली, तस्बिर ग्यालरी, गुगल म्याप र ग्राहक सोधपुछ फारमहरू समावेश गर्न सकिन्छ।',
       categoryEn: 'Custom Features',
       categoryNe: 'अनुकूलित विशेषताहरू',
     },
@@ -56,9 +51,9 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
       questionEn: 'Are you available for clients outside Birgunj or Nepal?',
       questionNe: 'के वीरगञ्ज बाहिर वा देश बाहिरका ग्राहकहरूका लागि पनि काम गर्नुहुन्छ?',
       answerEn:
-        'Yes! Remote collaboration is smooth and seamless via WhatsApp, Google Meet, and Email. Projects can be coordinated seamlessly from Kathmandu, Pokhara, across Nepal, or international locations.',
+        'Yes! Remote collaboration is smooth and seamless via Google Meet and online communication. Projects can be coordinated seamlessly from Kathmandu, Pokhara, across Nepal, or international locations.',
       answerNe:
-        'हो! ह्वाट्सएप, गुगल मिट र इमेल मार्फत काठमाडौँ, पोखरा, नेपालभर तथा विदेशमा रहेका सेवाग्राहीहरूसँग पनि सहज रूपमा अनलाइन सहकार्य गर्न सकिन्छ।',
+        'हो! गुगल मिट तथा अनलाइन सञ्चार मार्फत काठमाडौँ, पोखरा, नेपालभर तथा विदेशमा रहेका सेवाग्राहीहरूसँग पनि सहज रूपमा अनलाइन सहकार्य गर्न सकिन्छ।',
       categoryEn: 'Collaboration',
       categoryNe: 'सहकार्य',
     },
@@ -83,14 +78,6 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
       categoryNe: 'एआई परामर्श',
     },
   ];
-
-  const handleWhatsAppContact = () => {
-    const cleanNumber = contact.whatsappNumber.replace(/[^0-9]/g, '');
-    const message = encodeURIComponent(
-      'Namaste Rajababu! I have a question regarding a website project.'
-    );
-    window.open(`https://wa.me/977${cleanNumber}?text=${message}`, '_blank');
-  };
 
   return (
     <section
@@ -126,7 +113,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
         </div>
 
         {/* FAQ Accordion List */}
-        <div className="space-y-4 mb-16">
+        <div className="space-y-4">
           {faqItems.map((faq, index) => {
             const isOpen = expandedFaq === index;
             return (
@@ -188,40 +175,6 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
             );
           })}
         </div>
-
-        {/* Quick Question CTA Box */}
-        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-indigo-950/40 border border-blue-500/30 shadow-2xl text-center">
-          <div className="inline-flex p-3 rounded-2xl bg-blue-500/20 text-blue-400 mb-4 border border-blue-500/30">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <h4 className="text-xl sm:text-2xl font-bold text-slate-100 font-heading mb-2">
-            {language === 'NE' ? 'अन्य कुनै विशेष प्रश्न वा विचार छ?' : 'Have a Specific Question or Custom Idea?'}
-          </h4>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto mb-6 leading-relaxed">
-            {language === 'NE'
-              ? 'आफ्नो आवश्यकता अनुसार सिधै छलफल गर्न राजाबाबु मेहतालाई सन्देश पठाउनुहोस् वा तलको फारम प्रयोग गर्नुहोस्।'
-              : 'Direct consultation is completely free. Feel free to discuss your idea on WhatsApp or send a message using the Contact form below.'}
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5">
-            <a
-              href="#contact"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-blue-600/25"
-            >
-              <Mail className="w-4 h-4" />
-              <span>{language === 'NE' ? 'सम्पर्क फारममा जानुहोस्' : 'Go to Contact Form'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </a>
-            <button
-              type="button"
-              onClick={handleWhatsAppContact}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs sm:text-sm font-bold transition-all"
-            >
-              <MessageCircle className="w-4 h-4 text-emerald-400" />
-              <span>{language === 'NE' ? 'ह्वाट्सएपमा सोधपुछ' : 'WhatsApp Inquiry'}</span>
-            </button>
-          </div>
-        </div>
-
       </div>
     </section>
   );

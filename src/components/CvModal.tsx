@@ -493,13 +493,6 @@ ${cv.name} · ${cv.website}
                         <span>{cv.phone}</span>
                       </a>
                       <a
-                        href={`mailto:${cv.email}`}
-                        className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors"
-                      >
-                        <Mail className="w-3 h-3 text-blue-600 shrink-0" />
-                        <span>{cv.email}</span>
-                      </a>
-                      <a
                         href={cv.website}
                         target="_blank"
                         rel="noopener noreferrer"
