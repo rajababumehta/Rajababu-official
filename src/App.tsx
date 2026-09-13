@@ -303,10 +303,6 @@ export default function App() {
   const handleToggleLanguage = () => {
     const nextLang = language === 'EN' ? 'NE' : 'EN';
     setLanguage(nextLang);
-    showToast(
-      nextLang === 'NE' ? 'भाषा नेपालीमा परिवर्तन गरियो' : 'Language switched to English',
-      'info'
-    );
   };
 
   const handleLikeMoment = (id: string) => {
