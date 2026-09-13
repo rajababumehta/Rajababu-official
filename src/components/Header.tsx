@@ -52,25 +52,24 @@ export const Header: React.FC<HeaderProps> = ({
       id="home"
       className="relative min-h-[105vh] sm:min-h-[100vh] flex flex-col justify-end overflow-hidden bg-slate-950 pt-[380px] sm:pt-[480px] lg:pt-[540px] pb-10 sm:pb-16"
     >
-      {/* 1. HERO BACKGROUND COVER IMAGE (Full-viewport, uncropped top face anchoring with high brightness) */}
+      {/* 1. HERO BACKGROUND COVER IMAGE (Full-viewport, uncropped top face anchoring) */}
       <img
         src={heroImageSrc}
         alt="Rajababu Mehta - Website Developer, Student, and AI Explainer from Birgunj Nepal"
         referrerPolicy="no-referrer"
-        className="absolute inset-0 w-full h-full object-cover object-top filter brightness-110 contrast-105 saturate-105 pointer-events-none transition-all duration-500"
+        className="absolute inset-0 w-full h-full object-cover object-top filter brightness-95 contrast-105 pointer-events-none"
       />
 
-      {/* 2. DUAL-LAYER GRADIENTS OVERLAY & VIBRANT HIGH-BRIGHTNESS BACKDROP LIGHTING */}
-      {/* Top-to-bottom crystal clear gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/20 via-transparent via-50% to-slate-950/85 pointer-events-none" />
+      {/* 2. DUAL-LAYER GRADIENTS OVERLAY & BACKDROP LIGHTING */}
+      {/* Top-to-bottom subtle gradient: seamless transition with navbar, crystal clear center */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-transparent via-45% to-slate-950 pointer-events-none" />
 
-      {/* Bottom-to-top softened luminous gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none" />
+      {/* Bottom-to-top deep dark gradient: ensures ultra high contrast for typography and badges */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pointer-events-none" />
 
-      {/* Radiant ambient glow orbs with high-brightness lighting */}
-      <div className="absolute bottom-24 left-1/4 -translate-x-1/2 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none animate-pulse" />
-      <div className="absolute bottom-16 right-1/4 translate-x-1/2 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Subtle ambient glow orbs behind bottom hero text */}
+      <div className="absolute bottom-24 left-1/4 -translate-x-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-16 right-1/4 translate-x-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* 3. HERO FOREGROUND CONTAINER (Deeply anchored at bottom, never blocks face) */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-auto">

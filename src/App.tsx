@@ -372,33 +372,8 @@ export default function App() {
   const totalMoments = moments.length;
   const totalLikes = moments.reduce((acc, m) => acc + (m.likes || 0), 0);
 
-  // Auto-brightness effect: Keeps website automatically in High Brightness & screen awake
-  useEffect(() => {
-    // Keep screen awake for vibrant, clear display without dimming if supported
-    let wakeLockSentinel: any = null;
-    if ('wakeLock' in navigator) {
-      (navigator as any).wakeLock
-        ?.request('screen')
-        .then((lock: any) => {
-          wakeLockSentinel = lock;
-        })
-        .catch(() => {
-          // Gracefully continue if not allowed
-        });
-    }
-
-    return () => {
-      if (wakeLockSentinel) {
-        wakeLockSentinel.release().catch(() => {});
-      }
-    };
-  }, []);
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white site-brightness-auto-high relative overflow-x-hidden">
-      {/* Global Ambient Glow Mesh for High-Brightness Illuminating Atmosphere */}
-      <div className="fixed inset-0 pointer-events-none ambient-glow-mesh opacity-85 z-0" />
-
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
       {/* Toast Notification Container */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
