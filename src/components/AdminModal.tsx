@@ -19,6 +19,9 @@ import {
   HardDrive,
   BarChart3,
   Sparkles,
+  Link2,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { Language, AdminUser, ClipzoneImage, SystemSettings } from '../types';
 import {
@@ -27,7 +30,6 @@ import {
   logoutAdmin,
   getCurrentAdminUser,
   subscribeToAuth,
-  uploadFileToFirebaseStorage,
   saveImageMetadataToFirestore,
   subscribeToClipzoneImages,
   deleteClipzoneImage,
@@ -60,20 +62,20 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState('');
 
-  // Image upload state
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>('');
+  // Image URL & metadata state
+  const [imageUrl, setImageUrl] = useState('');
   const [imageTitle, setImageTitle] = useState('');
   const [imageTitleNe, setImageTitleNe] = useState('');
   const [imageCategory, setImageCategory] = useState('Technology');
   const [imageDesc, setImageDesc] = useState('');
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [previewError, setPreviewError] = useState(false);
+  const [previewLoaded, setPreviewLoaded] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Gallery items loaded from Firestore
   const [uploadedImages, setUploadedImages] = useState<ClipzoneImage[]>([]);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Listen to Auth state
   useEffect(() => {
@@ -176,36 +178,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     }
   };
 
-  // File selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      onShowToast(
-        language === 'NE' ? 'कृपया मान्य तस्बिर फाइल छान्नुहोस्।' : 'Please select a valid image file.',
-        'error'
-      );
-      return;
-    }
-
-    setUploadFile(file);
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
-
-    // Auto-populate title if empty
-    if (!imageTitle) {
-      const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
-      setImageTitle(cleanName);
-    }
-  };
-
-  // Upload to Firebase Storage & Firestore
-  const handleUploadSubmit = async (e: React.FormEvent) => {
+  // Save Image URL & Metadata to Firestore
+  const handleSaveImageSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!uploadFile) {
+    const cleanUrl = imageUrl.trim();
+    if (!cleanUrl) {
       onShowToast(
-        language === 'NE' ? 'कृपया अपलोड गर्न तस्बिर छान्नुहोस्।' : 'Please choose an image to upload.',
+        language === 'NE' ? 'तस्बिरको URL (Image Link) राख्नुहोस्।' : 'Please paste an Image URL.',
         'error'
       );
       return;
@@ -218,66 +197,52 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       return;
     }
 
-    setIsUploading(true);
-    setUploadProgress(0);
+    setIsSaving(true);
 
     try {
-      // 1. Upload file to Firebase Storage
-      const uploadRes = await uploadFileToFirebaseStorage(
-        uploadFile,
-        'portfolio_gallery',
-        (progress) => {
-          setUploadProgress(progress);
-        }
-      );
-
-      // 2. Save metadata to Firestore
-      const newImage = await saveImageMetadataToFirestore({
+      await saveImageMetadataToFirestore({
         title: imageTitle.trim(),
         titleNe: imageTitleNe.trim() || undefined,
         description: imageDesc.trim() || undefined,
         descNe: imageDesc.trim() || undefined,
-        imgUrl: uploadRes.downloadUrl,
-        storagePath: uploadRes.storagePath,
+        imgUrl: cleanUrl,
         category: imageCategory,
         uploadDate: new Date().toISOString(),
         likes: 0,
         tags: [imageCategory.toLowerCase()],
-        fileSize: uploadRes.fileSize,
         authorEmail: currentUser?.email || 'rajababum426@gmail.com',
         authorName: currentUser?.displayName || 'Rajababu Mehta',
       });
 
       onShowToast(
         language === 'NE'
-          ? 'तस्बिर Firebase Storage र Firestore मा सफलतापूर्वक अपलोड भयो!'
-          : 'Image successfully uploaded to Firebase Storage & Firestore!',
+          ? 'तस्बिर Firestore मा सफलतापूर्वक सुरक्षित भयो!'
+          : 'Image successfully saved to Firestore!',
         'success'
       );
 
       // Reset form
-      setUploadFile(null);
-      setPreviewUrl('');
+      setImageUrl('');
       setImageTitle('');
       setImageTitleNe('');
       setImageDesc('');
-      setUploadProgress(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      setPreviewError(false);
+      setPreviewLoaded(false);
 
-      // Switch to gallery to show newly uploaded item
+      // Switch to gallery tab to display newly added image
       setActiveTab('gallery');
     } catch (err: any) {
-      console.error('Firebase upload error:', err);
+      console.error('Firestore save error:', err);
       onShowToast(
-        err?.message || 'Failed to upload image to Firebase.',
+        err?.message || 'Failed to save image to Firestore.',
         'error'
       );
     } finally {
-      setIsUploading(false);
+      setIsSaving(false);
     }
   };
 
-  // Delete image from Firebase Firestore & Storage
+  // Delete image from Firestore
   const handleDeleteImage = async (img: ClipzoneImage) => {
     if (!confirm(language === 'NE' ? 'के तपाईँ यो तस्बिर हटाउन निश्चित हुनुहुन्छ?' : 'Are you sure you want to delete this image?')) {
       return;
@@ -285,9 +250,9 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
     setIsDeletingId(img.id);
     try {
-      await deleteClipzoneImage(img.id, img.storagePath);
+      await deleteClipzoneImage(img.id);
       onShowToast(
-        language === 'NE' ? 'तस्बिर हटाइयो।' : 'Image removed from Firestore & Storage.',
+        language === 'NE' ? 'तस्बिर Firestore बाट हटाइयो।' : 'Image removed from Firestore.',
         'info'
       );
     } catch (err: any) {
@@ -295,6 +260,23 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       onShowToast(err?.message || 'Failed to delete image.', 'error');
     } finally {
       setIsDeletingId(null);
+    }
+  };
+
+  const handleCopyUrl = (url: string, id: string) => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          setCopiedId(id);
+          setTimeout(() => setCopiedId(null), 2000);
+          onShowToast(
+            language === 'NE' ? 'तस्बिर लिङ्क प्रतिलिपि गरियो!' : 'Image URL copied to clipboard!',
+            'info'
+          );
+        });
+      }
+    } catch (err) {
+      console.warn('Copy error', err);
     }
   };
 
@@ -520,8 +502,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         : 'border-transparent text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    <Upload className="w-4 h-4" />
-                    {language === 'NE' ? 'नयाँ तस्बिर अपलोड' : 'Upload to Firebase Storage'}
+                    <Link2 className="w-4 h-4" />
+                    {language === 'NE' ? 'तस्बिर थप्नुहोस् (URL)' : 'Add Image (URL)'}
                   </button>
                   <button
                     onClick={() => setActiveTab('gallery')}
@@ -532,7 +514,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     }`}
                   >
                     <ImageIcon className="w-4 h-4" />
-                    {language === 'NE' ? `ग्यालरी (${uploadedImages.length})` : `Uploaded Images (${uploadedImages.length})`}
+                    {language === 'NE' ? `ग्यालरी (${uploadedImages.length})` : `Gallery (${uploadedImages.length})`}
                   </button>
                   <button
                     onClick={() => setActiveTab('settings')}
@@ -547,71 +529,157 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   </button>
                 </div>
 
-                {/* Tab 1: Image Upload System */}
+                {/* Tab 1: Image URL Input & Live Preview */}
                 {activeTab === 'upload' && (
-                  <form onSubmit={handleUploadSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {/* Left: File Picker & Preview */}
-                    <div className="space-y-4">
+                  <form onSubmit={handleSaveImageSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Left 6 cols: URL input, external host helpers, and Live Preview */}
+                    <div className="lg:col-span-6 space-y-4">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                          {language === 'NE' ? 'तस्बिर फाइल छान्नुहोस्' : 'Select Image File'}
-                        </label>
-                        <div
-                          onClick={() => fileInputRef.current?.click()}
-                          className="border-2 border-dashed border-slate-700 hover:border-blue-500/80 rounded-2xl p-6 text-center cursor-pointer bg-slate-950/50 transition-colors flex flex-col items-center justify-center min-h-[220px]"
-                        >
-                          {previewUrl ? (
-                            <div className="relative w-full h-44 rounded-xl overflow-hidden bg-slate-900">
-                              <img
-                                src={previewUrl}
-                                alt="Upload Preview"
-                                className="w-full h-full object-contain"
-                              />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-xs text-white font-medium">
-                                {language === 'NE' ? 'अर्को तस्बिर छान्नुहोस्' : 'Click to change image'}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              <div className="w-12 h-12 rounded-full bg-blue-500/10 text-blue-400 mx-auto flex items-center justify-center">
-                                <Upload className="w-6 h-6" />
-                              </div>
-                              <p className="text-xs font-medium text-slate-300">
-                                {language === 'NE'
-                                  ? 'फाइल यहाँ ड्र्याग गर्नुहोस् वा छान्नुहोस्'
-                                  : 'Click to select or drag & drop'}
-                              </p>
-                              <p className="text-[11px] text-slate-500">PNG, JPG, WEBP, GIF (Max 15MB)</p>
-                            </div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                          <span className="flex items-center gap-1.5">
+                            <Link2 className="w-3.5 h-3.5 text-blue-400" />
+                            <span>{language === 'NE' ? 'तस्बिरको URL (Image Link)' : 'Image URL'} *</span>
+                          </span>
+                          {imageUrl.trim() && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setImageUrl('');
+                                setPreviewError(false);
+                                setPreviewLoaded(false);
+                              }}
+                              className="text-[11px] text-slate-400 hover:text-slate-200 transition-colors"
+                            >
+                              {language === 'NE' ? 'खाली गर्नुहोस्' : 'Clear'}
+                            </button>
                           )}
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="hidden"
-                          />
-                        </div>
+                        </label>
+                        <input
+                          type="url"
+                          value={imageUrl}
+                          onChange={(e) => {
+                            setImageUrl(e.target.value);
+                            setPreviewError(false);
+                            setPreviewLoaded(false);
+                          }}
+                          placeholder="https://i.ibb.co/... or any direct image URL"
+                          required
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 placeholder:text-slate-500 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
                       </div>
 
-                      {uploadProgress !== null && (
-                        <div className="space-y-1.5">
-                          <div className="flex justify-between text-xs text-slate-400">
-                            <span>{language === 'NE' ? 'Storage मा अपलोड हुँदैछ...' : 'Uploading to Firebase Storage...'}</span>
-                            <span className="font-mono text-blue-400">{uploadProgress}%</span>
-                          </div>
-                          <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-blue-500 transition-all duration-200"
-                              style={{ width: `${uploadProgress}%` }}
-                            />
-                          </div>
+                      {/* Free Image Hosts Helpers */}
+                      <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2 text-xs">
+                        <div className="flex items-center justify-between text-slate-400">
+                          <span className="font-medium text-[11px] uppercase tracking-wider text-slate-400">
+                            {language === 'NE' ? 'तस्बिर अपलोड गर्ने नि:शुल्क वेबसाइटहरू:' : 'Recommended Free Image Hosts:'}
+                          </span>
+                          <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
+                            <CheckCircle2 className="w-3 h-3" />
+                            {language === 'NE' ? 'कुनै पनि लिङ्क चल्छ' : 'Any link works'}
+                          </span>
                         </div>
-                      )}
+                        <div className="flex flex-wrap gap-2">
+                          <a
+                            href="https://imgbb.com"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-blue-400 text-xs transition-colors"
+                          >
+                            <span>ImgBB</span>
+                            <ExternalLink className="w-3 h-3 text-slate-500" />
+                          </a>
+                          <a
+                            href="https://postimages.org"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-blue-400 text-xs transition-colors"
+                          >
+                            <span>Postimages</span>
+                            <ExternalLink className="w-3 h-3 text-slate-500" />
+                          </a>
+                          <a
+                            href="https://imgur.com/upload"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-blue-400 text-xs transition-colors"
+                          >
+                            <span>Imgur</span>
+                            <ExternalLink className="w-3 h-3 text-slate-500" />
+                          </a>
+                        </div>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">
+                          {language === 'NE'
+                            ? 'तस्बिर ती वेबसाइटमा अपलोड गरी "Direct Link" कपी गर्नुहोस् र माथिको बक्समा पेस्ट गर्नुहोस्।'
+                            : 'Upload image to any free website, copy the direct image link, and paste it in the box above.'}
+                        </p>
+                      </div>
+
+                      {/* Live Image Preview */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs text-slate-400">
+                          <span className="font-semibold text-slate-300">
+                            {language === 'NE' ? 'तस्बिर पूर्वावलोकन (Live Preview)' : 'Live Preview'}
+                          </span>
+                          {previewLoaded && !previewError && (
+                            <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-mono">
+                              <Check className="w-3 h-3" />
+                              {language === 'NE' ? 'पूर्वावलोकन लोड भयो' : 'Ready'}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="relative w-full h-52 rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center p-2">
+                          {imageUrl.trim() ? (
+                            <>
+                              {previewError ? (
+                                <div className="text-center p-4 space-y-1 text-rose-400">
+                                  <AlertCircle className="w-8 h-8 mx-auto text-rose-500/80" />
+                                  <p className="text-xs font-semibold">
+                                    {language === 'NE' ? 'तस्बिर लोड हुन सकेन' : 'Could not load image preview'}
+                                  </p>
+                                  <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
+                                    {language === 'NE'
+                                      ? 'कृपया लिङ्क सिधै तस्बिरको हो कि होइन जाँच्नुहोस्।'
+                                      : 'Make sure the URL points directly to an image (.jpg, .png, .webp, etc.).'}
+                                  </p>
+                                </div>
+                              ) : (
+                                <img
+                                  src={imageUrl.trim()}
+                                  alt="Preview"
+                                  referrerPolicy="no-referrer"
+                                  onLoad={() => {
+                                    setPreviewLoaded(true);
+                                    setPreviewError(false);
+                                  }}
+                                  onError={() => {
+                                    setPreviewError(true);
+                                    setPreviewLoaded(false);
+                                  }}
+                                  className="max-h-full max-w-full object-contain rounded-xl drop-shadow-md"
+                                />
+                              )}
+                            </>
+                          ) : (
+                            <div className="text-center p-6 space-y-2 text-slate-500">
+                              <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-400">
+                                <ImageIcon className="w-5 h-5" />
+                              </div>
+                              <p className="text-xs font-medium text-slate-400">
+                                {language === 'NE' ? 'माथि लिङ्क पेस्ट गरेपछि पूर्वावलोकन देखिनेछ' : 'Paste an Image URL to preview'}
+                              </p>
+                              <p className="text-[11px] text-slate-600">
+                                Supports ImgBB, Postimages, Google Photos, Cloudinary, Imgur, etc.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Right: Metadata Inputs */}
-                    <div className="space-y-4">
+                    {/* Right 6 cols: Metadata Inputs & Save Button */}
+                    <div className="space-y-4 lg:col-span-6">
                       <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1">
                           {language === 'NE' ? 'शीर्षक (English)' : 'Title (English)'} *
@@ -622,7 +690,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           onChange={(e) => setImageTitle(e.target.value)}
                           placeholder="e.g., Tech Seminar at Birgunj"
                           required
-                          className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
 
@@ -635,7 +703,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           value={imageTitleNe}
                           onChange={(e) => setImageTitleNe(e.target.value)}
                           placeholder="उदा: वीरगञ्जमा प्राविधिक सेमिनार"
-                          className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
 
@@ -646,7 +714,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         <select
                           value={imageCategory}
                           onChange={(e) => setImageCategory(e.target.value)}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                           <option value="Technology">Technology & Web Development</option>
                           <option value="Community">Community & Student Events</option>
@@ -658,31 +726,31 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                       <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1">
-                          {language === 'NE' ? 'विवरण' : 'Description'}
+                          {language === 'NE' ? 'विवरण' : 'Description (Optional)'}
                         </label>
                         <textarea
                           value={imageDesc}
                           onChange={(e) => setImageDesc(e.target.value)}
                           rows={3}
-                          placeholder="Add context or notes for this image..."
+                          placeholder="Add context, achievements, or notes for this image..."
                           className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                         />
                       </div>
 
                       <button
                         type="submit"
-                        disabled={isUploading || !uploadFile}
-                        className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all disabled:opacity-50"
+                        disabled={isSaving || !imageUrl.trim() || !imageTitle.trim()}
+                        className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-all disabled:opacity-50"
                       >
-                        {isUploading ? (
+                        {isSaving ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>{language === 'NE' ? 'अपलोड हुँदैछ...' : 'Uploading to Firebase...'}</span>
+                            <span>{language === 'NE' ? 'सुरक्षित गरिँदैछ...' : 'Saving to Firestore...'}</span>
                           </>
                         ) : (
                           <>
-                            <Upload className="w-4 h-4" />
-                            <span>{language === 'NE' ? 'Firebase मा सुरक्षित गर्नुहोस्' : 'Upload to Firebase Storage & Firestore'}</span>
+                            <Database className="w-4 h-4" />
+                            <span>{language === 'NE' ? 'Firestore मा सुरक्षित गर्नुहोस्' : 'Save Image to Firestore'}</span>
                           </>
                         )}
                       </button>
@@ -699,13 +767,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         <p className="text-sm font-medium">
                           {language === 'NE'
                             ? 'हालसम्म Firestore मा कुनै तस्बिर छैन।'
-                            : 'No images uploaded to Firestore collection yet.'}
+                            : 'No images saved in Firestore collection yet.'}
                         </p>
                         <button
                           onClick={() => setActiveTab('upload')}
                           className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors"
                         >
-                          {language === 'NE' ? 'पहिलो तस्बिर अपलोड गर्नुहोस्' : 'Upload your first image'}
+                          {language === 'NE' ? 'पहिलो तस्बिर थप्नुहोस्' : 'Add your first image URL'}
                         </button>
                       </div>
                     ) : (
@@ -719,9 +787,22 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               <img
                                 src={img.imgUrl}
                                 alt={img.title}
+                                referrerPolicy="no-referrer"
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                               <div className="absolute top-2 right-2 flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyUrl(img.imgUrl, img.id)}
+                                  className="p-1.5 rounded-lg bg-black/60 hover:bg-black/90 text-white backdrop-blur-sm transition-colors"
+                                  title="Copy Image Link"
+                                >
+                                  {copiedId === img.id ? (
+                                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                                  ) : (
+                                    <Copy className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
                                 <a
                                   href={img.imgUrl}
                                   target="_blank"
@@ -732,10 +813,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                   <ExternalLink className="w-3.5 h-3.5" />
                                 </a>
                                 <button
+                                  type="button"
                                   onClick={() => handleDeleteImage(img)}
                                   disabled={isDeletingId === img.id}
                                   className="p-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white backdrop-blur-sm transition-colors disabled:opacity-50"
-                                  title="Delete from Firebase"
+                                  title="Delete from Firestore"
                                 >
                                   {isDeletingId === img.id ? (
                                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -793,7 +875,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs space-y-1.5 font-mono text-slate-400">
                       <div>Project ID: <span className="text-slate-200">{firebaseConfig.projectId}</span></div>
                       <div>Auth Domain: <span className="text-slate-200">{firebaseConfig.authDomain}</span></div>
-                      <div>Storage Bucket: <span className="text-slate-200">{firebaseConfig.storageBucket}</span></div>
+                      <div>Database: <span className="text-emerald-400">Cloud Firestore (Direct URLs)</span></div>
                       <div>Measurement ID: <span className="text-emerald-400">{firebaseConfig.measurementId}</span></div>
                     </div>
                   </div>

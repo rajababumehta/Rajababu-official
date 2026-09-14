@@ -27,14 +27,6 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-  FirebaseStorage,
-} from 'firebase/storage';
-import {
   getAnalytics,
   isSupported as isAnalyticsSupported,
   Analytics,
@@ -85,11 +77,10 @@ export const createConfiguredFirestore = (targetApp: FirebaseApp): Firestore => 
   }
 };
 
-// Initialize Firebase Auth, Firestore, and Storage
+// Initialize Firebase Auth and Firestore
 export const auth: Auth = getAuth(app);
 export const firestore: Firestore = createConfiguredFirestore(app);
 export const db: Firestore = firestore; // Alias for convenience
-export const storage: FirebaseStorage = getStorage(app);
 
 // Initialize Firebase Analytics (conditionally when supported in browser environment)
 export let analytics: Analytics | null = null;
@@ -105,8 +96,8 @@ if (typeof window !== 'undefined') {
     });
 }
 
-// Re-export core initialization methods as requested
-export { getAuth, getFirestore, getStorage, getAnalytics };
+// Re-export core initialization methods
+export { getAuth, getFirestore, getAnalytics };
 
 // Stored / Active Firebase configuration
 export const getStoredFirebaseConfig = (): FirebaseConfig => {
@@ -140,7 +131,6 @@ export const isFirebaseConfigValid = (config: Partial<FirebaseConfig>): boolean 
 let appInstance: FirebaseApp = app;
 let authInstance: Auth = auth;
 let firestoreInstance: Firestore = firestore;
-let storageInstance: FirebaseStorage = storage;
 let analyticsInstance: Analytics | null = analytics;
 
 export const initializeFirebaseServices = (configOverride?: FirebaseConfig) => {
@@ -163,7 +153,6 @@ export const initializeFirebaseServices = (configOverride?: FirebaseConfig) => {
 
     authInstance = getAuth(appInstance);
     firestoreInstance = createConfiguredFirestore(appInstance);
-    storageInstance = getStorage(appInstance);
 
     if (typeof window !== 'undefined') {
       isAnalyticsSupported()
@@ -210,7 +199,7 @@ export const getFirebaseInstances = () => {
     auth: authInstance || auth,
     firestore: firestoreInstance || firestore,
     db: firestoreInstance || firestore,
-    storage: storageInstance || storage,
+    storage: null,
     analytics: analyticsInstance || analytics,
     isReady: true,
   };
@@ -492,71 +481,8 @@ export const sendResetEmail = async (email: string): Promise<void> => {
 };
 
 // ==========================================
-// STORAGE & FIRESTORE IMAGE SERVICES
+// FIRESTORE IMAGE SERVICES (EXTERNAL URL SYSTEM)
 // ==========================================
-
-export interface UploadImageResult {
-  downloadUrl: string;
-  storagePath: string;
-  fileSize: number;
-}
-
-/**
- * Upload an image file directly to Firebase Storage bucket
- */
-export const uploadFileToFirebaseStorage = async (
-  file: File,
-  folder = 'clipzone_gallery',
-  onProgress?: (percent: number) => void
-): Promise<UploadImageResult> => {
-  const { storage } = getFirebaseInstances();
-
-  if (!storage) {
-    throw new Error('Firebase Storage is not configured. Please paste your Firebase keys in the Settings tab.');
-  }
-
-  // Sanitize filename and create unique timestamped path
-  const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-  const timestamp = Date.now();
-  const storagePath = `${folder}/${timestamp}_${sanitizedName}`;
-  const fileRef = ref(storage, storagePath);
-
-  const uploadTask = uploadBytesResumable(fileRef, file, {
-    contentType: file.type,
-    customMetadata: {
-      originalName: file.name,
-      uploadedAt: new Date().toISOString(),
-    },
-  });
-
-  return new Promise((resolve, reject) => {
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        if (onProgress) {
-          onProgress(Math.round(progress));
-        }
-      },
-      (error) => {
-        console.error('Firebase Storage upload error:', error);
-        reject(new Error(`Storage Upload Failed: ${error.message}`));
-      },
-      async () => {
-        try {
-          const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve({
-            downloadUrl,
-            storagePath,
-            fileSize: file.size,
-          });
-        } catch (e: any) {
-          reject(new Error(`Failed to retrieve download URL: ${e.message}`));
-        }
-      }
-    );
-  });
-};
 
 /**
  * Save image metadata into Firestore Database `clipzone_images` collection
@@ -672,109 +598,24 @@ export const subscribeToClipzoneImages = (
 };
 
 /**
- * Delete image record from Firestore AND remove binary file from Firebase Storage
+ * Delete image record from Firestore
  */
 export const deleteClipzoneImage = async (
-  imageId: string,
-  storagePath?: string
+  imageId: string
 ): Promise<{ success: boolean; message: string }> => {
-  const { firestore, storage } = getFirebaseInstances();
+  const { firestore } = getFirebaseInstances();
 
-  // 1. Delete from Firestore if connected
   if (firestore) {
     try {
       const docRef = doc(firestore, 'clipzone_images', imageId);
       await deleteDoc(docRef);
     } catch (e: any) {
       console.error('Failed to delete doc from Firestore:', e);
+      throw e;
     }
   }
 
-  // 2. Delete from Firebase Storage if storagePath is provided
-  if (storage && storagePath) {
-    try {
-      const fileRef = ref(storage, storagePath);
-      await deleteObject(fileRef);
-    } catch (e: any) {
-      console.warn('Storage file deletion notice:', e?.message);
-    }
-  }
-
-  return { success: true, message: 'Image deleted successfully from Firebase!' };
-};
-
-/**
- * Client-side helper to compress an image file to a lightweight data URL
- * Ensures local storage quota is never exceeded if offline/local fallback is used
- */
-export const compressImageFile = (
-  file: File,
-  maxWidth = 1400,
-  maxHeight = 1400,
-  quality = 0.85
-): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > maxWidth || height > maxHeight) {
-          if (width / height > maxWidth / maxHeight) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          } else {
-            width = Math.round((width * maxHeight) / height);
-            height = maxHeight;
-          }
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(e.target?.result as string);
-          return;
-        }
-        ctx.drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve(dataUrl);
-      };
-      img.onerror = () => reject(new Error('Failed to load image for compression'));
-      img.src = e.target?.result as string;
-    };
-    reader.onerror = (err) => reject(err);
-    reader.readAsDataURL(file);
-  });
-};
-
-/**
- * Upload a profile/hero image to Firebase Storage (or fallback to compressed data URL)
- */
-export const uploadProfilePhoto = async (
-  file: File,
-  onProgress?: (percent: number) => void
-): Promise<{ url: string; storagePath?: string }> => {
-  const { storage, isReady } = getFirebaseInstances();
-
-  if (isReady && storage) {
-    const uploadResult = await uploadFileToFirebaseStorage(
-      file,
-      'profile_photos',
-      onProgress
-    );
-    return {
-      url: uploadResult.downloadUrl,
-      storagePath: uploadResult.storagePath,
-    };
-  }
-
-  // Fallback: compress image so it never exceeds browser localStorage limits
-  if (onProgress) onProgress(40);
-  const compressedDataUrl = await compressImageFile(file, 1600, 1600, 0.85);
-  if (onProgress) onProgress(100);
-  return { url: compressedDataUrl };
+  return { success: true, message: 'Image deleted successfully from Firestore!' };
 };
 
 /**
@@ -860,7 +701,6 @@ export const testFirebaseLiveConnection = async (configToTest?: FirebaseConfig) 
       connected: false,
       auth: false,
       firestore: false,
-      storage: false,
       message: 'Configuration is incomplete. Please ensure apiKey and projectId are filled.',
     };
   }
@@ -876,7 +716,6 @@ export const testFirebaseLiveConnection = async (configToTest?: FirebaseConfig) 
 
     const testAuth = getAuth(testApp);
     const testFirestore = createConfiguredFirestore(testApp);
-    const testStorage = getStorage(testApp);
 
     // Ping Firestore
     let firestoreOk = false;
@@ -894,7 +733,6 @@ export const testFirebaseLiveConnection = async (configToTest?: FirebaseConfig) 
       connected: true,
       auth: Boolean(testAuth),
       firestore: firestoreOk || Boolean(testFirestore),
-      storage: Boolean(testStorage),
       message: `Successfully connected to Firebase Project: ${config.projectId}!`,
     };
   } catch (error: any) {
@@ -902,7 +740,6 @@ export const testFirebaseLiveConnection = async (configToTest?: FirebaseConfig) 
       connected: false,
       auth: false,
       firestore: false,
-      storage: false,
       message: error?.message || 'Failed to establish connection with Firebase.',
     };
   }
