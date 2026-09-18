@@ -11,7 +11,6 @@ interface NavbarProps {
   language: Language;
   onToggleLanguage: () => void;
   profile: ProfileSettings;
-  onOpenCv?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -21,11 +20,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Menu items: Home, About Me, Skills, Services / Deliverables, FAQ, Contact
+  // Menu items: Home, About Me, Skills, Projects, Services, FAQ, Contact
   const navItems = [
     { href: '#home', labelEn: 'Home', labelNe: 'गृहपृष्ठ' },
     { href: '#about', labelEn: 'About Me', labelNe: 'बारेमा' },
     { href: '#skills', labelEn: 'Skills', labelNe: 'सीपहरू' },
+    { href: '#projects', labelEn: 'Projects', labelNe: 'परियोजनाहरू' },
     { href: '#services', labelEn: 'Services', labelNe: 'सेवाहरू' },
     { href: '#faq', labelEn: 'FAQ', labelNe: 'प्रश्नोत्तर' },
     { href: '#contact', labelEn: 'Contact', labelNe: 'सम्पर्क' },

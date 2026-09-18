@@ -11,9 +11,13 @@ import {
   X,
   Send,
   Layers,
+  Edit3,
+  Trash2,
+  Plus,
 } from 'lucide-react';
 import { Moment, Comment, Language } from '../types';
 import { formatLikes } from '../utils/likesFormatter';
+import { normalizeImageUrl, getProxiedImageUrl } from '../utils/imageUrl';
 
 interface JourneySectionProps {
   language: Language;
@@ -24,6 +28,9 @@ interface JourneySectionProps {
   commentsMap: Record<string, Comment[]>;
   onAddComment: (momentId: string, author: string, text: string) => void;
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
+  onOpenAdminUpload?: () => void;
+  onEditMoment?: (moment: Moment) => void;
+  onDeleteMoment?: (id: string) => void;
 }
 
 export const JourneySection: React.FC<JourneySectionProps> = ({
@@ -35,6 +42,9 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
   commentsMap,
   onAddComment,
   onShowToast,
+  onOpenAdminUpload,
+  onEditMoment,
+  onDeleteMoment,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeLightboxMoment, setActiveLightboxMoment] = useState<Moment | null>(null);
@@ -126,8 +136,19 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
             </p>
           </div>
 
-          {/* Action Bar (Auto-Boost) */}
+          {/* Action Bar (Auto-Boost and Direct Add Photo) */}
           <div className="flex flex-wrap items-center gap-3">
+            {onOpenAdminUpload && (
+              <button
+                id="btn-add-moment-photo"
+                onClick={onOpenAdminUpload}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                title="Add new photo directly to website"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{language === 'NE' ? '+ तस्बिर थप्नुहोस्' : '+ Add Photo'}</span>
+              </button>
+            )}
             <button
               id="btn-auto-boost-all-likes"
               onClick={onAutoBoostAllLikes}
@@ -171,11 +192,21 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
             <h3 className="text-xl font-bold text-slate-200 mb-2">
               {language === 'NE' ? 'तस्बिरहरू थप्न तयार छ' : 'Ready for Moments & Photo Links'}
             </h3>
-            <p className="text-sm sm:text-base text-slate-400 max-w-lg mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-400 max-w-lg mx-auto leading-relaxed mb-6">
               {language === 'NE'
-                ? 'तपाईँले प्रदान गर्नुहुने तस्बिर लिंकहरू यहाँ उच्च गुणस्तर र पूर्ण आकारमा प्रस्तुत गरिनेछन्।'
-                : 'All previous sample photos have been cleared. Send your image links to feature them in this gallery.'}
+                ? 'तपाईँले प्रदान गर्नुहुने तस्बिर वा फोटो लिंकहरू यहाँ सिधै सार्वजनिक हुनेछन्।'
+                : 'Publish your photo links or uploads directly to this live showcase.'}
             </p>
+            {onOpenAdminUpload && (
+              <button
+                type="button"
+                onClick={onOpenAdminUpload}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{language === 'NE' ? 'पहिलो तस्बिर सार्वजनिक गर्नुहोस्' : 'Publish First Photo'}</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -197,18 +228,30 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                   <div className="relative aspect-[4/3] w-full bg-slate-950 overflow-hidden flex items-center justify-center p-3">
                     {/* Ambient blurred reflection backdrop */}
                     <img
-                      src={moment.imgUrl}
+                      src={normalizeImageUrl(moment.imgUrl)}
                       alt=""
                       aria-hidden="true"
                       referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (!target.src.includes('wsrv.nl/?url=')) {
+                          target.src = getProxiedImageUrl(moment.imgUrl);
+                        }
+                      }}
                       className="absolute inset-0 w-full h-full object-cover filter blur-2xl opacity-25 scale-125 pointer-events-none"
                     />
 
                     {/* Main Uncropped Photo */}
                     <img
-                      src={moment.imgUrl}
+                      src={normalizeImageUrl(moment.imgUrl)}
                       alt={`Rajababu Mehta - ${moment.titleEn || 'Moments & Tech Journey'}`}
                       referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (!target.src.includes('wsrv.nl/?url=')) {
+                          target.src = getProxiedImageUrl(moment.imgUrl);
+                        }
+                      }}
                       className="relative z-10 max-h-full max-w-full object-contain rounded-xl drop-shadow-[0_15px_25px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-[1.02]"
                       loading="lazy"
                     />
@@ -229,7 +272,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                     </div>
 
                     {/* Hover Toolbar overlay */}
-                    <div className="absolute inset-0 z-30 bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-3">
+                    <div className="absolute inset-0 z-30 bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2.5">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -240,8 +283,40 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                         title="View Full Uncropped Photo & Comments"
                         aria-label="View photo details"
                       >
-                        <Eye className="w-5 h-5" />
+                        <Eye className="w-4 h-4" />
                       </button>
+
+                      {onEditMoment && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditMoment(moment);
+                          }}
+                          className="p-3 rounded-2xl bg-amber-600/90 hover:bg-amber-500 text-white shadow-lg shadow-amber-600/40 transition-transform active:scale-90"
+                          title="Edit Photo Details"
+                          aria-label="Edit photo"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                      )}
+
+                      {onDeleteMoment && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(language === 'NE' ? 'यो तस्बिर वेबसाइटबाट हटाउन चाहनुहुन्छ?' : 'Are you sure you want to delete this photo from the website?')) {
+                              onDeleteMoment(moment.id);
+                            }
+                          }}
+                          className="p-3 rounded-2xl bg-rose-600/90 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/40 transition-transform active:scale-90"
+                          title="Delete Photo from Website"
+                          aria-label="Delete photo"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -320,9 +395,15 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
               {/* Left Column: Full Uncropped Image */}
               <div className="lg:col-span-7 bg-slate-950 flex items-center justify-center p-4 sm:p-6 relative min-h-[300px] lg:min-h-[500px]">
                 <img
-                  src={activeLightboxMoment.imgUrl}
+                  src={normalizeImageUrl(activeLightboxMoment.imgUrl)}
                   alt={`Rajababu Mehta - ${activeLightboxMoment.titleEn || 'Moments & Tech Journey'}`}
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('wsrv.nl/?url=')) {
+                      target.src = getProxiedImageUrl(activeLightboxMoment.imgUrl);
+                    }
+                  }}
                   className="max-h-[70vh] w-auto max-w-full object-contain rounded-2xl drop-shadow-2xl"
                 />
 
@@ -336,18 +417,50 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
               {/* Right Column: Information, Likes & Visitor Comments */}
               <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-slate-900/90 overflow-y-auto max-h-[85vh]">
                 <div>
-                  {/* Top Bar with Close Button */}
+                  {/* Top Bar with Edit, Delete, Close Buttons */}
                   <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
                     <div className="flex items-center gap-2 text-xs text-slate-400">
                       <Calendar className="w-3.5 h-3.5" />
                       <span>{activeLightboxMoment.date}</span>
                     </div>
-                    <button
-                      onClick={() => setActiveLightboxMoment(null)}
-                      className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {onEditMoment && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const m = activeLightboxMoment;
+                            setActiveLightboxMoment(null);
+                            onEditMoment(m);
+                          }}
+                          className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-amber-400 border border-slate-800 transition-colors"
+                          title="Edit Photo"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                      )}
+                      {onDeleteMoment && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm(language === 'NE' ? 'यो तस्बिर वेबसाइटबाट हटाउन चाहनुहुन्छ?' : 'Are you sure you want to delete this photo from the website?')) {
+                              const id = activeLightboxMoment.id;
+                              setActiveLightboxMoment(null);
+                              onDeleteMoment(id);
+                            }
+                          }}
+                          className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-rose-400 border border-slate-800 transition-colors"
+                          title="Delete Photo"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setActiveLightboxMoment(null)}
+                        className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Title & Description */}

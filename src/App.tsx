@@ -388,7 +388,6 @@ export default function App() {
         language={language}
         onToggleLanguage={handleToggleLanguage}
         profile={systemSettings.profile}
-        onOpenCv={handleOpenCv}
       />
 
       {/* Main Page Content */}

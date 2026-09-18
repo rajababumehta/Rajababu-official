@@ -8,8 +8,24 @@ export interface NormalizedUrlResult {
   url: string;
   originalUrl: string;
   converted: boolean;
-  platform?: 'imgbb' | 'imgur' | 'gdrive' | 'dropbox' | 'github' | 'html_embed' | 'bbcode' | 'direct';
+  platform?: 'imgbb' | 'postimages' | 'imgur' | 'gdrive' | 'dropbox' | 'github' | 'html_embed' | 'bbcode' | 'direct';
   notes?: string;
+}
+
+/**
+ * Returns a reliable CDN web proxy URL (via wsrv.nl) for external images
+ * that block hotlinking, have strict CORS headers, or fail on direct loading.
+ */
+export function getProxiedImageUrl(rawUrl: string): string {
+  if (!rawUrl || rawUrl.startsWith('data:') || rawUrl.startsWith('/')) {
+    return rawUrl;
+  }
+  const clean = rawUrl.trim();
+  // If already proxied, return as is
+  if (clean.includes('wsrv.nl/?url=')) {
+    return clean;
+  }
+  return `https://wsrv.nl/?url=${encodeURIComponent(clean)}`;
 }
 
 /**
@@ -30,16 +46,22 @@ export function analyzeImageUrl(rawInput: string): NormalizedUrlResult {
 
   let text = rawInput.trim();
 
+  // Decode HTML entities if pasted from source code (e.g. &amp; -> &)
+  text = text.replace(/&amp;/g, '&');
+
+  // Strip wrapping markdown, brackets, quotes or whitespace
+  text = text.replace(/^<+|>+$/g, '').replace(/^"+|"+$/g, '').replace(/^'+|'+$/g, '');
+
   // 1. Check for HTML <img> embed code: e.g. <img src="..." /> or <a href="..."><img src="..." /></a>
   const htmlImgMatch = text.match(/<img[^>]+src=["']([^"']+)["']/i);
   if (htmlImgMatch && htmlImgMatch[1]) {
-    const extracted = htmlImgMatch[1].trim();
+    const extracted = htmlImgMatch[1].trim().replace(/&amp;/g, '&');
     return {
       url: extracted,
       originalUrl: text,
       converted: true,
       platform: 'html_embed',
-      notes: 'Extracted direct image source from HTML embed code',
+      notes: 'Direct image source extracted from HTML embed code',
     };
   }
 
@@ -52,7 +74,7 @@ export function analyzeImageUrl(rawInput: string): NormalizedUrlResult {
       originalUrl: text,
       converted: true,
       platform: 'bbcode',
-      notes: 'Extracted direct image from BBCode markup',
+      notes: 'Direct image extracted from BBCode markup',
     };
   }
 
@@ -68,37 +90,62 @@ export function analyzeImageUrl(rawInput: string): NormalizedUrlResult {
     };
   }
 
-  // Clean trailing punctuation or whitespace
-  text = text.replace(/["'>]+$/, '');
+  // Clean trailing punctuation or trailing slashes
+  text = text.replace(/["'>)]+$/, '');
 
-  // 4. ImgBB Handler
-  // Case A: User pasted viewer link: https://ibb.co/C5wnswvR or http://ibb.co/C5wnswvR
+  // 4. Postimages / Postimg Handler
+  // e.g. https://i.postimg.cc/k65V78yD/image.jpg (direct)
+  // or viewer link https://postimg.cc/k65V78yD or https://postimages.org/
+  if (text.includes('postimg.cc') || text.includes('postimages.org')) {
+    if (text.includes('i.postimg.cc')) {
+      return {
+        url: text,
+        originalUrl: text,
+        converted: false,
+        platform: 'postimages',
+        notes: 'Direct Postimages link ready',
+      };
+    }
+    // Convert viewer link like https://postimg.cc/k65V78yD or https://postimg.cc/gallery/xxx
+    const postimgSlugMatch = text.match(/postimg\.cc\/([a-zA-Z0-9_-]+)/i);
+    if (postimgSlugMatch && postimgSlugMatch[1]) {
+      const slug = postimgSlugMatch[1];
+      // Postimages direct images reside on i.postimg.cc/<slug>/image.jpg or via proxy
+      return {
+        url: `https://i.postimg.cc/${slug}/image.jpg`,
+        originalUrl: text,
+        converted: true,
+        platform: 'postimages',
+        notes: 'Converted Postimages page link to direct image URL',
+      };
+    }
+  }
+
+  // 5. ImgBB Handler
+  // If user pasted direct link i.ibb.co/...
+  if (text.includes('i.ibb.co')) {
+    return {
+      url: text,
+      originalUrl: text,
+      converted: false,
+      platform: 'imgbb',
+      notes: 'Direct ImgBB image link ready',
+    };
+  }
+
+  // If user pasted viewer page: https://ibb.co/C5wnswvR
   const ibbViewerMatch = text.match(/^https?:\/\/ibb\.co\/([a-zA-Z0-9_-]+)\/?$/i);
   if (ibbViewerMatch && ibbViewerMatch[1]) {
-    const slug = ibbViewerMatch[1];
     return {
-      url: `https://i.ibb.co/${slug}/image.jpg`,
+      url: text,
       originalUrl: text,
-      converted: true,
+      converted: false,
       platform: 'imgbb',
-      notes: 'Converted ImgBB viewer page link to direct image URL',
+      notes: 'ImgBB viewer page. Tip: on ImgBB, select "Direct link" in the embed codes dropdown.',
     };
   }
 
-  // Case B: User pasted full imgbb link with slash: https://ibb.co/C5wnswvR/anything
-  const ibbViewerSubMatch = text.match(/^https?:\/\/ibb\.co\/([a-zA-Z0-9_-]+)/i);
-  if (ibbViewerSubMatch && !text.includes('i.ibb.co')) {
-    const slug = ibbViewerSubMatch[1];
-    return {
-      url: `https://i.ibb.co/${slug}/image.jpg`,
-      originalUrl: text,
-      converted: true,
-      platform: 'imgbb',
-      notes: 'Converted ImgBB viewer page link to direct image URL',
-    };
-  }
-
-  // 5. Imgur Handler
+  // 6. Imgur Handler
   // e.g. https://imgur.com/ABCxyz or https://m.imgur.com/ABCxyz
   const imgurMatch = text.match(/^https?:\/\/(?:m\.)?imgur\.com\/(?:a\/|gallery\/)?([a-zA-Z0-9]+)$/i);
   if (imgurMatch && imgurMatch[1] && !text.includes('i.imgur.com')) {
@@ -112,12 +159,14 @@ export function analyzeImageUrl(rawInput: string): NormalizedUrlResult {
     };
   }
 
-  // 6. Google Drive Handler
+  // 7. Google Drive Handler
   // e.g. https://drive.google.com/file/d/FILE_ID/view?usp=sharing
   // or https://drive.google.com/open?id=FILE_ID
+  // or https://drive.google.com/uc?id=FILE_ID
   const gDriveMatch1 = text.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
   const gDriveMatch2 = text.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/i);
-  const gDriveId = gDriveMatch1?.[1] || gDriveMatch2?.[1];
+  const gDriveMatch3 = text.match(/drive\.google\.com\/uc\?(?:export=view&)?id=([a-zA-Z0-9_-]+)/i);
+  const gDriveId = gDriveMatch1?.[1] || gDriveMatch2?.[1] || gDriveMatch3?.[1];
   if (gDriveId) {
     return {
       url: `https://lh3.googleusercontent.com/d/${gDriveId}`,
@@ -128,7 +177,7 @@ export function analyzeImageUrl(rawInput: string): NormalizedUrlResult {
     };
   }
 
-  // 7. Dropbox Handler
+  // 8. Dropbox Handler
   // e.g. https://www.dropbox.com/s/xyz/photo.jpg?dl=0
   if (text.includes('dropbox.com') && (text.includes('?dl=0') || !text.includes('raw=1'))) {
     const dropboxClean = text.replace(/[?&]dl=[01]/g, '').replace(/[?&]raw=1/g, '');
@@ -142,7 +191,7 @@ export function analyzeImageUrl(rawInput: string): NormalizedUrlResult {
     };
   }
 
-  // 8. GitHub Blob to Raw
+  // 9. GitHub Blob to Raw
   // e.g. https://github.com/user/repo/blob/main/img.jpg
   if (text.includes('github.com') && text.includes('/blob/')) {
     return {
