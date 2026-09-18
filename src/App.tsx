@@ -28,6 +28,7 @@ import {
   subscribeToClipzoneImages,
   subscribeToSystemSettings,
 } from './services/firebase';
+import { normalizeImageUrl } from './utils/imageUrl';
 
 const FIXED_HERO_IMAGE =
   'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg';
@@ -39,7 +40,7 @@ const clipzoneImageToMoment = (img: ClipzoneImage): Moment => ({
   titleNe: img.titleNe || img.title,
   descEn: img.description || '',
   descNe: img.descNe || img.description || '',
-  imgUrl: img.imgUrl,
+  imgUrl: normalizeImageUrl(img.imgUrl),
   likes: img.likes || 0,
   category: img.category || 'AI Clipzone',
   date: img.uploadDate ? new Date(img.uploadDate).toLocaleDateString() : 'Recent',
@@ -90,6 +91,15 @@ export default function App() {
       experience: {
         ...DEFAULT_SYSTEM_SETTINGS.experience,
         ...(raw?.experience || {}),
+        badgeEn: DEFAULT_SYSTEM_SETTINGS.experience.badgeEn,
+        badgeNe: DEFAULT_SYSTEM_SETTINGS.experience.badgeNe,
+        headingEn: DEFAULT_SYSTEM_SETTINGS.experience.headingEn,
+        headingNe: DEFAULT_SYSTEM_SETTINGS.experience.headingNe,
+        skills: DEFAULT_SYSTEM_SETTINGS.experience.skills,
+        milestones: DEFAULT_SYSTEM_SETTINGS.experience.milestones,
+        quoteEn: DEFAULT_SYSTEM_SETTINGS.experience.quoteEn,
+        quoteNe: DEFAULT_SYSTEM_SETTINGS.experience.quoteNe,
+        quoteAuthor: DEFAULT_SYSTEM_SETTINGS.experience.quoteAuthor,
       },
       contact: {
         ...DEFAULT_SYSTEM_SETTINGS.contact,
