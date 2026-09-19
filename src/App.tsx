@@ -18,7 +18,7 @@ import { CvModal } from './components/CvModal';
 import { AdminModal } from './components/AdminModal';
 import { JourneySection } from './components/JourneySection';
 
-import { Language, Moment, Comment, SystemSettings, ClipzoneImage } from './types';
+import { Language, Moment, Comment, SystemSettings, ClipzoneImage, AdminUser } from './types';
 import {
   STORAGE_KEYS,
   DEFAULT_SYSTEM_SETTINGS,
@@ -28,6 +28,8 @@ import {
 import {
   subscribeToClipzoneImages,
   subscribeToSystemSettings,
+  getCurrentAdminUser,
+  subscribeToAuth,
 } from './services/firebase';
 import { normalizeImageUrl } from './utils/imageUrl';
 
@@ -202,9 +204,20 @@ export default function App() {
   const handleOpenCv = () => setIsCvOpen(true);
   const handleCloseCv = () => setIsCvOpen(false);
 
-  // 8. Firebase Admin Modal State
+  // 8. Firebase Admin Modal & Authentication State
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [initialEditMoment, setInitialEditMoment] = useState<Moment | null>(null);
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(() => getCurrentAdminUser());
+
+  useEffect(() => {
+    const unsubscribe = subscribeToAuth((user) => {
+      setAdminUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const isAdminLoggedIn = Boolean(adminUser);
+
   const handleOpenAdmin = () => setIsAdminOpen(true);
   const handleCloseAdmin = () => {
     setIsAdminOpen(false);
@@ -452,6 +465,7 @@ export default function App() {
           commentsMap={commentsMap}
           onAddComment={handleAddComment}
           onShowToast={showToast}
+          isAdmin={isAdminLoggedIn}
           onOpenAdminUpload={handleOpenAdmin}
           onEditMoment={handleStartEditMoment}
           onDeleteMoment={handleDeleteMoment}
@@ -482,6 +496,8 @@ export default function App() {
       <Footer
         language={language}
         profile={systemSettings.profile}
+        isAdmin={isAdminLoggedIn}
+        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Official Verified CV Modal & PDF Downloader */}

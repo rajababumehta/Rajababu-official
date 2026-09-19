@@ -24,10 +24,11 @@ interface JourneySectionProps {
   moments?: Moment[];
   onLikeMoment: (id: string) => void;
   userLikedMoments?: string[];
-  onAutoBoostAllLikes: () => void;
+  onAutoBoostAllLikes?: () => void;
   commentsMap?: Record<string, Comment[]>;
   onAddComment: (momentId: string, author: string, text: string) => void;
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
+  isAdmin?: boolean;
   onOpenAdminUpload?: () => void;
   onEditMoment?: (moment: Moment) => void;
   onDeleteMoment?: (id: string) => void;
@@ -42,6 +43,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
   commentsMap = {},
   onAddComment,
   onShowToast,
+  isAdmin = false,
   onOpenAdminUpload,
   onEditMoment,
   onDeleteMoment,
@@ -138,29 +140,33 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
             </p>
           </div>
 
-          {/* Action Bar (Auto-Boost and Direct Add Photo) */}
-          <div className="flex flex-wrap items-center gap-3">
-            {onOpenAdminUpload && (
-              <button
-                id="btn-add-moment-photo"
-                onClick={onOpenAdminUpload}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                title="Add new photo directly to website"
-              >
-                <Plus className="w-4 h-4" />
-                <span>{language === 'NE' ? '+ तस्बिर थप्नुहोस्' : '+ Add Photo'}</span>
-              </button>
-            )}
-            <button
-              id="btn-auto-boost-all-likes"
-              onClick={onAutoBoostAllLikes}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-600/90 to-rose-600/90 hover:from-pink-500 hover:to-rose-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-pink-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
-              title="Boost realistic engagement likes across all photos"
-            >
-              <Zap className="w-4 h-4 text-amber-300 animate-bounce" />
-              <span>{language === 'NE' ? '⚡ सबैमा लाइक्स बढाउनुहोस्' : '⚡ Auto-Boost Likes'}</span>
-            </button>
-          </div>
+          {/* Action Bar (Auto-Boost and Direct Add Photo) - Only visible when Admin is logged in */}
+          {isAdmin && (
+            <div className="flex flex-wrap items-center gap-3">
+              {onOpenAdminUpload && (
+                <button
+                  id="btn-add-moment-photo"
+                  onClick={onOpenAdminUpload}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  title="Add new photo directly to website"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{language === 'NE' ? '+ तस्बिर थप्नुहोस्' : '+ Add Photo'}</span>
+                </button>
+              )}
+              {onAutoBoostAllLikes && (
+                <button
+                  id="btn-auto-boost-all-likes"
+                  onClick={onAutoBoostAllLikes}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-600/90 to-rose-600/90 hover:from-pink-500 hover:to-rose-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-pink-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  title="Boost realistic engagement likes across all photos"
+                >
+                  <Zap className="w-4 h-4 text-amber-300 animate-bounce" />
+                  <span>{language === 'NE' ? '⚡ सबैमा लाइक्स बढाउनुहोस्' : '⚡ Auto-Boost Likes'}</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Dynamic Category Filter Pills (Only when moments exist) */}
@@ -192,14 +198,14 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
               <Camera className="w-8 h-8" />
             </div>
             <h3 className="text-xl font-bold text-slate-200 mb-2">
-              {language === 'NE' ? 'तस्बिरहरू थप्न तयार छ' : 'Ready for Moments & Photo Links'}
+              {language === 'NE' ? 'परियोजनाहरू चाँडै उपलब्ध हुनेछन्' : 'Featured Projects & Visual Showcase'}
             </h3>
             <p className="text-sm sm:text-base text-slate-400 max-w-lg mx-auto leading-relaxed mb-6">
               {language === 'NE'
-                ? 'तपाईँले प्रदान गर्नुहुने तस्बिर वा फोटो लिंकहरू यहाँ सिधै सार्वजनिक हुनेछन्।'
-                : 'Publish your photo links or uploads directly to this live showcase.'}
+                ? 'नयाँ वेब परियोजनाहरू र प्राविधिक गतिविधिहरू यहाँ चाँडै प्रदर्शन गरिनेछ।'
+                : 'Modern web applications, client solutions, and technical highlights are currently featured here.'}
             </p>
-            {onOpenAdminUpload && (
+            {isAdmin && onOpenAdminUpload && (
               <button
                 type="button"
                 onClick={onOpenAdminUpload}
@@ -288,7 +294,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                         <Eye className="w-4 h-4" />
                       </button>
 
-                      {onEditMoment && (
+                      {isAdmin && onEditMoment && (
                         <button
                           type="button"
                           onClick={(e) => {
@@ -303,7 +309,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                         </button>
                       )}
 
-                      {onDeleteMoment && (
+                      {isAdmin && onDeleteMoment && (
                         <button
                           type="button"
                           onClick={(e) => {
