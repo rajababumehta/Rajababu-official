@@ -59,10 +59,10 @@ interface AdminModalProps {
   language: Language;
   systemSettings: SystemSettings;
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
-  moments: Moment[];
-  onAddMoment: (moment: Moment) => void;
-  onUpdateMoment: (moment: Moment) => void;
-  onDeleteMoment: (id: string) => void;
+  moments?: Moment[];
+  onAddMoment?: (moment: Moment) => void;
+  onUpdateMoment?: (moment: Moment) => void;
+  onDeleteMoment?: (id: string) => void;
   initialEditMoment?: Moment | null;
 }
 
@@ -72,7 +72,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   language,
   systemSettings,
   onShowToast,
-  moments,
+  moments = [],
   onAddMoment,
   onUpdateMoment,
   onDeleteMoment,
@@ -342,7 +342,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       };
 
       // 1. Direct website public add (instant live website state)
-      onAddMoment(newMoment);
+      onAddMoment?.(newMoment);
 
       // 2. Best-effort background sync (does not block or fail user)
       saveImageMetadataToFirestore({
@@ -427,7 +427,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       lastModified: Date.now(),
     };
 
-    onUpdateMoment(updatedMoment);
+    onUpdateMoment?.(updatedMoment);
     setEditingMoment(null);
     onShowToast(
       language === 'NE' ? 'तस्बिरको विवरण सफलतापूर्वक अद्यावधिक भयो!' : 'Photo details updated successfully!',
@@ -447,7 +447,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       return;
     }
 
-    onDeleteMoment(id);
+    onDeleteMoment?.(id);
 
     // Optional background delete
     deleteClipzoneImage(id).catch(() => {});
@@ -725,7 +725,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     }`}
                   >
                     <ImageIcon className="w-4 h-4" />
-                    {language === 'NE' ? `ग्यालरी व्यवस्थापन (${moments.length})` : `Manage Photos (${moments.length})`}
+                    {language === 'NE' ? `ग्यालरी व्यवस्थापन (${(moments || []).length})` : `Manage Photos (${(moments || []).length})`}
                   </button>
                   <button
                     onClick={() => setActiveTab('settings')}
@@ -1153,7 +1153,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       </button>
                     </div>
 
-                    {moments.length === 0 ? (
+                    {(moments || []).length === 0 ? (
                       <div className="text-center py-12 text-slate-400 space-y-3">
                         <ImageIcon className="w-12 h-12 mx-auto text-slate-600" />
                         <p className="text-sm font-medium">
@@ -1170,7 +1170,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {moments.map((m) => (
+                        {(moments || []).map((m) => (
                           <div
                             key={m.id}
                             className="group relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden flex flex-col hover:border-slate-700 transition-all"

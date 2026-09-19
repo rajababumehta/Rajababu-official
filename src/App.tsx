@@ -16,6 +16,7 @@ import { ToastContainer, ToastMessage } from './components/Toast';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
 import { CvModal } from './components/CvModal';
 import { AdminModal } from './components/AdminModal';
+import { JourneySection } from './components/JourneySection';
 
 import { Language, Moment, Comment, SystemSettings, ClipzoneImage } from './types';
 import {
@@ -203,8 +204,12 @@ export default function App() {
 
   // 8. Firebase Admin Modal State
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [initialEditMoment, setInitialEditMoment] = useState<Moment | null>(null);
   const handleOpenAdmin = () => setIsAdminOpen(true);
-  const handleCloseAdmin = () => setIsAdminOpen(false);
+  const handleCloseAdmin = () => {
+    setIsAdminOpen(false);
+    setInitialEditMoment(null);
+  };
 
   // Global keyboard shortcut to open Admin panel: Ctrl+Shift+A or Cmd+Shift+A
   useEffect(() => {
@@ -375,8 +380,35 @@ export default function App() {
     });
   };
 
-  const totalMoments = moments.length;
-  const totalLikes = moments.reduce((acc, m) => acc + (m.likes || 0), 0);
+  const handleAddMoment = (newMoment: Moment) => {
+    setMoments((prev) => [newMoment, ...(prev || [])]);
+  };
+
+  const handleUpdateMoment = (updatedMoment: Moment) => {
+    setMoments((prev) => (prev || []).map((m) => (m.id === updatedMoment.id ? updatedMoment : m)));
+  };
+
+  const handleDeleteMoment = (id: string) => {
+    setMoments((prev) => (prev || []).filter((m) => m.id !== id));
+    try {
+      const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
+      const deletedIds: string[] = deletedIdsStr ? JSON.parse(deletedIdsStr) : [];
+      if (!deletedIds.includes(id)) {
+        deletedIds.push(id);
+        localStorage.setItem(STORAGE_KEYS.DELETED_MOMENT_IDS, JSON.stringify(deletedIds));
+      }
+    } catch (e) {
+      console.error('Failed to store deleted moment id', e);
+    }
+  };
+
+  const handleStartEditMoment = (moment: Moment) => {
+    setInitialEditMoment(moment);
+    setIsAdminOpen(true);
+  };
+
+  const totalMoments = (moments || []).length;
+  const totalLikes = (moments || []).reduce((acc, m) => acc + (m.likes || 0), 0);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
@@ -408,6 +440,21 @@ export default function App() {
         <ExperienceSection
           language={language}
           experience={systemSettings.experience}
+        />
+
+        {/* Projects & Visual Journey Section */}
+        <JourneySection
+          language={language}
+          moments={moments}
+          onLikeMoment={handleLikeMoment}
+          userLikedMoments={userLikedMoments}
+          onAutoBoostAllLikes={handleAutoBoostAllLikes}
+          commentsMap={commentsMap}
+          onAddComment={handleAddComment}
+          onShowToast={showToast}
+          onOpenAdminUpload={handleOpenAdmin}
+          onEditMoment={handleStartEditMoment}
+          onDeleteMoment={handleDeleteMoment}
         />
 
         {/* Web Deliverables & Technical Standards Section */}
@@ -452,6 +499,11 @@ export default function App() {
         language={language}
         systemSettings={systemSettings}
         onShowToast={showToast}
+        moments={moments}
+        onAddMoment={handleAddMoment}
+        onUpdateMoment={handleUpdateMoment}
+        onDeleteMoment={handleDeleteMoment}
+        initialEditMoment={initialEditMoment}
       />
 
       {/* Floating Circle WhatsApp Button in Bottom Right */}

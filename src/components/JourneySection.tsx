@@ -21,11 +21,11 @@ import { normalizeImageUrl, getProxiedImageUrl } from '../utils/imageUrl';
 
 interface JourneySectionProps {
   language: Language;
-  moments: Moment[];
+  moments?: Moment[];
   onLikeMoment: (id: string) => void;
-  userLikedMoments: string[];
+  userLikedMoments?: string[];
   onAutoBoostAllLikes: () => void;
-  commentsMap: Record<string, Comment[]>;
+  commentsMap?: Record<string, Comment[]>;
   onAddComment: (momentId: string, author: string, text: string) => void;
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
   onOpenAdminUpload?: () => void;
@@ -35,11 +35,11 @@ interface JourneySectionProps {
 
 export const JourneySection: React.FC<JourneySectionProps> = ({
   language,
-  moments,
+  moments = [],
   onLikeMoment,
-  userLikedMoments,
+  userLikedMoments = [],
   onAutoBoostAllLikes,
-  commentsMap,
+  commentsMap = {},
   onAddComment,
   onShowToast,
   onOpenAdminUpload,
@@ -56,15 +56,17 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
   // Extract all categories dynamically
   const categories = useMemo(() => {
     const defaultCats = ['Technology', 'Community', 'Networking', 'Professional', 'Milestone', 'Personal'];
-    const customCats = moments.map((m) => m.category).filter(Boolean);
+    const safeMoments = moments || [];
+    const customCats = safeMoments.map((m) => m.category).filter(Boolean);
     const set = new Set(['All', ...defaultCats, ...customCats]);
     return Array.from(set);
   }, [moments]);
 
   // Filter moments
   const filteredMoments = useMemo(() => {
-    if (selectedCategory === 'All') return moments;
-    return moments.filter((m) => m.category.toLowerCase() === selectedCategory.toLowerCase());
+    const safeMoments = moments || [];
+    if (selectedCategory === 'All') return safeMoments;
+    return safeMoments.filter((m) => m.category?.toLowerCase() === selectedCategory.toLowerCase());
   }, [moments, selectedCategory]);
 
   const handleCommentSubmit = (e: React.FormEvent) => {
@@ -162,7 +164,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
         </div>
 
         {/* Dynamic Category Filter Pills (Only when moments exist) */}
-        {moments.length > 0 && categories.length > 1 && (
+        {(moments || []).length > 0 && categories.length > 1 && (
           <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-10 no-scrollbar">
             {categories.map((cat) => {
               const isSelected = selectedCategory.toLowerCase() === cat.toLowerCase();
@@ -211,8 +213,8 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredMoments.map((moment, idx) => {
-              const isLiked = userLikedMoments.includes(moment.id);
-              const momentComments = commentsMap[moment.id] || [];
+              const isLiked = (userLikedMoments || []).includes(moment.id);
+              const momentComments = (commentsMap || {})[moment.id] || [];
 
               return (
                 <motion.div
