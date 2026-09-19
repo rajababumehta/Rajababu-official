@@ -90,6 +90,15 @@ export default function App() {
       experience: {
         ...DEFAULT_SYSTEM_SETTINGS.experience,
         ...(raw?.experience || {}),
+        badgeEn: DEFAULT_SYSTEM_SETTINGS.experience.badgeEn,
+        badgeNe: DEFAULT_SYSTEM_SETTINGS.experience.badgeNe,
+        headingEn: DEFAULT_SYSTEM_SETTINGS.experience.headingEn,
+        headingNe: DEFAULT_SYSTEM_SETTINGS.experience.headingNe,
+        skills: DEFAULT_SYSTEM_SETTINGS.experience.skills,
+        milestones: DEFAULT_SYSTEM_SETTINGS.experience.milestones,
+        quoteEn: DEFAULT_SYSTEM_SETTINGS.experience.quoteEn,
+        quoteNe: DEFAULT_SYSTEM_SETTINGS.experience.quoteNe,
+        quoteAuthor: DEFAULT_SYSTEM_SETTINGS.experience.quoteAuthor,
       },
       contact: {
         ...DEFAULT_SYSTEM_SETTINGS.contact,
