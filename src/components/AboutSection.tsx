@@ -27,7 +27,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 
   return (
     <section id="about" className="py-20 sm:py-28 bg-slate-950/60 border-t border-slate-900 relative scroll-mt-24">
-      <div id="about-me" className="absolute -top-24 pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}

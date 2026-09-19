@@ -11,28 +11,34 @@ interface NavbarProps {
   language: Language;
   onToggleLanguage: () => void;
   profile: ProfileSettings;
+  onOpenCv: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   language,
   onToggleLanguage,
   profile,
+  onOpenCv,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Menu items: Home, About Me, Skills, Projects, Services, FAQ, Contact
+  // Menu items: Home, About, About Me (opens CV), Skills, Services / Deliverables, FAQ, Contact
   const navItems = [
-    { href: '#home', labelEn: 'Home', labelNe: 'गृहपृष्ठ' },
-    { href: '#about', labelEn: 'About Me', labelNe: 'बारेमा' },
-    { href: '#skills', labelEn: 'Skills', labelNe: 'सीपहरू' },
-    { href: '#projects', labelEn: 'Projects', labelNe: 'परियोजनाहरू' },
-    { href: '#services', labelEn: 'Services', labelNe: 'सेवाहरू' },
-    { href: '#faq', labelEn: 'FAQ', labelNe: 'प्रश्नोत्तर' },
-    { href: '#contact', labelEn: 'Contact', labelNe: 'सम्पर्क' },
+    { href: '#home', labelEn: 'Home', labelNe: 'गृहपृष्ठ', isCv: false },
+    { href: '#about', labelEn: 'About', labelNe: 'बारेमा', isCv: false },
+    { href: '#about-me', labelEn: 'About Me', labelNe: 'About Me', isCv: true },
+    { href: '#skills', labelEn: 'Skills', labelNe: 'सीपहरू', isCv: false },
+    { href: '#services', labelEn: 'Services', labelNe: 'सेवाहरू', isCv: false },
+    { href: '#faq', labelEn: 'FAQ', labelNe: 'प्रश्नोत्तर', isCv: false },
+    { href: '#contact', labelEn: 'Contact', labelNe: 'सम्पर्क', isCv: false },
   ];
 
-  const handleNavClick = () => {
+  const handleNavClick = (e: React.MouseEvent, item: (typeof navItems)[0]) => {
     setMobileMenuOpen(false);
+    if (item.isCv) {
+      e.preventDefault();
+      onOpenCv();
+    }
   };
 
   return (
@@ -73,7 +79,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <a
                   key={item.href}
                   href={item.href}
-                  className="px-3 py-1.5 rounded-full text-xs lg:text-sm font-medium transition-all whitespace-nowrap text-slate-300 hover:text-white hover:bg-slate-800/80"
+                  onClick={(e) => {
+                    if (item.isCv) {
+                      e.preventDefault();
+                      onOpenCv();
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs lg:text-sm font-medium transition-all whitespace-nowrap ${
+                    item.isCv
+                      ? 'text-blue-300 hover:text-white hover:bg-blue-600/25 font-semibold border border-blue-500/30'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
+                  }`}
                 >
                   {language === 'NE' ? item.labelNe : item.labelEn}
                 </a>
@@ -141,10 +157,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <a
                     key={item.href}
                     href={item.href}
-                    onClick={handleNavClick}
-                    className="px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900/90 transition-colors flex items-center justify-between"
+                    onClick={(e) => handleNavClick(e, item)}
+                    className="px-4 py-2 rounded-2xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900/90 transition-colors flex items-center justify-between"
                   >
                     <span>{language === 'NE' ? item.labelNe : item.labelEn}</span>
+                    {item.isCv && (
+                      <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-semibold">
+                        View CV
+                      </span>
+                    )}
                   </a>
                 ))}
               </nav>
