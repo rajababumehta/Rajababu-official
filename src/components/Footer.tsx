@@ -1,19 +1,15 @@
 import React from 'react';
-import { Sparkles, ArrowUp, Lock, ShieldCheck } from 'lucide-react';
+import { Sparkles, ArrowUp } from 'lucide-react';
 import { Language, ProfileSettings } from '../types';
 
 interface FooterProps {
   language: Language;
   profile: ProfileSettings;
-  isAdmin?: boolean;
-  onOpenAdmin?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   language,
   profile,
-  isAdmin = false,
-  onOpenAdmin,
 }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -48,35 +44,10 @@ export const Footer: React.FC<FooterProps> = ({
             </div>
           </div>
 
-          {/* Center Note & Discreet Admin Trigger */}
-          <div className="flex items-center gap-4 text-xs text-slate-400">
-            <div className="flex items-center gap-1.5">
-              <span>{language === 'NE' ? 'सफा कोड र आधुनिक वेब प्रविधिका साथ निर्मित' : 'Crafted with clean code & modern web technology'}</span>
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            </div>
-
-            {onOpenAdmin && (
-              <button
-                type="button"
-                onClick={onOpenAdmin}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] transition-all ${
-                  isAdmin
-                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25'
-                    : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900 border border-transparent'
-                }`}
-                title={isAdmin ? 'Admin Authenticated — Click to Open Panel' : 'Administrator Portal Access'}
-                aria-label="Admin Portal"
-              >
-                {isAdmin ? (
-                  <>
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>{language === 'NE' ? 'एडमिन सक्रिय' : 'Admin Active'}</span>
-                  </>
-                ) : (
-                  <Lock className="w-3 h-3 opacity-60" />
-                )}
-              </button>
-            )}
+          {/* Center Note */}
+          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+            <span>{language === 'NE' ? 'सफा कोड र आधुनिक वेब प्रविधिका साथ निर्मित' : 'Crafted with clean code & modern web technology'}</span>
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
           </div>
 
           {/* Scroll to top button */}
