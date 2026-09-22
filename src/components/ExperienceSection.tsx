@@ -23,9 +23,12 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
 }) => {
   const [activeCategory, setActiveCategory] = useState<'all' | 'technical' | 'strategy'>('all');
 
+  const skillsList = experience?.skills || [];
+  const milestonesList = experience?.milestones || [];
+
   const filteredSkills = activeCategory === 'all'
-    ? experience.skills
-    : experience.skills.filter((s) => s.category === activeCategory);
+    ? skillsList
+    : skillsList.filter((s) => s.category === activeCategory);
 
   return (
     <section id="skills" className="py-20 sm:py-28 bg-slate-950/70 border-t border-slate-900 relative scroll-mt-24">
@@ -137,7 +140,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
             </h3>
 
             <div className="relative pl-6 sm:pl-8 space-y-8 before:absolute before:left-2 sm:before:left-3 before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-blue-500 before:via-indigo-500 before:to-slate-800">
-              {experience.milestones.map((milestone, idx) => (
+              {milestonesList.map((milestone, idx) => (
                 <motion.div
                   key={milestone.id}
                   initial={{ opacity: 0, x: 20 }}

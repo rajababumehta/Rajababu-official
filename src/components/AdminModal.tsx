@@ -22,8 +22,23 @@ import {
   Link2,
   Copy,
   Check,
+  FolderUp,
+  FileImage,
+  Info,
+  HelpCircle,
+  Smartphone,
+  Globe,
+  Edit3,
+  Plus,
 } from 'lucide-react';
-import { Language, AdminUser, ClipzoneImage, SystemSettings } from '../types';
+import { Language, AdminUser, ClipzoneImage, SystemSettings, Moment } from '../types';
+import {
+  analyzeImageUrl,
+  normalizeImageUrl,
+  compressImageFile,
+  getProxiedImageUrl,
+  NormalizedUrlResult,
+} from '../utils/imageUrl';
 import {
   loginAdmin,
   loginAsLocalAdmin,
@@ -44,6 +59,11 @@ interface AdminModalProps {
   language: Language;
   systemSettings: SystemSettings;
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
+  moments?: Moment[];
+  onAddMoment?: (moment: Moment) => void;
+  onUpdateMoment?: (moment: Moment) => void;
+  onDeleteMoment?: (id: string) => void;
+  initialEditMoment?: Moment | null;
 }
 
 export const AdminModal: React.FC<AdminModalProps> = ({
@@ -52,9 +72,22 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   language,
   systemSettings,
   onShowToast,
+  moments = [],
+  onAddMoment,
+  onUpdateMoment,
+  onDeleteMoment,
+  initialEditMoment,
 }) => {
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [activeTab, setActiveTab] = useState<'upload' | 'gallery' | 'settings'>('upload');
+
+  // Edit existing moment state
+  const [editingMoment, setEditingMoment] = useState<Moment | null>(null);
+  const [editTitleEn, setEditTitleEn] = useState('');
+  const [editTitleNe, setEditTitleNe] = useState('');
+  const [editCategory, setEditCategory] = useState('Technology');
+  const [editImgUrl, setEditImgUrl] = useState('');
+  const [editDescEn, setEditDescEn] = useState('');
 
   // Login form state
   const [email, setEmail] = useState('');
@@ -71,7 +104,22 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [previewError, setPreviewError] = useState(false);
   const [previewLoaded, setPreviewLoaded] = useState(false);
+  const [useProxyFallback, setUseProxyFallback] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Dual-mode Upload: Device File Picker vs Image URL
+  const [uploadSource, setUploadSource] = useState<'device' | 'url'>('url');
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [fileDetails, setFileDetails] = useState<{
+    fileName: string;
+    width: number;
+    height: number;
+    originalKb: number;
+    compressedKb: number;
+  } | null>(null);
+  const [urlAnalysis, setUrlAnalysis] = useState<NormalizedUrlResult | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Gallery items loaded from Firestore
   const [uploadedImages, setUploadedImages] = useState<ClipzoneImage[]>([]);
@@ -84,6 +132,14 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     });
     return () => unsubAuth();
   }, []);
+
+  // Handle opening directly in Edit mode when requested
+  useEffect(() => {
+    if (isOpen && initialEditMoment) {
+      handleStartEdit(initialEditMoment);
+      setActiveTab('gallery');
+    }
+  }, [isOpen, initialEditMoment]);
 
   // Update current user immediately whenever modal opens
   useEffect(() => {
@@ -178,13 +234,83 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     }
   };
 
-  // Save Image URL & Metadata to Firestore
+  // Device File Selector & Compressor
+  const handleDeviceFile = async (file: File) => {
+    if (!file || !file.type.startsWith('image/')) {
+      onShowToast(
+        language === 'NE' ? 'कृपया तस्बिर (Image) फाइल मात्र चयन गर्नुहोस्।' : 'Please select a valid image file.',
+        'error'
+      );
+      return;
+    }
+
+    setIsCompressing(true);
+    setPreviewError(false);
+    setPreviewLoaded(false);
+
+    try {
+      const res = await compressImageFile(file, 1600, 0.85);
+      setImageUrl(res.dataUrl);
+      setFileDetails({
+        fileName: file.name,
+        width: res.width,
+        height: res.height,
+        originalKb: Math.round(res.originalSize / 1024),
+        compressedKb: Math.round(res.compressedSize / 1024),
+      });
+      setUrlAnalysis(null);
+      setPreviewLoaded(true);
+
+      // Auto-populate title if empty
+      if (!imageTitle.trim()) {
+        const cleanName = file.name
+          .replace(/\.[^/.]+$/, '')
+          .replace(/[-_]/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+        setImageTitle(cleanName);
+      }
+
+      onShowToast(
+        language === 'NE'
+          ? `तस्बिर लोड भयो (${res.width}×${res.height}, ${Math.round(res.compressedSize / 1024)} KB)`
+          : `Photo ready (${res.width}×${res.height}, ${Math.round(res.compressedSize / 1024)} KB)`,
+        'success'
+      );
+    } catch (err: any) {
+      console.error('File compression error:', err);
+      onShowToast(err?.message || 'Failed to process selected image', 'error');
+    } finally {
+      setIsCompressing(false);
+    }
+  };
+
+  // URL Input Handler with Real-time Analysis & Auto-Resolution
+  const handleUrlInputChange = (val: string) => {
+    setPreviewError(false);
+    setPreviewLoaded(false);
+    setUseProxyFallback(false);
+
+    if (!val.trim()) {
+      setImageUrl('');
+      setUrlAnalysis(null);
+      return;
+    }
+
+    const analysis = analyzeImageUrl(val);
+    setUrlAnalysis(analysis);
+    // If it's a viewer link or embed code, we automatically set the direct loadable URL
+    setImageUrl(analysis.url);
+    setFileDetails(null);
+  };
+
+  // Publish Image directly to website (CRUD)
   const handleSaveImageSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanUrl = imageUrl.trim();
+    const rawClean = normalizeImageUrl(imageUrl.trim());
+    const cleanUrl = useProxyFallback ? getProxiedImageUrl(rawClean) : rawClean;
     if (!cleanUrl) {
       onShowToast(
-        language === 'NE' ? 'तस्बिरको URL (Image Link) राख्नुहोस्।' : 'Please paste an Image URL.',
+        language === 'NE' ? 'तस्बिरको URL (Image Link) वा फाइल राख्नुहोस्।' : 'Please provide an Image URL or select a photo.',
         'error'
       );
       return;
@@ -200,7 +326,26 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     setIsSaving(true);
 
     try {
-      await saveImageMetadataToFirestore({
+      const newMomentId = `moment-${Date.now()}`;
+      const newMoment: Moment = {
+        id: newMomentId,
+        titleEn: imageTitle.trim(),
+        titleNe: imageTitleNe.trim() || imageTitle.trim(),
+        descEn: imageDesc.trim() || 'Published by Admin',
+        descNe: imageDesc.trim() || 'एडमिनद्वारा प्रकाशित',
+        imgUrl: cleanUrl,
+        likes: Math.floor(Math.random() * 30) + 140,
+        category: imageCategory,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        isUserUploaded: true,
+        uploadedAt: new Date().toISOString(),
+      };
+
+      // 1. Direct website public add (instant live website state)
+      onAddMoment?.(newMoment);
+
+      // 2. Best-effort background sync (does not block or fail user)
+      saveImageMetadataToFirestore({
         title: imageTitle.trim(),
         titleNe: imageTitleNe.trim() || undefined,
         description: imageDesc.trim() || undefined,
@@ -208,16 +353,18 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         imgUrl: cleanUrl,
         category: imageCategory,
         uploadDate: new Date().toISOString(),
-        likes: 0,
+        likes: newMoment.likes,
         tags: [imageCategory.toLowerCase()],
         authorEmail: currentUser?.email || 'rajababum426@gmail.com',
         authorName: currentUser?.displayName || 'Rajababu Mehta',
+      }).catch((err) => {
+        console.warn('Optional Firestore background sync skipped:', err?.message);
       });
 
       onShowToast(
         language === 'NE'
-          ? 'तस्बिर Firestore मा सफलतापूर्वक सुरक्षित भयो!'
-          : 'Image successfully saved to Firestore!',
+          ? 'तस्बिर वेबसाइटमा सफलतापूर्वक सार्वजनिक भयो!'
+          : 'Photo published directly to website!',
         'success'
       );
 
@@ -226,20 +373,84 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       setImageTitle('');
       setImageTitleNe('');
       setImageDesc('');
+      setFileDetails(null);
+      setUrlAnalysis(null);
       setPreviewError(false);
       setPreviewLoaded(false);
 
-      // Switch to gallery tab to display newly added image
+      // Switch to gallery tab to display newly added image with edit/delete controls
       setActiveTab('gallery');
     } catch (err: any) {
-      console.error('Firestore save error:', err);
+      console.error('Publish error:', err);
       onShowToast(
-        err?.message || 'Failed to save image to Firestore.',
+        err?.message || 'Failed to publish image to website.',
         'error'
       );
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Start editing existing moment
+  const handleStartEdit = (moment: Moment) => {
+    setEditingMoment(moment);
+    setEditTitleEn(moment.titleEn || '');
+    setEditTitleNe(moment.titleNe || '');
+    setEditCategory(moment.category || 'Technology');
+    setEditImgUrl(moment.imgUrl || '');
+    setEditDescEn(moment.descEn || '');
+  };
+
+  // Save edited moment
+  const handleSaveEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingMoment) return;
+
+    const cleanUrl = normalizeImageUrl(editImgUrl.trim());
+    if (!cleanUrl) {
+      onShowToast(language === 'NE' ? 'तस्बिरको मान्य लिङ्क राख्नुहोस्।' : 'Please enter a valid image URL.', 'error');
+      return;
+    }
+    if (!editTitleEn.trim()) {
+      onShowToast(language === 'NE' ? 'शीर्षक राख्नुहोस्।' : 'Please enter a title.', 'error');
+      return;
+    }
+
+    const updatedMoment: Moment = {
+      ...editingMoment,
+      titleEn: editTitleEn.trim(),
+      titleNe: editTitleNe.trim() || editTitleEn.trim(),
+      category: editCategory,
+      imgUrl: cleanUrl,
+      descEn: editDescEn.trim() || editingMoment.descEn,
+      descNe: editDescEn.trim() || editingMoment.descNe,
+      lastModified: Date.now(),
+    };
+
+    onUpdateMoment?.(updatedMoment);
+    setEditingMoment(null);
+    onShowToast(
+      language === 'NE' ? 'तस्बिरको विवरण सफलतापूर्वक अद्यावधिक भयो!' : 'Photo details updated successfully!',
+      'success'
+    );
+  };
+
+  // Delete moment from website
+  const handleDeleteMomentAction = (id: string, title?: string) => {
+    if (
+      !confirm(
+        language === 'NE'
+          ? `के तपाईँ "${title || 'यो तस्बिर'}" वेबसाइटबाट हटाउन निश्चित हुनुहुन्छ?`
+          : `Are you sure you want to delete "${title || 'this photo'}" from the website?`
+      )
+    ) {
+      return;
+    }
+
+    onDeleteMoment?.(id);
+
+    // Optional background delete
+    deleteClipzoneImage(id).catch(() => {});
   };
 
   // Delete image from Firestore
@@ -502,8 +713,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         : 'border-transparent text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    <Link2 className="w-4 h-4" />
-                    {language === 'NE' ? 'तस्बिर थप्नुहोस् (URL)' : 'Add Image (URL)'}
+                    <Plus className="w-4 h-4" />
+                    {language === 'NE' ? 'तस्बिर थप्नुहोस् (Add Photo)' : 'Add Photo'}
                   </button>
                   <button
                     onClick={() => setActiveTab('gallery')}
@@ -514,7 +725,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     }`}
                   >
                     <ImageIcon className="w-4 h-4" />
-                    {language === 'NE' ? `ग्यालरी (${uploadedImages.length})` : `Gallery (${uploadedImages.length})`}
+                    {language === 'NE' ? `ग्यालरी व्यवस्थापन (${(moments || []).length})` : `Manage Photos (${(moments || []).length})`}
                   </button>
                   <button
                     onClick={() => setActiveTab('settings')}
@@ -525,95 +736,208 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     }`}
                   >
                     <Database className="w-4 h-4" />
-                    {language === 'NE' ? 'Firestore सेटिङहरू' : 'Firestore Sync'}
+                    {language === 'NE' ? 'सिङ्क तथा सेटिङहरू' : 'Sync & Settings'}
                   </button>
                 </div>
 
-                {/* Tab 1: Image URL Input & Live Preview */}
+                {/* Tab 1: Image Upload (Device & URL) & Live Preview */}
                 {activeTab === 'upload' && (
                   <form onSubmit={handleSaveImageSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Left 6 cols: URL input, external host helpers, and Live Preview */}
+                    {/* Left 6 cols: Source Switcher, Input, and Live Preview */}
                     <div className="lg:col-span-6 space-y-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
-                          <span className="flex items-center gap-1.5">
-                            <Link2 className="w-3.5 h-3.5 text-blue-400" />
-                            <span>{language === 'NE' ? 'तस्बिरको URL (Image Link)' : 'Image URL'} *</span>
-                          </span>
-                          {imageUrl.trim() && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setImageUrl('');
-                                setPreviewError(false);
-                                setPreviewLoaded(false);
-                              }}
-                              className="text-[11px] text-slate-400 hover:text-slate-200 transition-colors"
-                            >
-                              {language === 'NE' ? 'खाली गर्नुहोस्' : 'Clear'}
-                            </button>
-                          )}
-                        </label>
-                        <input
-                          type="url"
-                          value={imageUrl}
-                          onChange={(e) => {
-                            setImageUrl(e.target.value);
-                            setPreviewError(false);
-                            setPreviewLoaded(false);
+                      {/* Source Mode Switcher: Device File vs External Link */}
+                      <div className="flex rounded-xl bg-slate-950 p-1 border border-slate-800">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUploadSource('url');
+                            fileInputRef.current && (fileInputRef.current.value = '');
                           }}
-                          placeholder="https://i.ibb.co/... or any direct image URL"
-                          required
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 placeholder:text-slate-500 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                          className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                            uploadSource === 'url'
+                              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                              : 'text-slate-400 hover:text-slate-200'
+                          }`}
+                        >
+                          <Link2 className="w-3.5 h-3.5" />
+                          <span>{language === 'NE' ? 'लिङ्क पेस्ट गर्नुहोस् (URL)' : 'Paste Image Link'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUploadSource('device');
+                          }}
+                          className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                            uploadSource === 'device'
+                              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                              : 'text-slate-400 hover:text-slate-200'
+                          }`}
+                        >
+                          <FolderUp className="w-3.5 h-3.5" />
+                          <span>{language === 'NE' ? 'फोन / कम्प्युटरबाट छान्नुहोस्' : 'Upload from Device'}</span>
+                        </button>
                       </div>
 
-                      {/* Free Image Hosts Helpers */}
-                      <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2 text-xs">
-                        <div className="flex items-center justify-between text-slate-400">
-                          <span className="font-medium text-[11px] uppercase tracking-wider text-slate-400">
-                            {language === 'NE' ? 'तस्बिर अपलोड गर्ने नि:शुल्क वेबसाइटहरू:' : 'Recommended Free Image Hosts:'}
-                          </span>
-                          <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
-                            <CheckCircle2 className="w-3 h-3" />
-                            {language === 'NE' ? 'कुनै पनि लिङ्क चल्छ' : 'Any link works'}
-                          </span>
+                      {/* MODE 1: Device File Picker / Drag & Drop */}
+                      {uploadSource === 'device' ? (
+                        <div className="space-y-3">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleDeviceFile(file);
+                            }}
+                            className="hidden"
+                          />
+                          <div
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              setIsDragging(true);
+                            }}
+                            onDragLeave={() => setIsDragging(false)}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              setIsDragging(false);
+                              const file = e.dataTransfer.files?.[0];
+                              if (file) handleDeviceFile(file);
+                            }}
+                            onClick={() => fileInputRef.current?.click()}
+                            className={`cursor-pointer rounded-2xl border-2 border-dashed p-5 text-center transition-all ${
+                              isDragging
+                                ? 'border-blue-500 bg-blue-500/10'
+                                : 'border-slate-700 bg-slate-950/70 hover:border-slate-600 hover:bg-slate-900/60'
+                            }`}
+                          >
+                            <div className="w-12 h-12 mx-auto mb-2.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                              {isCompressing ? (
+                                <Loader2 className="w-6 h-6 animate-spin" />
+                              ) : (
+                                <FolderUp className="w-6 h-6" />
+                              )}
+                            </div>
+                            <p className="text-xs font-semibold text-slate-200">
+                              {language === 'NE'
+                                ? 'तस्बिर छनौट गर्न यहाँ थिच्नुहोस् वा तानेर छोड्नुहोस्'
+                                : 'Click to select photo from phone/gallery or drop file here'}
+                            </p>
+                            <p className="text-[11px] text-slate-400 mt-1">
+                              {language === 'NE'
+                                ? 'कुनै पनि साइजको तस्बिर स्वतः अनुकूलित (Compressed) हुनेछ'
+                                : 'JPG, PNG, WebP supported • Automatically optimized for web'}
+                            </p>
+                          </div>
+
+                          {fileDetails && (
+                            <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-800/60 flex items-center justify-between text-xs text-emerald-300 font-mono">
+                              <span className="flex items-center gap-1.5 truncate max-w-[240px]">
+                                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                                <span className="truncate">{fileDetails.fileName}</span>
+                              </span>
+                              <span className="text-[11px] text-emerald-400 shrink-0">
+                                {fileDetails.width}×{fileDetails.height} • {fileDetails.compressedKb} KB
+                              </span>
+                            </div>
+                          )}
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          <a
-                            href="https://imgbb.com"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-blue-400 text-xs transition-colors"
-                          >
-                            <span>ImgBB</span>
-                            <ExternalLink className="w-3 h-3 text-slate-500" />
-                          </a>
-                          <a
-                            href="https://postimages.org"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-blue-400 text-xs transition-colors"
-                          >
-                            <span>Postimages</span>
-                            <ExternalLink className="w-3 h-3 text-slate-500" />
-                          </a>
-                          <a
-                            href="https://imgur.com/upload"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-blue-400 text-xs transition-colors"
-                          >
-                            <span>Imgur</span>
-                            <ExternalLink className="w-3 h-3 text-slate-500" />
-                          </a>
+                      ) : (
+                        /* MODE 2: Paste Image Link with Smart Auto-Resolution */
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                              <span className="flex items-center gap-1.5">
+                                <Link2 className="w-3.5 h-3.5 text-blue-400" />
+                                <span>{language === 'NE' ? 'तस्बिरको URL (Image Link)' : 'Image URL'} *</span>
+                              </span>
+                              {imageUrl.trim() && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setImageUrl('');
+                                    setUrlAnalysis(null);
+                                    setPreviewError(false);
+                                    setPreviewLoaded(false);
+                                  }}
+                                  className="text-[11px] text-slate-400 hover:text-slate-200 transition-colors"
+                                >
+                                  {language === 'NE' ? 'खाली गर्नुहोस्' : 'Clear'}
+                                </button>
+                              )}
+                            </label>
+                            <input
+                              type="text"
+                              value={imageUrl}
+                              onChange={(e) => handleUrlInputChange(e.target.value)}
+                              placeholder="e.g. https://ibb.co/C5wnswvR or direct image link"
+                              required={uploadSource === 'url'}
+                              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 placeholder:text-slate-500 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+
+                          {/* Auto-converted Pill Alert */}
+                          {urlAnalysis?.converted && (
+                            <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/70 text-xs text-emerald-300 flex items-center gap-2">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                              <span className="text-[11px] leading-tight">
+                                {language === 'NE'
+                                  ? 'तस्बिरको लिङ्क स्वतः प्रत्यक्ष तस्बिरमा रूपान्तरण भयो!'
+                                  : (urlAnalysis.notes || 'Auto-converted to direct image URL for live preview!')}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Free Image Hosts Helpers & ImgBB Direct Link Tip */}
+                          <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2 text-xs">
+                            <div className="flex items-center justify-between text-slate-400">
+                              <span className="font-medium text-[11px] uppercase tracking-wider text-slate-400">
+                                {language === 'NE' ? 'तस्बिर वेबसाइटहरू:' : 'Supported Image Hosts:'}
+                              </span>
+                              <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
+                                <CheckCircle2 className="w-3 h-3" />
+                                {language === 'NE' ? 'स्वतः पहिचान' : 'Auto-detected'}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <a
+                                href="https://imgbb.com"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-blue-400 text-xs transition-colors"
+                              >
+                                <span>ImgBB</span>
+                                <ExternalLink className="w-3 h-3 text-slate-500" />
+                              </a>
+                              <a
+                                href="https://postimages.org"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-blue-400 text-xs transition-colors"
+                              >
+                                <span>Postimages</span>
+                                <ExternalLink className="w-3 h-3 text-slate-500" />
+                              </a>
+                              <a
+                                href="https://imgur.com/upload"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-blue-400 text-xs transition-colors"
+                              >
+                                <span>Imgur</span>
+                                <ExternalLink className="w-3 h-3 text-slate-500" />
+                              </a>
+                            </div>
+                            <div className="text-[11px] text-slate-400 leading-relaxed pt-1 border-t border-slate-900 flex items-start gap-1.5">
+                              <Info className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+                              <span>
+                                {language === 'NE'
+                                  ? 'ImgBB मा तस्बिर अपलोड गरेपछि "Embed codes" ड्रपडाउनमा "Direct link" रोज्न सक्नुहुन्छ, अथवा कुनै पनि लिङ्क यहाँ पेस्ट गर्दा स्वतः रूपान्तरण हुन्छ।'
+                                  : 'ImgBB Tip: In the ImgBB embed dropdown, select "Direct link" (starts with i.ibb.co) or paste any link above and we auto-convert it.'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <p className="text-[11px] text-slate-500 leading-relaxed">
-                          {language === 'NE'
-                            ? 'तस्बिर ती वेबसाइटमा अपलोड गरी "Direct Link" कपी गर्नुहोस् र माथिको बक्समा पेस्ट गर्नुहोस्।'
-                            : 'Upload image to any free website, copy the direct image link, and paste it in the box above.'}
-                        </p>
-                      </div>
+                      )}
 
                       {/* Live Image Preview */}
                       <div className="space-y-1.5">
@@ -624,29 +948,60 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           {previewLoaded && !previewError && (
                             <span className="text-[11px] text-emerald-400 flex items-center gap-1 font-mono">
                               <Check className="w-3 h-3" />
-                              {language === 'NE' ? 'पूर्वावलोकन लोड भयो' : 'Ready'}
+                              {language === 'NE' ? 'पूर्वावलोकन तयार छ' : 'Ready to Publish'}
                             </span>
                           )}
                         </div>
 
                         <div className="relative w-full h-52 rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center p-2">
-                          {imageUrl.trim() ? (
+                          {isCompressing ? (
+                            <div className="text-center p-6 space-y-2 text-blue-400">
+                              <Loader2 className="w-8 h-8 mx-auto animate-spin" />
+                              <p className="text-xs font-semibold">
+                                {language === 'NE' ? 'तस्बिर तयार गरिँदैछ...' : 'Optimizing photo...'}
+                              </p>
+                            </div>
+                          ) : imageUrl.trim() ? (
                             <>
                               {previewError ? (
-                                <div className="text-center p-4 space-y-1 text-rose-400">
-                                  <AlertCircle className="w-8 h-8 mx-auto text-rose-500/80" />
+                                <div className="text-center p-4 space-y-2 text-rose-400 max-w-sm mx-auto">
+                                  <AlertCircle className="w-7 h-7 mx-auto text-rose-500/80" />
                                   <p className="text-xs font-semibold">
                                     {language === 'NE' ? 'तस्बिर लोड हुन सकेन' : 'Could not load image preview'}
                                   </p>
-                                  <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
+                                  <p className="text-[11px] text-slate-400 leading-relaxed">
                                     {language === 'NE'
-                                      ? 'कृपया लिङ्क सिधै तस्बिरको हो कि होइन जाँच्नुहोस्।'
-                                      : 'Make sure the URL points directly to an image (.jpg, .png, .webp, etc.).'}
+                                      ? 'यो लिङ्क सिधै तस्बिरको होइन वा पेज लिङ्क हो। कृपया ImgBB मा "Direct link" कपी गर्नुहोस् वा सिधै फोनबाट छान्नुहोस्।'
+                                      : 'This URL might be a webpage rather than a direct image file (.jpg, .png).'}
                                   </p>
+                                  <div className="pt-1 flex flex-wrap items-center justify-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setUseProxyFallback(true);
+                                        setPreviewError(false);
+                                      }}
+                                      className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-medium flex items-center gap-1.5 transition-colors"
+                                    >
+                                      <Globe className="w-3.5 h-3.5" />
+                                      <span>{language === 'NE' ? 'वेब प्रोक्सीबाट लोड गर्नुहोस्' : 'Load via Web Proxy'}</span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setUploadSource('device');
+                                        setTimeout(() => fileInputRef.current?.click(), 100);
+                                      }}
+                                      className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-medium flex items-center gap-1.5 transition-colors"
+                                    >
+                                      <FolderUp className="w-3.5 h-3.5" />
+                                      <span>{language === 'NE' ? 'फोनबाट तस्बिर छान्नुहोस्' : 'Choose from Device instead'}</span>
+                                    </button>
+                                  </div>
                                 </div>
                               ) : (
                                 <img
-                                  src={imageUrl.trim()}
+                                  src={useProxyFallback ? getProxiedImageUrl(normalizeImageUrl(imageUrl.trim())) : normalizeImageUrl(imageUrl.trim())}
                                   alt="Preview"
                                   referrerPolicy="no-referrer"
                                   onLoad={() => {
@@ -654,8 +1009,14 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                     setPreviewError(false);
                                   }}
                                   onError={() => {
-                                    setPreviewError(true);
-                                    setPreviewLoaded(false);
+                                    const raw = normalizeImageUrl(imageUrl.trim());
+                                    if (!useProxyFallback && !raw.startsWith('data:') && !raw.includes('wsrv.nl')) {
+                                      // Automatic fallback to web proxy CDN if direct host failed
+                                      setUseProxyFallback(true);
+                                    } else {
+                                      setPreviewError(true);
+                                      setPreviewLoaded(false);
+                                    }
                                   }}
                                   className="max-h-full max-w-full object-contain rounded-xl drop-shadow-md"
                                 />
@@ -667,10 +1028,10 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                 <ImageIcon className="w-5 h-5" />
                               </div>
                               <p className="text-xs font-medium text-slate-400">
-                                {language === 'NE' ? 'माथि लिङ्क पेस्ट गरेपछि पूर्वावलोकन देखिनेछ' : 'Paste an Image URL to preview'}
+                                {language === 'NE' ? 'तस्बिर छानेपछि वा लिङ्क राखेपछि पूर्वावलोकन देखिनेछ' : 'Choose a photo or paste link to preview'}
                               </p>
                               <p className="text-[11px] text-slate-600">
-                                Supports ImgBB, Postimages, Google Photos, Cloudinary, Imgur, etc.
+                                Direct upload, ImgBB, Postimages, Google Drive, Imgur supported
                               </p>
                             </div>
                           )}
@@ -737,6 +1098,15 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         />
                       </div>
 
+                      <div className="p-3 rounded-xl bg-blue-950/40 border border-blue-800/40 text-[11px] text-blue-300 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span>
+                          {language === 'NE'
+                            ? 'सिधै वेबसाइटमा सार्वजनिक हुनेछ • कुनै Firebase आवश्यक छैन • Admin ले Edit र Delete गर्न सक्छ'
+                            : 'Publishes directly to live website • No Firebase required • Admin can Edit & Delete anytime'}
+                        </span>
+                      </div>
+
                       <button
                         type="submit"
                         disabled={isSaving || !imageUrl.trim() || !imageTitle.trim()}
@@ -745,12 +1115,12 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         {isSaving ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>{language === 'NE' ? 'सुरक्षित गरिँदैछ...' : 'Saving to Firestore...'}</span>
+                            <span>{language === 'NE' ? 'सार्वजनिक गरिँदैछ...' : 'Publishing...'}</span>
                           </>
                         ) : (
                           <>
-                            <Database className="w-4 h-4" />
-                            <span>{language === 'NE' ? 'Firestore मा सुरक्षित गर्नुहोस्' : 'Save Image to Firestore'}</span>
+                            <Globe className="w-4 h-4" />
+                            <span>{language === 'NE' ? 'वेबसाइटमा सिधै सार्वजनिक गर्नुहोस्' : 'Publish Directly to Website'}</span>
                           </>
                         )}
                       </button>
@@ -758,89 +1128,134 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   </form>
                 )}
 
-                {/* Tab 2: Gallery List */}
+                {/* Tab 2: Live Website Photos (CRUD Management: Add, Edit, Delete) */}
                 {activeTab === 'gallery' && (
                   <div className="space-y-4">
-                    {uploadedImages.length === 0 ? (
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                      <div>
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                          <ImageIcon className="w-4 h-4 text-blue-400" />
+                          <span>{language === 'NE' ? 'वेबसाइटमा प्रकाशित तस्बिरहरू' : 'Live Website Photos'}</span>
+                        </h4>
+                        <p className="text-[11px] text-slate-400">
+                          {language === 'NE'
+                            ? 'यहाँबाट कुनै पनि तस्बिर सम्पादन (Edit) वा हटाउन (Delete) सक्नुहुन्छ।'
+                            : 'Edit details or delete any photo directly from the website.'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('upload')}
+                        className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-blue-600/25 transition-all"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>{language === 'NE' ? '+ नयाँ थप्नुहोस्' : '+ Add New'}</span>
+                      </button>
+                    </div>
+
+                    {(moments || []).length === 0 ? (
                       <div className="text-center py-12 text-slate-400 space-y-3">
                         <ImageIcon className="w-12 h-12 mx-auto text-slate-600" />
                         <p className="text-sm font-medium">
                           {language === 'NE'
-                            ? 'हालसम्म Firestore मा कुनै तस्बिर छैन।'
-                            : 'No images saved in Firestore collection yet.'}
+                            ? 'वेबसाइटमा हाल कुनै तस्बिर छैन।'
+                            : 'No photos published on the website yet.'}
                         </p>
                         <button
                           onClick={() => setActiveTab('upload')}
                           className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors"
                         >
-                          {language === 'NE' ? 'पहिलो तस्बिर थप्नुहोस्' : 'Add your first image URL'}
+                          {language === 'NE' ? 'पहिलो तस्बिर सार्वजनिक गर्नुहोस्' : 'Publish your first photo'}
                         </button>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {uploadedImages.map((img) => (
+                        {(moments || []).map((m) => (
                           <div
-                            key={img.id}
-                            className="group relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden flex flex-col"
+                            key={m.id}
+                            className="group relative bg-slate-950 border border-slate-800 rounded-xl overflow-hidden flex flex-col hover:border-slate-700 transition-all"
                           >
-                            <div className="h-40 overflow-hidden bg-slate-900 relative">
+                            <div className="h-44 overflow-hidden bg-slate-900 relative flex items-center justify-center p-2">
+                              {/* Background ambient reflection */}
                               <img
-                                src={img.imgUrl}
-                                alt={img.title}
+                                src={normalizeImageUrl(m.imgUrl)}
+                                alt=""
                                 referrerPolicy="no-referrer"
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                className="absolute inset-0 w-full h-full object-cover filter blur-lg opacity-25 scale-110 pointer-events-none"
                               />
-                              <div className="absolute top-2 right-2 flex items-center gap-1">
+                              <img
+                                src={normalizeImageUrl(m.imgUrl)}
+                                alt={m.titleEn}
+                                referrerPolicy="no-referrer"
+                                className="relative z-10 max-h-full max-w-full object-contain rounded-lg group-hover:scale-105 transition-transform duration-300"
+                              />
+                              <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
                                 <button
                                   type="button"
-                                  onClick={() => handleCopyUrl(img.imgUrl, img.id)}
-                                  className="p-1.5 rounded-lg bg-black/60 hover:bg-black/90 text-white backdrop-blur-sm transition-colors"
+                                  onClick={() => handleStartEdit(m)}
+                                  className="p-1.5 rounded-lg bg-blue-600/90 hover:bg-blue-600 text-white backdrop-blur-sm shadow transition-colors"
+                                  title="Edit Photo Details"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyUrl(m.imgUrl, m.id)}
+                                  className="p-1.5 rounded-lg bg-black/70 hover:bg-black/90 text-white backdrop-blur-sm transition-colors"
                                   title="Copy Image Link"
                                 >
-                                  {copiedId === img.id ? (
+                                  {copiedId === m.id ? (
                                     <Check className="w-3.5 h-3.5 text-emerald-400" />
                                   ) : (
                                     <Copy className="w-3.5 h-3.5" />
                                   )}
                                 </button>
                                 <a
-                                  href={img.imgUrl}
+                                  href={normalizeImageUrl(m.imgUrl)}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="p-1.5 rounded-lg bg-black/60 hover:bg-black/90 text-white backdrop-blur-sm transition-colors"
+                                  className="p-1.5 rounded-lg bg-black/70 hover:bg-black/90 text-white backdrop-blur-sm transition-colors"
                                   title="Open raw image"
                                 >
                                   <ExternalLink className="w-3.5 h-3.5" />
                                 </a>
                                 <button
                                   type="button"
-                                  onClick={() => handleDeleteImage(img)}
-                                  disabled={isDeletingId === img.id}
-                                  className="p-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white backdrop-blur-sm transition-colors disabled:opacity-50"
-                                  title="Delete from Firestore"
+                                  onClick={() => handleDeleteMomentAction(m.id, m.titleEn)}
+                                  className="p-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white backdrop-blur-sm transition-colors"
+                                  title="Delete from Website"
                                 >
-                                  {isDeletingId === img.id ? (
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                  ) : (
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  )}
+                                  <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               </div>
-                              <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-sm text-[10px] font-mono text-blue-300">
-                                {img.category}
+                              <span className="absolute bottom-2 left-2 z-20 px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-sm text-[10px] font-mono text-blue-300">
+                                {m.category}
                               </span>
                             </div>
 
                             <div className="p-3 flex-1 flex flex-col justify-between">
                               <div>
-                                <h4 className="font-semibold text-xs text-white truncate">{img.title}</h4>
-                                {img.description && (
-                                  <p className="text-[11px] text-slate-400 line-clamp-2 mt-1">{img.description}</p>
+                                <h4 className="font-semibold text-xs text-white truncate">
+                                  {language === 'NE' ? m.titleNe : m.titleEn}
+                                </h4>
+                                {m.descEn && (
+                                  <p className="text-[11px] text-slate-400 line-clamp-2 mt-1">
+                                    {language === 'NE' ? m.descNe : m.descEn}
+                                  </p>
                                 )}
                               </div>
-                              <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-500 font-mono">
-                                <span>{new Date(img.uploadDate).toLocaleDateString()}</span>
-                                <span className="text-amber-400">{img.likes || 0} likes</span>
+                              <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                                <span>{m.date || 'Live'}</span>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-rose-400 font-bold">{m.likes || 0} likes</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartEdit(m)}
+                                    className="ml-2 text-blue-400 hover:text-blue-300 underline text-[10px]"
+                                  >
+                                    {language === 'NE' ? 'सम्पादन' : 'Edit'}
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -887,7 +1302,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
           {/* Footer */}
           <div className="px-5 py-3 border-t border-slate-800 bg-slate-950/80 flex items-center justify-between text-xs text-slate-400 shrink-0">
             <span className="font-mono text-[11px] text-slate-500">
-              Firebase SDK v12.18.0 • rajababu-mehta
+              Admin CMS • rajababum426@gmail.com
             </span>
             <button
               onClick={onClose}
@@ -897,6 +1312,128 @@ export const AdminModal: React.FC<AdminModalProps> = ({
             </button>
           </div>
         </motion.div>
+
+        {/* Edit Photo Details Modal */}
+        {editingMoment && (
+          <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Edit3 className="w-4 h-4 text-blue-400" />
+                  <span>{language === 'NE' ? 'तस्बिर विवरण सम्पादन गर्नुहोस् (Edit Photo)' : 'Edit Photo Details'}</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setEditingMoment(null)}
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveEditSubmit} className="space-y-3.5 text-xs">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    {language === 'NE' ? 'तस्बिरको URL (Image Link)' : 'Image URL'} *
+                  </label>
+                  <input
+                    type="text"
+                    value={editImgUrl}
+                    onChange={(e) => setEditImgUrl(e.target.value)}
+                    required
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Live Preview of modified image */}
+                {editImgUrl && (
+                  <div className="h-32 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center p-2 relative">
+                    <img
+                      src={normalizeImageUrl(editImgUrl)}
+                      alt="Preview"
+                      referrerPolicy="no-referrer"
+                      className="max-h-full max-w-full object-contain rounded-lg"
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">
+                      {language === 'NE' ? 'शीर्षक (English)' : 'Title (English)'} *
+                    </label>
+                    <input
+                      type="text"
+                      value={editTitleEn}
+                      onChange={(e) => setEditTitleEn(e.target.value)}
+                      required
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-semibold mb-1">
+                      {language === 'NE' ? 'शीर्षक (नेपाली)' : 'Title (Nepali)'}
+                    </label>
+                    <input
+                      type="text"
+                      value={editTitleNe}
+                      onChange={(e) => setEditTitleNe(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    {language === 'NE' ? 'वर्ग (Category)' : 'Category'}
+                  </label>
+                  <select
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Technology">Technology & Web Development</option>
+                    <option value="Community">Community & Student Events</option>
+                    <option value="Networking">Networking & Conferences</option>
+                    <option value="Professional">Professional Milestones</option>
+                    <option value="Personal">Personal Moments</option>
+                    <option value="Projects">Client Projects</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    {language === 'NE' ? 'विवरण (Description)' : 'Description'}
+                  </label>
+                  <textarea
+                    value={editDescEn}
+                    onChange={(e) => setEditDescEn(e.target.value)}
+                    rows={2}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setEditingMoment(null)}
+                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors"
+                  >
+                    {language === 'NE' ? 'रद्द गर्नुहोस्' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition-colors"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>{language === 'NE' ? 'परिमार्जन सुरक्षित गर्नुहोस्' : 'Save Changes'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </AnimatePresence>
   );

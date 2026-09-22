@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const heroImageSrc =
     profile.heroImage ||
-    'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg';
+    'https://i.ibb.co/8LJDF00Z/IMG-1780197697082.jpg';
 
   const rolesEn = [
     'AI Website Developer',
@@ -52,20 +52,27 @@ export const Header: React.FC<HeaderProps> = ({
       id="home"
       className="relative min-h-[105vh] sm:min-h-[100vh] flex flex-col justify-end overflow-hidden bg-slate-950 pt-[380px] sm:pt-[480px] lg:pt-[540px] pb-10 sm:pb-16"
     >
-      {/* 1. HERO BACKGROUND COVER IMAGE (Full-viewport, uncropped top face anchoring) */}
-      <img
-        src={heroImageSrc}
-        alt="Rajababu Mehta - Website Developer, Student, and AI Explainer from Birgunj Nepal"
-        referrerPolicy="no-referrer"
-        className="absolute inset-0 w-full h-full object-cover object-top filter brightness-95 contrast-105 pointer-events-none"
-      />
+      {/* 1. HERO BACKGROUND COVER IMAGE (Adjusted upward so face and body are clearly centered and unobstructed) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <img
+          src={heroImageSrc}
+          onError={(e) => {
+            if (e.currentTarget.src !== window.location.origin + '/hero-image.jpg') {
+              e.currentTarget.src = '/hero-image.jpg';
+            }
+          }}
+          alt="Rajababu Mehta - Website Developer, Student, and AI Explainer from Birgunj Nepal"
+          referrerPolicy="no-referrer"
+          className="w-full h-full object-cover object-[center_18%] sm:object-[center_22%] scale-[1.08] sm:scale-100 -translate-y-8 sm:translate-y-0 filter brightness-95 contrast-105"
+        />
+      </div>
 
       {/* 2. DUAL-LAYER GRADIENTS OVERLAY & BACKDROP LIGHTING */}
-      {/* Top-to-bottom subtle gradient: seamless transition with navbar, crystal clear center */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-transparent via-45% to-slate-950 pointer-events-none" />
+      {/* Top subtle gradient for seamless navbar blending */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/50 via-transparent via-25% to-transparent pointer-events-none" />
 
-      {/* Bottom-to-top deep dark gradient: ensures ultra high contrast for typography and badges */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pointer-events-none" />
+      {/* Bottom dark gradient: anchored low so face and upper body remain crisp and unobstructed */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 via-30% to-transparent pointer-events-none" />
 
       {/* Subtle ambient glow orbs behind bottom hero text */}
       <div className="absolute bottom-24 left-1/4 -translate-x-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
