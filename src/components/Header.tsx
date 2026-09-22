@@ -50,9 +50,9 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header
       id="home"
-      className="relative min-h-[105vh] sm:min-h-[100vh] flex flex-col justify-end overflow-hidden bg-slate-950 pt-[380px] sm:pt-[480px] lg:pt-[540px] pb-10 sm:pb-16"
+      className="relative min-h-[105vh] sm:min-h-[100vh] flex flex-col justify-end overflow-hidden bg-slate-950 pt-[320px] sm:pt-[440px] lg:pt-[500px] pb-10 sm:pb-16"
     >
-      {/* 1. HERO BACKGROUND COVER IMAGE (Adjusted upward so face and body are clearly centered and unobstructed) */}
+      {/* 1. HERO BACKGROUND COVER IMAGE (Head elevated directly to the top below navbar, full face & body in focus) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <img
           src={heroImageSrc}
@@ -63,16 +63,16 @@ export const Header: React.FC<HeaderProps> = ({
           }}
           alt="Rajababu Mehta - Website Developer, Student, and AI Explainer from Birgunj Nepal"
           referrerPolicy="no-referrer"
-          className="w-full h-full object-cover object-[center_18%] sm:object-[center_22%] scale-[1.08] sm:scale-100 -translate-y-8 sm:translate-y-0 filter brightness-95 contrast-105"
+          className="w-full h-full object-cover object-[center_48%] sm:object-[center_46%] md:object-[center_44%] scale-[1.46] sm:scale-[1.25] md:scale-[1.15] -translate-y-36 sm:-translate-y-24 md:-translate-y-14 filter brightness-95 contrast-105"
         />
       </div>
 
       {/* 2. DUAL-LAYER GRADIENTS OVERLAY & BACKDROP LIGHTING */}
       {/* Top subtle gradient for seamless navbar blending */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/50 via-transparent via-25% to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-transparent via-18% to-transparent pointer-events-none" />
 
-      {/* Bottom dark gradient: anchored low so face and upper body remain crisp and unobstructed */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 via-30% to-transparent pointer-events-none" />
+      {/* Bottom dark gradient: anchored very low (via-20%) so face and entire upper torso stay totally clear */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 via-20% to-transparent pointer-events-none" />
 
       {/* Subtle ambient glow orbs behind bottom hero text */}
       <div className="absolute bottom-24 left-1/4 -translate-x-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
