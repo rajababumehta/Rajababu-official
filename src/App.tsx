@@ -16,8 +16,9 @@ import { ToastContainer, ToastMessage } from './components/Toast';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
 import { CvModal } from './components/CvModal';
 import { AdminModal } from './components/AdminModal';
+import { JourneySection } from './components/JourneySection';
 
-import { Language, Moment, Comment, SystemSettings, ClipzoneImage } from './types';
+import { Language, Moment, Comment, SystemSettings, ClipzoneImage, AdminUser } from './types';
 import {
   STORAGE_KEYS,
   DEFAULT_SYSTEM_SETTINGS,
@@ -27,10 +28,13 @@ import {
 import {
   subscribeToClipzoneImages,
   subscribeToSystemSettings,
+  getCurrentAdminUser,
+  subscribeToAuth,
 } from './services/firebase';
+import { normalizeImageUrl } from './utils/imageUrl';
 
 const FIXED_HERO_IMAGE =
-  'https://i.ibb.co/8LJDF00Z/IMG-1780197697082.jpg';
+  'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg';
 
 // Helper converter functions
 const clipzoneImageToMoment = (img: ClipzoneImage): Moment => ({
@@ -39,7 +43,7 @@ const clipzoneImageToMoment = (img: ClipzoneImage): Moment => ({
   titleNe: img.titleNe || img.title,
   descEn: img.description || '',
   descNe: img.descNe || img.description || '',
-  imgUrl: img.imgUrl,
+  imgUrl: normalizeImageUrl(img.imgUrl),
   likes: img.likes || 0,
   category: img.category || 'AI Clipzone',
   date: img.uploadDate ? new Date(img.uploadDate).toLocaleDateString() : 'Recent',
@@ -200,10 +204,25 @@ export default function App() {
   const handleOpenCv = () => setIsCvOpen(true);
   const handleCloseCv = () => setIsCvOpen(false);
 
-  // 8. Firebase Admin Modal State
+  // 8. Firebase Admin Modal & Authentication State
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [initialEditMoment, setInitialEditMoment] = useState<Moment | null>(null);
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(() => getCurrentAdminUser());
+
+  useEffect(() => {
+    const unsubscribe = subscribeToAuth((user) => {
+      setAdminUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const isAdminLoggedIn = Boolean(adminUser);
+
   const handleOpenAdmin = () => setIsAdminOpen(true);
-  const handleCloseAdmin = () => setIsAdminOpen(false);
+  const handleCloseAdmin = () => {
+    setIsAdminOpen(false);
+    setInitialEditMoment(null);
+  };
 
   // Global keyboard shortcut to open Admin panel: Ctrl+Shift+A or Cmd+Shift+A
   useEffect(() => {
@@ -374,8 +393,35 @@ export default function App() {
     });
   };
 
-  const totalMoments = moments.length;
-  const totalLikes = moments.reduce((acc, m) => acc + (m.likes || 0), 0);
+  const handleAddMoment = (newMoment: Moment) => {
+    setMoments((prev) => [newMoment, ...(prev || [])]);
+  };
+
+  const handleUpdateMoment = (updatedMoment: Moment) => {
+    setMoments((prev) => (prev || []).map((m) => (m.id === updatedMoment.id ? updatedMoment : m)));
+  };
+
+  const handleDeleteMoment = (id: string) => {
+    setMoments((prev) => (prev || []).filter((m) => m.id !== id));
+    try {
+      const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
+      const deletedIds: string[] = deletedIdsStr ? JSON.parse(deletedIdsStr) : [];
+      if (!deletedIds.includes(id)) {
+        deletedIds.push(id);
+        localStorage.setItem(STORAGE_KEYS.DELETED_MOMENT_IDS, JSON.stringify(deletedIds));
+      }
+    } catch (e) {
+      console.error('Failed to store deleted moment id', e);
+    }
+  };
+
+  const handleStartEditMoment = (moment: Moment) => {
+    setInitialEditMoment(moment);
+    setIsAdminOpen(true);
+  };
+
+  const totalMoments = (moments || []).length;
+  const totalLikes = (moments || []).reduce((acc, m) => acc + (m.likes || 0), 0);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
@@ -387,7 +433,6 @@ export default function App() {
         language={language}
         onToggleLanguage={handleToggleLanguage}
         profile={systemSettings.profile}
-        onOpenCv={handleOpenCv}
       />
 
       {/* Main Page Content */}
@@ -408,6 +453,22 @@ export default function App() {
         <ExperienceSection
           language={language}
           experience={systemSettings.experience}
+        />
+
+        {/* Projects & Visual Journey Section */}
+        <JourneySection
+          language={language}
+          moments={moments}
+          onLikeMoment={handleLikeMoment}
+          userLikedMoments={userLikedMoments}
+          onAutoBoostAllLikes={handleAutoBoostAllLikes}
+          commentsMap={commentsMap}
+          onAddComment={handleAddComment}
+          onShowToast={showToast}
+          isAdmin={isAdminLoggedIn}
+          onOpenAdminUpload={handleOpenAdmin}
+          onEditMoment={handleStartEditMoment}
+          onDeleteMoment={handleDeleteMoment}
         />
 
         {/* Web Deliverables & Technical Standards Section */}
@@ -435,6 +496,8 @@ export default function App() {
       <Footer
         language={language}
         profile={systemSettings.profile}
+        isAdmin={isAdminLoggedIn}
+        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Official Verified CV Modal & PDF Downloader */}
@@ -452,6 +515,11 @@ export default function App() {
         language={language}
         systemSettings={systemSettings}
         onShowToast={showToast}
+        moments={moments}
+        onAddMoment={handleAddMoment}
+        onUpdateMoment={handleUpdateMoment}
+        onDeleteMoment={handleDeleteMoment}
+        initialEditMoment={initialEditMoment}
       />
 
       {/* Floating Circle WhatsApp Button in Bottom Right */}
