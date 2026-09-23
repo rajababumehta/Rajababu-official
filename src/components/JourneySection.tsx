@@ -13,7 +13,6 @@ import {
   Layers,
   Edit3,
   Trash2,
-  Plus,
 } from 'lucide-react';
 import { Moment, Comment, Language } from '../types';
 import { formatLikes } from '../utils/likesFormatter';
@@ -44,7 +43,6 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
   onAddComment,
   onShowToast,
   isAdmin = false,
-  onOpenAdminUpload,
   onEditMoment,
   onDeleteMoment,
 }) => {
@@ -140,31 +138,18 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
             </p>
           </div>
 
-          {/* Action Bar (Auto-Boost and Direct Add Photo) - Only visible when Admin is logged in */}
-          {isAdmin && (
+          {/* Action Bar (Auto-Boost) - Only visible when Admin is logged in */}
+          {isAdmin && onAutoBoostAllLikes && (
             <div className="flex flex-wrap items-center gap-3">
-              {onOpenAdminUpload && (
-                <button
-                  id="btn-add-moment-photo"
-                  onClick={onOpenAdminUpload}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                  title="Add new photo directly to website"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>{language === 'NE' ? '+ तस्बिर थप्नुहोस्' : '+ Add Photo'}</span>
-                </button>
-              )}
-              {onAutoBoostAllLikes && (
-                <button
-                  id="btn-auto-boost-all-likes"
-                  onClick={onAutoBoostAllLikes}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-600/90 to-rose-600/90 hover:from-pink-500 hover:to-rose-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-pink-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                  title="Boost realistic engagement likes across all photos"
-                >
-                  <Zap className="w-4 h-4 text-amber-300 animate-bounce" />
-                  <span>{language === 'NE' ? '⚡ सबैमा लाइक्स बढाउनुहोस्' : '⚡ Auto-Boost Likes'}</span>
-                </button>
-              )}
+              <button
+                id="btn-auto-boost-all-likes"
+                onClick={onAutoBoostAllLikes}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-600/90 to-rose-600/90 hover:from-pink-500 hover:to-rose-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-pink-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                title="Boost realistic engagement likes across all photos"
+              >
+                <Zap className="w-4 h-4 text-amber-300 animate-bounce" />
+                <span>{language === 'NE' ? '⚡ सबैमा लाइक्स बढाउनुहोस्' : '⚡ Auto-Boost Likes'}</span>
+              </button>
             </div>
           )}
         </div>
@@ -200,21 +185,11 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
             <h3 className="text-xl font-bold text-slate-200 mb-2">
               {language === 'NE' ? 'परियोजनाहरू चाँडै उपलब्ध हुनेछन्' : 'Featured Projects & Visual Showcase'}
             </h3>
-            <p className="text-sm sm:text-base text-slate-400 max-w-lg mx-auto leading-relaxed mb-6">
+            <p className="text-sm sm:text-base text-slate-400 max-w-lg mx-auto leading-relaxed">
               {language === 'NE'
                 ? 'नयाँ वेब परियोजनाहरू र प्राविधिक गतिविधिहरू यहाँ चाँडै प्रदर्शन गरिनेछ।'
                 : 'Modern web applications, client solutions, and technical highlights are currently featured here.'}
             </p>
-            {isAdmin && onOpenAdminUpload && (
-              <button
-                type="button"
-                onClick={onOpenAdminUpload}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all"
-              >
-                <Plus className="w-4 h-4" />
-                <span>{language === 'NE' ? 'पहिलो तस्बिर सार्वजनिक गर्नुहोस्' : 'Publish First Photo'}</span>
-              </button>
-            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

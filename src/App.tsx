@@ -466,7 +466,6 @@ export default function App() {
           onAddComment={handleAddComment}
           onShowToast={showToast}
           isAdmin={isAdminLoggedIn}
-          onOpenAdminUpload={handleOpenAdmin}
           onEditMoment={handleStartEditMoment}
           onDeleteMoment={handleDeleteMoment}
         />
@@ -496,8 +495,6 @@ export default function App() {
       <Footer
         language={language}
         profile={systemSettings.profile}
-        isAdmin={isAdminLoggedIn}
-        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Official Verified CV Modal & PDF Downloader */}
