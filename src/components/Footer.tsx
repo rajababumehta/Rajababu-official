@@ -5,8 +5,6 @@ import { Language, ProfileSettings } from '../types';
 interface FooterProps {
   language: Language;
   profile: ProfileSettings;
-  isAdmin?: boolean;
-  onOpenAdmin?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
