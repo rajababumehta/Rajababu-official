@@ -224,7 +224,7 @@ export default function App() {
     setInitialEditMoment(null);
   };
 
-  // Global keyboard shortcut (Ctrl+Shift+A / Cmd+Shift+A) or URL hash (#admin) to open Admin panel discreetly
+  // Global keyboard shortcut to open Admin panel: Ctrl+Shift+A or Cmd+Shift+A
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
@@ -232,20 +232,8 @@ export default function App() {
         setIsAdminOpen((prev) => !prev);
       }
     };
-
-    const handleUrlCheck = () => {
-      if (window.location.hash === '#admin' || window.location.search.includes('admin=true')) {
-        setIsAdminOpen(true);
-      }
-    };
-
-    handleUrlCheck();
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('hashchange', handleUrlCheck);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('hashchange', handleUrlCheck);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const showToast = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -478,6 +466,7 @@ export default function App() {
           onAddComment={handleAddComment}
           onShowToast={showToast}
           isAdmin={isAdminLoggedIn}
+          onOpenAdminUpload={handleOpenAdmin}
           onEditMoment={handleStartEditMoment}
           onDeleteMoment={handleDeleteMoment}
         />
@@ -507,6 +496,8 @@ export default function App() {
       <Footer
         language={language}
         profile={systemSettings.profile}
+        isAdmin={isAdminLoggedIn}
+        onOpenAdmin={handleOpenAdmin}
       />
 
       {/* Official Verified CV Modal & PDF Downloader */}
