@@ -109,20 +109,6 @@
   <body class="bg-slate-950 text-slate-100 antialiased selection:bg-blue-600 selection:text-white font-sans">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker
-            .register('/sw.js', { scope: '/' })
-            .then((registration) => {
-              console.log('Ai Clipzone Service Worker registered successfully with scope:', registration.scope);
-            })
-            .catch((error) => {
-              console.error('Ai Clipzone Service Worker registration failed:', error);
-            });
-        });
-      }
-    </script>
   </body>
 </html>
 

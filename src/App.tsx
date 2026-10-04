@@ -16,6 +16,7 @@ import { ToastContainer, ToastMessage } from './components/Toast';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
 import { CvModal } from './components/CvModal';
 import { AdminModal } from './components/AdminModal';
+import { OfflineIndicator } from './components/OfflineIndicator';
 
 import { Language, Moment, Comment, SystemSettings, ClipzoneImage } from './types';
 import {
@@ -459,6 +460,9 @@ export default function App() {
         language={language}
         whatsappNumber={systemSettings.contact.whatsappNumber}
       />
+
+      {/* PWA Offline Connectivity Indicator */}
+      <OfflineIndicator />
     </div>
   );
 }
