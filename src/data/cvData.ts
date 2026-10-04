@@ -41,7 +41,7 @@ export const RAJABABU_CV_DATA: CvData = {
   name: 'RAJABABU MEHTA',
   role: 'Student | AI Web Developer',
   location: 'Birgunj, Nepal',
-  email: 'rajababum426@gmail.com',
+  email: 'support@rajababumehta.com.np',
   website: 'https://rajababumehta.com.np',
   phone: '9816689232',
   summary:
@@ -92,6 +92,11 @@ export const RAJABABU_CV_DATA: CvData = {
       platform: 'Instagram',
       handle: 'mr.rajababumehta',
       url: 'https://www.instagram.com/mr.rajababumehta',
+    },
+    {
+      platform: 'LinkedIn',
+      handle: 'rajababumehta',
+      url: 'https://www.linkedin.com/in/rajababumehta',
     },
   ],
   personalDetails: {

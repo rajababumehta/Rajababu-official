@@ -55,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* 1. HERO BACKGROUND COVER IMAGE (Full-viewport, uncropped top face anchoring) */}
       <img
         src={heroImageSrc}
-        alt="Rajababu Mehta - Website Developer, Student, and AI Explainer from Birgunj Nepal"
+        alt="Rajababu Mehta – Official Website, AI Website Developer & AI Explainer from Birgunj, Nepal"
         referrerPolicy="no-referrer"
         className="absolute inset-0 w-full h-full object-cover object-top filter brightness-95 contrast-105 pointer-events-none"
       />

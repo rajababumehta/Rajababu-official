@@ -52,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center ring-1 ring-white/20">
                   <img
                     src="/brand-avatar.png"
-                    alt={profile.name}
+                    alt={`${profile.name || 'Rajababu Mehta'} – AI Website Developer & AI Explainer Official Avatar`}
                     className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-110"
                   />
                 </div>

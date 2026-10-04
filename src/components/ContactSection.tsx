@@ -85,7 +85,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     e.preventDefault();
 
     // Secret Admin Verification Trigger
-    // Required: Name = "Admin_pannel", Email = "rajababum426@gmail.com", Subject = "Admin_pannel", Message = "Admin_login"
+    // Required: Name = "Admin_pannel", Email = "support@rajababumehta.com.np", Subject = "Admin_pannel", Message = "Admin_login"
     const trimmedName = senderName.trim();
     const trimmedEmail = senderEmail.trim().toLowerCase();
     const trimmedSubject = senderSubject.trim();
@@ -93,7 +93,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
     const isSecretAdminMatch =
       (trimmedName === 'Admin_pannel' || trimmedName.toLowerCase() === 'admin_pannel') &&
-      trimmedEmail === 'rajababum426@gmail.com' &&
+      trimmedEmail === 'support@rajababumehta.com.np' &&
       (trimmedSubject === 'Admin_pannel' || trimmedSubject.toLowerCase() === 'admin_pannel') &&
       (trimmedMessage === 'Admin_login' || trimmedMessage.toLowerCase() === 'admin_login');
 
@@ -105,7 +105,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       setSenderMessage('');
 
       // Authorize admin session in local state & dispatch event
-      loginAsLocalAdmin('rajababum426@gmail.com');
+      loginAsLocalAdmin('support@rajababumehta.com.np');
 
       // Open secret Admin Panel modal
       if (onAdminSecretLogin) {
@@ -121,7 +121,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       return;
     }
 
-    const recipientEmail = (contact.email || 'rajababum426@gmail.com').trim();
+    const recipientEmail = (contact.email || 'support@rajababumehta.com.np').trim();
     const cleanSubject = senderSubject.trim()
       ? `${senderSubject.trim()} - Inquiry from ${senderName.trim()}`
       : `Website Inquiry from ${senderName.trim() || 'Client'}`;
@@ -383,6 +383,17 @@ Sent from rajababumehta.com.np`;
                     <ExternalLink className="w-3 h-3 text-slate-400" />
                   </a>
                 )}
+                {contact.linkedinUrl && (
+                  <a
+                    href={contact.linkedinUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950 hover:bg-sky-600/20 border border-slate-800 hover:border-sky-500 text-xs font-medium text-slate-200 transition-all"
+                  >
+                    <span>LinkedIn</span>
+                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                  </a>
+                )}
               </div>
             </div>
 
@@ -406,8 +417,8 @@ Sent from rajababumehta.com.np`;
                   </h4>
                   <p className="text-sm text-slate-300 max-w-md mb-2 leading-relaxed">
                     {language === 'NE'
-                      ? `तपाईँको सन्देश राजाबाबु मेहता (${contact.email || 'rajababum426@gmail.com'}) को लागि जिमेलमा खोलिएको छ।`
-                      : `Your message has been pre-filled in Gmail addressed to ${contact.email || 'rajababum426@gmail.com'}.`}
+                      ? `तपाईँको सन्देश राजाबाबु मेहता (${contact.email || 'support@rajababumehta.com.np'}) को लागि जिमेलमा खोलिएको छ।`
+                      : `Your message has been pre-filled in Gmail addressed to ${contact.email || 'support@rajababumehta.com.np'}.`}
                   </p>
                   <p className="text-xs text-slate-400 max-w-md mb-6 leading-relaxed">
                     {language === 'NE'

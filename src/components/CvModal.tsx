@@ -456,7 +456,7 @@ ${cv.name} · ${cv.website}
                         <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
                           <img
                             src={avatarDataUrl}
-                            alt={cv.name}
+                            alt={`${cv.name} – Rajababu Mehta Official Curriculum Vitae Photo`}
                             className="cv-avatar-img w-full h-full object-cover object-center"
                             crossOrigin="anonymous"
                             loading="eager"
@@ -466,9 +466,9 @@ ${cv.name} · ${cv.website}
                       </div>
 
                       <div>
-                        <h1 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight font-heading uppercase">
+                        <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight font-heading uppercase">
                           {cv.name}
-                        </h1>
+                        </h2>
                         <p className="text-xs sm:text-sm font-bold text-blue-600 mt-0.5 flex items-center gap-1.5">
                           <Sparkles className="w-3.5 h-3.5 shrink-0 text-blue-600" />
                           <span>{cv.role}</span>

@@ -190,6 +190,17 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
             <div className="text-sm font-bold text-blue-400">
               — {experience.quoteAuthor}
             </div>
+            <div className="mt-4 pt-3 flex items-center justify-center gap-2 text-xs">
+              <span className="text-slate-400">
+                {language === 'NE' ? 'वेबसाइट परियोजना सुरु गर्न:' : 'Ready to start a project?'}
+              </span>
+              <a
+                href="#contact"
+                className="text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-4 transition-colors"
+              >
+                {language === 'NE' ? 'राजाबाबु मेहतासँग सम्पर्क गर्नुहोस्' : 'Connect with Rajababu Mehta'} →
+              </a>
+            </div>
           </div>
         </div>
 

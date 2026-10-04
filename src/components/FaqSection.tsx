@@ -175,6 +175,22 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
             );
           })}
         </div>
+
+        {/* Contact CTA internal link under FAQ */}
+        <div className="mt-12 text-center">
+          <p className="text-slate-400 text-sm mb-3">
+            {language === 'NE'
+              ? 'के तपाईँको कुनै अन्य विशेष प्रश्न वा परियोजना सम्बन्धी सोधपुछ छ?'
+              : 'Have another specific question or custom website requirement?'}
+          </p>
+          <a
+            href="#contact"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 font-semibold text-xs sm:text-sm transition-all"
+          >
+            <span>{language === 'NE' ? 'राजाबाबु मेहतालाई सन्देश पठाउनुहोस्' : 'Send a Message to Rajababu Mehta'}</span>
+            <span>→</span>
+          </a>
+        </div>
       </div>
     </section>
   );

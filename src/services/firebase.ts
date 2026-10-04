@@ -381,7 +381,7 @@ export const getCurrentAdminUser = (): AdminUser | null => {
   return null;
 };
 
-export const loginAsLocalAdmin = (email = 'rajababum426@gmail.com'): AdminUser => {
+export const loginAsLocalAdmin = (email = 'support@rajababumehta.com.np'): AdminUser => {
   const adminUser: AdminUser = {
     uid: `admin-${email.replace(/[^a-zA-Z0-9]/g, '_')}`,
     email: email,

@@ -26,7 +26,7 @@ export const Footer: React.FC<FooterProps> = ({
               <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center ring-1 ring-white/20">
                 <img
                   src="/brand-avatar.png"
-                  alt={profile.name}
+                  alt={`${profile.name || 'Rajababu Mehta'} – AI Website Developer & AI Explainer Official Avatar`}
                   className="w-full h-full object-cover object-center"
                 />
               </div>
@@ -42,6 +42,33 @@ export const Footer: React.FC<FooterProps> = ({
                   : 'Official Website • AI Website Developer, AI Explainer & Student • Birgunj, Nepal © 2026'}
               </div>
             </div>
+          </div>
+
+          {/* Quick Internal Nav Links for Search Engines & Visitors */}
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-400">
+            <a href="#home" className="hover:text-blue-400 transition-colors">
+              {language === 'NE' ? 'गृहपृष्ठ' : 'Home'}
+            </a>
+            <span>•</span>
+            <a href="#about" className="hover:text-blue-400 transition-colors">
+              {language === 'NE' ? 'परिचय' : 'About'}
+            </a>
+            <span>•</span>
+            <a href="#skills" className="hover:text-blue-400 transition-colors">
+              {language === 'NE' ? 'सीपहरू' : 'Skills'}
+            </a>
+            <span>•</span>
+            <a href="#services" className="hover:text-blue-400 transition-colors">
+              {language === 'NE' ? 'सेवाहरू' : 'Deliverables'}
+            </a>
+            <span>•</span>
+            <a href="#faq" className="hover:text-blue-400 transition-colors">
+              FAQ
+            </a>
+            <span>•</span>
+            <a href="#contact" className="hover:text-blue-400 transition-colors">
+              {language === 'NE' ? 'सम्पर्क' : 'Contact'}
+            </a>
           </div>
 
           {/* Center Note */}

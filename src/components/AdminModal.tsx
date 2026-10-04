@@ -159,7 +159,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Quick 1-click Admin Access
   const handleQuickAccess = () => {
-    const user = loginAsLocalAdmin(email.trim() || 'rajababum426@gmail.com');
+    const user = loginAsLocalAdmin(email.trim() || 'support@rajababumehta.com.np');
     setCurrentUser(user);
     onShowToast(
       language === 'NE' ? 'एडमिन ड्यासबोर्डमा स्वागत छ!' : 'Welcome to the Administrator Dashboard!',
@@ -210,7 +210,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         uploadDate: new Date().toISOString(),
         likes: 0,
         tags: [imageCategory.toLowerCase()],
-        authorEmail: currentUser?.email || 'rajababum426@gmail.com',
+        authorEmail: currentUser?.email || 'support@rajababumehta.com.np',
         authorName: currentUser?.displayName || 'Rajababu Mehta',
       });
 
@@ -415,7 +415,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="rajababum426@gmail.com"
+                      placeholder="support@rajababumehta.com.np"
                       required
                       className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
@@ -474,7 +474,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   <span>
                     {language === 'NE'
                       ? 'तत्काल एडमिन प्रवेश (Instant Access)'
-                      : '⚡ Instant Admin Access (rajababum426@gmail.com)'}
+                      : '⚡ Instant Admin Access (support@rajababumehta.com.np)'}
                   </span>
                 </button>
 
@@ -647,7 +647,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               ) : (
                                 <img
                                   src={imageUrl.trim()}
-                                  alt="Preview"
+                                  alt="Rajababu Mehta Media Preview"
                                   referrerPolicy="no-referrer"
                                   onLoad={() => {
                                     setPreviewLoaded(true);
@@ -786,7 +786,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             <div className="h-40 overflow-hidden bg-slate-900 relative">
                               <img
                                 src={img.imgUrl}
-                                alt={img.title}
+                                alt={`${img.title} – Rajababu Mehta Gallery Image`}
                                 referrerPolicy="no-referrer"
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />

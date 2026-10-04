@@ -105,7 +105,7 @@ export default function App() {
         ...(raw?.contact || {}),
         headingEn: '',
         headingNe: '',
-        email: 'rajababum426@gmail.com',
+        email: 'support@rajababumehta.com.np',
         phone: '9816689232',
         locationEn: 'Birgunj, Nepal',
         locationNe: 'वीरगञ्ज, नेपाल',
@@ -234,8 +234,8 @@ export default function App() {
     localStorage.setItem(STORAGE_KEYS.LANGUAGE, language);
     document.title =
       language === 'NE'
-        ? 'राजाबाबु मेहता | वेबसाइट डेभलपर, विद्यार्थी तथा एआई व्याख्याकर्ता - वीरगञ्ज'
-        : 'Rajababu Mehta | Website Developer, Student & AI Explainer - Birgunj, Nepal';
+        ? 'राजाबाबु मेहता – आधिकारिक वेबसाइट | एआई वेबसाइट डेभलपर तथा एआई व्याख्याकर्ता'
+        : 'Rajababu Mehta – Official Website | AI Website Developer & AI Explainer';
   }, [language]);
 
   useEffect(() => {
