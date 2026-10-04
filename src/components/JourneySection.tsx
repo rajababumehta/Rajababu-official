@@ -13,6 +13,8 @@ import {
   Layers,
   Edit3,
   Trash2,
+  Sparkles,
+  Newspaper,
 } from 'lucide-react';
 import { Moment, Comment, Language } from '../types';
 import { formatLikes } from '../utils/likesFormatter';
@@ -118,23 +120,24 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
   };
 
   return (
-    <section id="projects" className="py-20 sm:py-28 bg-slate-950 relative scroll-mt-24">
+    <section id="posts" className="py-20 sm:py-28 bg-slate-950 relative scroll-mt-24 border-t border-slate-900/60">
+      <div id="projects" className="hidden" aria-hidden="true" />
       <div id="journey" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Heading & Global Boost Bar */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-3">
-              <Camera className="w-3.5 h-3.5" />
-              <span>{language === 'NE' ? 'परियोजनाहरू तथा दृश्य यात्रा' : 'Projects & Visual Journey'}</span>
+              <Newspaper className="w-3.5 h-3.5 text-blue-400" />
+              <span>{language === 'NE' ? 'नयाँ लेख तथा पोस्टहरू' : 'Latest Posts & Updates'}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 font-heading tracking-tight">
-              {language === 'NE' ? 'प्रमुख परियोजनाहरू तथा उपलब्धिहरू' : 'Featured Projects & Creations'}
+              {language === 'NE' ? 'नयाँ पोस्टहरू तथा प्राविधिक अपडेटहरू' : 'Latest Posts & Tech Insights'}
             </h2>
-            <p className="text-sm sm:text-base text-slate-400 mt-2 max-w-xl">
+            <p className="text-sm sm:text-base text-slate-400 mt-2 max-w-xl leading-relaxed">
               {language === 'NE'
-                ? 'वेब विकास कार्यहरू, प्राविधिक अन्वेषण र वास्तविक परियोजनाहरू।'
-                : 'A showcase of web applications, client solutions, digital workshops, and technical milestones.'}
+                ? 'राजाबाबु मेहताद्वारा प्रकाशित नयाँ एआई गाइड, वेब विकास अपडेट, लेख तथा महत्त्वपूर्ण जानकारीहरू।'
+                : 'Articles, practical AI workflows, website engineering guides, and project updates by Rajababu Mehta.'}
             </p>
           </div>
 

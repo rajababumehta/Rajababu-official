@@ -21,9 +21,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Menu items: Home, About Me, Skills, Services / Deliverables, FAQ, Contact
+  // Menu items: Home, Post, About Me, Skills, Services / Deliverables, FAQ, Contact
   const navItems = [
     { href: '#home', labelEn: 'Home', labelNe: 'गृहपृष्ठ' },
+    { href: '#posts', labelEn: 'Post', labelNe: 'पोस्ट' },
     { href: '#about', labelEn: 'About Me', labelNe: 'बारेमा' },
     { href: '#skills', labelEn: 'Skills', labelNe: 'सीपहरू' },
     { href: '#services', labelEn: 'Services', labelNe: 'सेवाहरू' },

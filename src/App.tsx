@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Header } from './components/Header';
+import { JourneySection } from './components/JourneySection';
 import { AboutSection } from './components/AboutSection';
 import { ExperienceSection } from './components/ExperienceSection';
 import { DeliverablesSection } from './components/DeliverablesSection';
@@ -146,7 +147,7 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEYS.CUSTOM_MOMENTS);
       if (saved !== null) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           // Filter out legacy unsplash mock images, ai generated images and deleted IDs
           const validMoments = parsed.filter(
             (m: Moment) =>
@@ -155,8 +156,11 @@ export default function App() {
               !m.imgUrl?.includes('rajababu_nature_moment') &&
               !['moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6', 'moment-rajababu-nature'].includes(m.id)
           );
-          if (validMoments.length > 0) {
-            return validMoments;
+          const defaultUniques = DEFAULT_MOMENTS.filter(
+            (def) => !deletedIds.includes(def.id) && !validMoments.some((v) => v.id === def.id)
+          );
+          if (validMoments.length > 0 || defaultUniques.length > 0) {
+            return [...validMoments, ...defaultUniques];
           }
         }
       }
@@ -375,6 +379,25 @@ export default function App() {
     });
   };
 
+  const handleDeleteMoment = (id: string) => {
+    try {
+      const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
+      const deletedIds: string[] = deletedIdsStr ? JSON.parse(deletedIdsStr) : [];
+      if (!deletedIds.includes(id)) {
+        deletedIds.push(id);
+        localStorage.setItem(STORAGE_KEYS.DELETED_MOMENT_IDS, JSON.stringify(deletedIds));
+      }
+      setMoments((prev) => prev.filter((m) => m.id !== id));
+      showToast(language === 'NE' ? 'पोस्ट हटाइयो' : 'Post removed', 'info');
+    } catch (e) {
+      console.error('Delete post error:', e);
+    }
+  };
+
+  const handleEditMoment = (_moment: Moment) => {
+    setIsAdminOpen(true);
+  };
+
   const totalMoments = moments.length;
   const totalLikes = moments.reduce((acc, m) => acc + (m.likes || 0), 0);
 
@@ -397,6 +420,22 @@ export default function App() {
         <Header
           language={language}
           profile={systemSettings.profile}
+        />
+
+        {/* Posts & Tech Updates Section (Right after Home) */}
+        <JourneySection
+          language={language}
+          moments={moments}
+          onLikeMoment={handleLikeMoment}
+          userLikedMoments={userLikedMoments}
+          onAutoBoostAllLikes={handleAutoBoostAllLikes}
+          commentsMap={commentsMap}
+          onAddComment={handleAddComment}
+          onShowToast={showToast}
+          isAdmin={isAdminOpen}
+          onOpenAdminUpload={() => setIsAdminOpen(true)}
+          onEditMoment={handleEditMoment}
+          onDeleteMoment={handleDeleteMoment}
         />
 
         {/* About Section */}
