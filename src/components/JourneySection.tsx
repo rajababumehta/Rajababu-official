@@ -1,24 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Camera,
   Heart,
   Calendar,
   Zap,
-  Eye,
   MessageSquare,
   Share2,
   X,
   Send,
-  Layers,
   Edit3,
   Trash2,
-  Sparkles,
   Newspaper,
+  BookOpen,
 } from 'lucide-react';
 import { Moment, Comment, Language } from '../types';
 import { formatLikes } from '../utils/likesFormatter';
-import { normalizeImageUrl, getProxiedImageUrl } from '../utils/imageUrl';
 
 interface JourneySectionProps {
   language: Language;
@@ -45,6 +41,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
   onAddComment,
   onShowToast,
   isAdmin = false,
+  onOpenAdminUpload,
   onEditMoment,
   onDeleteMoment,
 }) => {
@@ -57,7 +54,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
 
   // Extract all categories dynamically
   const categories = useMemo(() => {
-    const defaultCats = ['Technology', 'Community', 'Networking', 'Professional', 'Milestone', 'Personal'];
+    const defaultCats = ['Technology', 'AI Explainer', 'Web Development', 'Milestone'];
     const safeMoments = moments || [];
     const customCats = safeMoments.map((m) => m.category).filter(Boolean);
     const set = new Set(['All', ...defaultCats, ...customCats]);
@@ -92,7 +89,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
       // fallback
     }
     onShowToast(
-      language === 'NE' ? 'तस्बिर लिंक क्लिपबोर्डमा प्रतिलिपि गरियो!' : 'Direct moment link copied to clipboard!',
+      language === 'NE' ? 'पोस्ट लिंक क्लिपबोर्डमा प्रतिलिपि गरियो!' : 'Direct post link copied to clipboard!',
       'info'
     );
   };
@@ -104,16 +101,12 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
         return 'सबै';
       case 'technology':
         return 'प्रविधि';
-      case 'community':
-        return 'समुदाय';
-      case 'networking':
-        return 'नेटवर्किङ';
-      case 'professional':
-        return 'व्यावसायिक';
+      case 'ai explainer':
+        return 'एआई व्याख्या';
+      case 'web development':
+        return 'वेब विकास';
       case 'milestone':
         return 'उपलब्धि';
-      case 'personal':
-        return 'व्यक्तिगत';
       default:
         return cat;
     }
@@ -148,7 +141,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                 id="btn-auto-boost-all-likes"
                 onClick={onAutoBoostAllLikes}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-600/90 to-rose-600/90 hover:from-pink-500 hover:to-rose-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-pink-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                title="Boost realistic engagement likes across all photos"
+                title="Boost realistic engagement likes across all posts"
               >
                 <Zap className="w-4 h-4 text-amber-300 animate-bounce" />
                 <span>{language === 'NE' ? '⚡ सबैमा लाइक्स बढाउनुहोस्' : '⚡ Auto-Boost Likes'}</span>
@@ -157,7 +150,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
           )}
         </div>
 
-        {/* Dynamic Category Filter Pills (Only when moments exist) */}
+        {/* Dynamic Category Filter Pills */}
         {(moments || []).length > 0 && categories.length > 1 && (
           <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-10 no-scrollbar">
             {categories.map((cat) => {
@@ -179,23 +172,31 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
           </div>
         )}
 
-        {/* Uncropped Media Grid */}
+        {/* Clean Editorial Post Cards Grid (NO IMAGES) */}
         {filteredMoments.length === 0 ? (
           <div className="py-20 text-center rounded-3xl bg-slate-900/30 border border-slate-800/60 p-8 sm:p-12">
             <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto mb-4">
-              <Camera className="w-8 h-8" />
+              <Newspaper className="w-8 h-8" />
             </div>
             <h3 className="text-xl font-bold text-slate-200 mb-2">
-              {language === 'NE' ? 'परियोजनाहरू चाँडै उपलब्ध हुनेछन्' : 'Featured Projects & Visual Showcase'}
+              {language === 'NE' ? 'हाल कुनै नयाँ पोस्ट प्रकाशित भएको छैन' : 'No Posts Published Yet'}
             </h3>
             <p className="text-sm sm:text-base text-slate-400 max-w-lg mx-auto leading-relaxed">
               {language === 'NE'
-                ? 'नयाँ वेब परियोजनाहरू र प्राविधिक गतिविधिहरू यहाँ चाँडै प्रदर्शन गरिनेछ।'
-                : 'Modern web applications, client solutions, and technical highlights are currently featured here.'}
+                ? 'राजाबाबु मेहताका नयाँ प्राविधिक लेख, एआई गाइड र अपडेटहरू यहाँ चाँडै प्रकाशित गरिनेछ।'
+                : 'Articles, practical AI workflows, and tech engineering updates by Rajababu Mehta will appear here.'}
             </p>
+            {isAdmin && onOpenAdminUpload && (
+              <button
+                onClick={onOpenAdminUpload}
+                className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
+              >
+                <span>{language === 'NE' ? '✍️ नयाँ पोस्ट लेख्नुहोस्' : '✍️ Create New Post'}</span>
+              </button>
+            )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">
             {filteredMoments.map((moment, idx) => {
               const isLiked = (userLikedMoments || []).includes(moment.id);
               const momentComments = (commentsMap || {})[moment.id] || [];
@@ -208,149 +209,127 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: idx * 0.05 }}
-                  className="group relative rounded-3xl bg-slate-900/80 border border-slate-800/90 overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all duration-300 shadow-xl"
+                  className="group relative rounded-3xl bg-slate-900/70 border border-slate-800/80 p-6 sm:p-7 flex flex-col justify-between hover:border-blue-500/40 hover:bg-slate-900/90 transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-blue-950/20"
                 >
-                  {/* Top Image Display Area with Ambient Glow & Uncropped Containment */}
-                  <div className="relative aspect-[4/3] w-full bg-slate-950 overflow-hidden flex items-center justify-center p-3">
-                    {/* Ambient blurred reflection backdrop */}
-                    <img
-                      src={normalizeImageUrl(moment.imgUrl)}
-                      alt=""
-                      aria-hidden="true"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        if (!target.src.includes('wsrv.nl/?url=')) {
-                          target.src = getProxiedImageUrl(moment.imgUrl);
-                        }
-                      }}
-                      className="absolute inset-0 w-full h-full object-cover filter blur-2xl opacity-25 scale-125 pointer-events-none"
-                    />
-
-                    {/* Main Uncropped Photo */}
-                    <img
-                      src={normalizeImageUrl(moment.imgUrl)}
-                      alt={`Rajababu Mehta - ${moment.titleEn || 'Moments & Tech Journey'}`}
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        if (!target.src.includes('wsrv.nl/?url=')) {
-                          target.src = getProxiedImageUrl(moment.imgUrl);
-                        }
-                      }}
-                      className="relative z-10 max-h-full max-w-full object-contain rounded-xl drop-shadow-[0_15px_25px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-[1.02]"
-                      loading="lazy"
-                    />
-
-                    {/* Top Overlay Badges */}
-                    <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
-                      <span className="px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-slate-800 text-[11px] font-bold text-blue-400">
+                  {/* Card Content Top Area */}
+                  <div>
+                    {/* Top Bar: Category Pill & Date */}
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                      <span className="px-3 py-1 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs font-semibold text-blue-400">
                         {getCategoryBadgeLabel(moment.category)}
                       </span>
+
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+                          <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                          {moment.date}
+                        </span>
+
+                        {isAdmin && (
+                          <div className="flex items-center gap-1 ml-2">
+                            {onEditMoment && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onEditMoment(moment);
+                                }}
+                                className="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-amber-400 border border-slate-800 text-xs transition-colors"
+                                title="Edit Post"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            {onDeleteMoment && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm(language === 'NE' ? 'यो पोस्ट वेबसाइटबाट हटाउन चाहनुहुन्छ?' : 'Are you sure you want to delete this post?')) {
+                                    onDeleteMoment(moment.id);
+                                  }
+                                }}
+                                className="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-rose-400 border border-slate-800 text-xs transition-colors"
+                                title="Delete Post"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Top Right Date Badge */}
-                    <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5">
-                      <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-slate-800 text-[11px] font-medium text-slate-300">
-                        <Calendar className="w-3 h-3 text-slate-400" />
-                        {moment.date}
-                      </span>
-                    </div>
+                    {/* Post Title */}
+                    <h3
+                      onClick={() => setActiveLightboxMoment(moment)}
+                      className="font-heading font-bold text-lg sm:text-xl text-slate-100 group-hover:text-blue-300 transition-colors mb-3 leading-snug cursor-pointer"
+                    >
+                      {language === 'NE' ? moment.titleNe : moment.titleEn}
+                    </h3>
 
-                    {/* Hover Toolbar overlay */}
-                    <div className="absolute inset-0 z-30 bg-slate-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2.5">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveLightboxMoment(moment);
-                        }}
-                        className="p-3 rounded-2xl bg-blue-600/90 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/40 transition-transform active:scale-90"
-                        title="View Full Uncropped Photo & Comments"
-                        aria-label="View photo details"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
+                    {/* Post Description */}
+                    <p className="text-sm text-slate-300/90 leading-relaxed mb-5">
+                      {language === 'NE' ? moment.descNe : moment.descEn}
+                    </p>
 
-                      {isAdmin && onEditMoment && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEditMoment(moment);
-                          }}
-                          className="p-3 rounded-2xl bg-amber-600/90 hover:bg-amber-500 text-white shadow-lg shadow-amber-600/40 transition-transform active:scale-90"
-                          title="Edit Photo Details"
-                          aria-label="Edit photo"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                      )}
-
-                      {isAdmin && onDeleteMoment && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (window.confirm(language === 'NE' ? 'यो तस्बिर वेबसाइटबाट हटाउन चाहनुहुन्छ?' : 'Are you sure you want to delete this photo from the website?')) {
-                              onDeleteMoment(moment.id);
-                            }
-                          }}
-                          className="p-3 rounded-2xl bg-rose-600/90 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/40 transition-transform active:scale-90"
-                          title="Delete Photo from Website"
-                          aria-label="Delete photo"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
+                    {/* Author Credit Pill */}
+                    <div className="flex items-center gap-2.5 py-3 border-t border-slate-800/60">
+                      <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-800 ring-1 ring-blue-500/30 shrink-0">
+                        <img src="/brand-avatar.png" alt="Rajababu Mehta" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-300">
+                        <span className="font-semibold text-slate-200">Rajababu Mehta</span>
+                        <span className="text-slate-600">•</span>
+                        <span className="text-blue-400 text-[11px] font-medium">
+                          {language === 'NE' ? 'एआई वेबसाइट डेभलपर' : 'AI Website Developer'}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Card Body Description & Action Footer */}
-                  <div className="p-5 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-heading font-bold text-base sm:text-lg text-slate-100 line-clamp-1 mb-2">
-                        {language === 'NE' ? moment.titleNe : moment.titleEn}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-slate-400 line-clamp-2 leading-relaxed mb-4">
-                        {language === 'NE' ? moment.descNe : moment.descEn}
-                      </p>
-                    </div>
+                  {/* Card Action Footer */}
+                  <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between mt-2">
+                    {/* Heart Like Interaction */}
+                    <button
+                      onClick={() => onLikeMoment(moment.id)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 ${
+                        isLiked
+                          ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-inner'
+                          : 'bg-slate-950 text-slate-400 hover:text-rose-400 border border-slate-800'
+                      }`}
+                      title={isLiked ? 'Unlike' : 'Like'}
+                    >
+                      <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-rose-400 text-rose-400' : ''}`} />
+                      <span>{formatLikes(moment.likes || 0)}</span>
+                    </button>
 
-                    <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
-                      {/* Heart Like Interaction */}
+                    {/* Right Controls */}
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={() => onLikeMoment(moment.id)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 ${
-                          isLiked
-                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-inner'
-                            : 'bg-slate-950 text-slate-400 hover:text-rose-400 border border-slate-800'
-                        }`}
-                        title={isLiked ? 'Unlike photo' : 'Like photo'}
+                        onClick={() => setActiveLightboxMoment(moment)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 text-xs font-medium transition-colors"
+                        title="View comments"
                       >
-                        <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-rose-400 text-rose-400' : ''}`} />
-                        <span>{formatLikes(moment.likes || 0)}</span>
+                        <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
+                        <span>{momentComments.length}</span>
                       </button>
 
-                      {/* Right info: comments count & lightbox open */}
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setActiveLightboxMoment(moment)}
-                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 text-xs font-medium transition-colors"
-                          title="View comments"
-                        >
-                          <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
-                          <span>{momentComments.length}</span>
-                        </button>
+                      <button
+                        onClick={() => handleCopyShareLink(moment)}
+                        className="p-1.5 rounded-xl bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 transition-colors"
+                        title="Share link"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                      </button>
 
-                        <button
-                          onClick={() => handleCopyShareLink(moment)}
-                          className="p-1.5 rounded-xl bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 transition-colors"
-                          title="Share link"
-                        >
-                          <Share2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => setActiveLightboxMoment(moment)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600/90 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ml-1"
+                      >
+                        <span>{language === 'NE' ? 'विस्तृत' : 'Read'}</span>
+                        <BookOpen className="w-3 h-3" />
+                      </button>
                     </div>
                   </div>
                 </motion.div>
@@ -361,7 +340,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
 
       </div>
 
-      {/* Lightbox Modal: Uncropped Full-Resolution View with Comments & Likes */}
+      {/* Article Detail / Comments Reader Modal (Clean, No-Image Layout) */}
       <AnimatePresence>
         {activeLightboxMoment && (
           <motion.div
@@ -376,176 +355,173 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 shadow-2xl my-auto max-h-[90vh]"
+              className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden max-w-2xl w-full shadow-2xl my-auto p-6 sm:p-8 max-h-[90vh] overflow-y-auto flex flex-col justify-between"
             >
-              {/* Left Column: Full Uncropped Image */}
-              <div className="lg:col-span-7 bg-slate-950 flex items-center justify-center p-4 sm:p-6 relative min-h-[300px] lg:min-h-[500px]">
-                <img
-                  src={normalizeImageUrl(activeLightboxMoment.imgUrl)}
-                  alt={`Rajababu Mehta - ${activeLightboxMoment.titleEn || 'Moments & Tech Journey'}`}
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.src.includes('wsrv.nl/?url=')) {
-                      target.src = getProxiedImageUrl(activeLightboxMoment.imgUrl);
-                    }
-                  }}
-                  className="max-h-[70vh] w-auto max-w-full object-contain rounded-2xl drop-shadow-2xl"
-                />
+              <div>
+                {/* Modal Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400">
+                      {getCategoryBadgeLabel(activeLightboxMoment.category)}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                      <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                      {activeLightboxMoment.date}
+                    </span>
+                  </div>
 
-                <div className="absolute top-4 left-4 flex gap-2">
-                  <span className="px-3 py-1 rounded-xl bg-slate-950/80 backdrop-blur-md border border-slate-800 text-xs font-bold text-blue-400">
-                    {getCategoryBadgeLabel(activeLightboxMoment.category)}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {onEditMoment && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const m = activeLightboxMoment;
+                          setActiveLightboxMoment(null);
+                          onEditMoment(m);
+                        }}
+                        className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-amber-400 border border-slate-800 transition-colors"
+                        title="Edit Post"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                    )}
+                    {onDeleteMoment && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(language === 'NE' ? 'यो पोस्ट हटाउन चाहनुहुन्छ?' : 'Are you sure you want to delete this post?')) {
+                            const id = activeLightboxMoment.id;
+                            setActiveLightboxMoment(null);
+                            onDeleteMoment(id);
+                          }
+                        }}
+                        className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-rose-400 border border-slate-800 transition-colors"
+                        title="Delete Post"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setActiveLightboxMoment(null)}
+                      className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Post Title */}
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-100 font-heading mb-4 leading-snug">
+                  {language === 'NE' ? activeLightboxMoment.titleNe : activeLightboxMoment.titleEn}
+                </h3>
+
+                {/* Author Info */}
+                <div className="flex items-center gap-2.5 pb-5 border-b border-slate-800/80 mb-6">
+                  <div className="w-7 h-7 rounded-full overflow-hidden bg-slate-800 ring-1 ring-blue-500/30 shrink-0">
+                    <img src="/brand-avatar.png" alt="Rajababu Mehta" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="font-semibold text-slate-200">Rajababu Mehta</span>
+                    <span className="text-slate-600">•</span>
+                    <span className="text-blue-400 font-medium">
+                      {language === 'NE' ? 'एआई वेबसाइट डेभलपर • वीरगञ्ज, नेपाल' : 'AI Website Developer • Birgunj, Nepal'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Full Article Content */}
+                <div className="prose prose-invert max-w-none text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+                  <p>{language === 'NE' ? activeLightboxMoment.descNe : activeLightboxMoment.descEn}</p>
+                </div>
+
+                {/* Interactions Row: Like + Share */}
+                <div className="flex items-center gap-3 pb-6 border-b border-slate-800 mb-6">
+                  <button
+                    onClick={() => onLikeMoment(activeLightboxMoment.id)}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all active:scale-95 ${
+                      userLikedMoments.includes(activeLightboxMoment.id)
+                        ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-inner'
+                        : 'bg-slate-950 text-slate-300 hover:text-rose-400 border border-slate-800'
+                    }`}
+                  >
+                    <Heart
+                      className={`w-4 h-4 ${
+                        userLikedMoments.includes(activeLightboxMoment.id) ? 'fill-rose-400 text-rose-400' : ''
+                      }`}
+                    />
+                    <span>{formatLikes(activeLightboxMoment.likes || 0)} {language === 'NE' ? 'प्रतिक्रियाहरू' : 'Likes'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleCopyShareLink(activeLightboxMoment)}
+                    className="p-3 rounded-2xl bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
+                    title="Copy link"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Comments Feed */}
+                <div className="mb-4">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
+                    <span>
+                      {language === 'NE' ? 'प्रतिक्रियाहरू' : 'Visitor Comments'} (
+                      {(commentsMap[activeLightboxMoment.id] || []).length})
+                    </span>
+                  </h4>
+
+                  <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
+                    {(commentsMap[activeLightboxMoment.id] || []).length === 0 ? (
+                      <div className="text-xs text-slate-500 py-3 text-center italic">
+                        {language === 'NE' ? 'पहिलो प्रतिक्रिया दिनुहोस्!' : 'Be the first to leave a comment!'}
+                      </div>
+                    ) : (
+                      (commentsMap[activeLightboxMoment.id] || []).map((comment) => (
+                        <div
+                          key={comment.id}
+                          className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs"
+                        >
+                          <div className="flex items-center justify-between font-semibold text-slate-200 mb-1">
+                            <span>{comment.author}</span>
+                            <span className="text-[10px] text-slate-500">
+                              {new Date(comment.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-slate-400 leading-snug">{comment.text}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Right Column: Information, Likes & Visitor Comments */}
-              <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between bg-slate-900/90 overflow-y-auto max-h-[85vh]">
-                <div>
-                  {/* Top Bar with Edit, Delete, Close Buttons */}
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>{activeLightboxMoment.date}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {onEditMoment && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const m = activeLightboxMoment;
-                            setActiveLightboxMoment(null);
-                            onEditMoment(m);
-                          }}
-                          className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-amber-400 border border-slate-800 transition-colors"
-                          title="Edit Photo"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                      )}
-                      {onDeleteMoment && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (window.confirm(language === 'NE' ? 'यो तस्बिर वेबसाइटबाट हटाउन चाहनुहुन्छ?' : 'Are you sure you want to delete this photo from the website?')) {
-                              const id = activeLightboxMoment.id;
-                              setActiveLightboxMoment(null);
-                              onDeleteMoment(id);
-                            }
-                          }}
-                          className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-rose-400 border border-slate-800 transition-colors"
-                          title="Delete Photo"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => setActiveLightboxMoment(null)}
-                        className="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Title & Description */}
-                  <h3 className="text-xl sm:text-2xl font-bold text-slate-100 font-heading mb-3 leading-snug">
-                    {language === 'NE' ? activeLightboxMoment.titleNe : activeLightboxMoment.titleEn}
-                  </h3>
-                  <p className="text-sm text-slate-300 leading-relaxed mb-6">
-                    {language === 'NE' ? activeLightboxMoment.descNe : activeLightboxMoment.descEn}
-                  </p>
-
-                  {/* Interactions Row */}
-                  <div className="flex items-center gap-3 pb-6 border-b border-slate-800 mb-6">
-                    <button
-                      onClick={() => onLikeMoment(activeLightboxMoment.id)}
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all active:scale-95 ${
-                        userLikedMoments.includes(activeLightboxMoment.id)
-                          ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-inner'
-                          : 'bg-slate-950 text-slate-300 hover:text-rose-400 border border-slate-800'
-                      }`}
-                    >
-                      <Heart
-                        className={`w-4 h-4 ${
-                          userLikedMoments.includes(activeLightboxMoment.id) ? 'fill-rose-400 text-rose-400' : ''
-                        }`}
-                      />
-                      <span>{formatLikes(activeLightboxMoment.likes || 0)} {language === 'NE' ? 'प्रतिक्रियाहरू' : 'Likes'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleCopyShareLink(activeLightboxMoment)}
-                      className="p-3 rounded-2xl bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
-                      title="Copy link"
-                    >
-                      <Share2 className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Comments Feed */}
-                  <div className="mb-4">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
-                      <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
-                      <span>
-                        {language === 'NE' ? 'प्रतिक्रियाहरू' : 'Visitor Comments'} (
-                        {(commentsMap[activeLightboxMoment.id] || []).length})
-                      </span>
-                    </h4>
-
-                    <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
-                      {(commentsMap[activeLightboxMoment.id] || []).length === 0 ? (
-                        <div className="text-xs text-slate-500 py-3 text-center italic">
-                          {language === 'NE' ? 'पहिलो प्रतिक्रिया दिनुहोस्!' : 'Be the first to leave a comment!'}
-                        </div>
-                      ) : (
-                        (commentsMap[activeLightboxMoment.id] || []).map((comment) => (
-                          <div
-                            key={comment.id}
-                            className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs"
-                          >
-                            <div className="flex items-center justify-between font-semibold text-slate-200 mb-1">
-                              <span>{comment.author}</span>
-                              <span className="text-[10px] text-slate-500">
-                                {new Date(comment.createdAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <p className="text-slate-400 leading-snug">{comment.text}</p>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Comment Input Form */}
-                <form onSubmit={handleCommentSubmit} className="mt-4 pt-4 border-t border-slate-800 space-y-2">
+              {/* Comment Input Form */}
+              <form onSubmit={handleCommentSubmit} className="mt-4 pt-4 border-t border-slate-800 space-y-2">
+                <input
+                  type="text"
+                  placeholder={language === 'NE' ? 'तपाईँको नाम (वैकल्पिक)' : 'Your name (optional)'}
+                  value={commentAuthor}
+                  onChange={(e) => setCommentAuthor(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500"
+                />
+                <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder={language === 'NE' ? 'तपाईँको नाम (वैकल्पिक)' : 'Your name (optional)'}
-                    value={commentAuthor}
-                    onChange={(e) => setCommentAuthor(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500"
+                    required
+                    placeholder={language === 'NE' ? 'प्रतिक्रिया लेख्नुहोस्...' : 'Write a comment...'}
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500"
                   />
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      required
-                      placeholder={language === 'NE' ? 'प्रतिक्रिया लेख्नुहोस्...' : 'Write a comment...'}
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500"
-                    />
-                    <button
-                      type="submit"
-                      className="p-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shrink-0 shadow-md shadow-blue-600/30 transition-all"
-                    >
-                      <Send className="w-4 h-4" />
-                    </button>
-                  </div>
-                </form>
-              </div>
+                  <button
+                    type="submit"
+                    className="p-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white shrink-0 shadow-md shadow-blue-600/30 transition-all cursor-pointer"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </motion.div>
         )}

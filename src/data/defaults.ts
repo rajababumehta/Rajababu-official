@@ -221,56 +221,7 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   },
 };
 
-export const DEFAULT_MOMENTS: Moment[] = [
-  {
-    id: 'post-1',
-    titleEn: 'Building Modern AI-Powered Websites in Nepal',
-    titleNe: 'नेपालमा आधुनिक एआई-सञ्चालित वेबसाइट निर्माण',
-    descEn: 'Exploring modern web architecture, prompt engineering, high-performance web development, and responsive design for businesses in Birgunj and across Nepal.',
-    descNe: 'वीरगञ्ज तथा नेपालभरिका व्यवसायहरूका लागि आधुनिक वेब संरचना, प्रम्प्ट इन्जिनियरिङ, छिटो खुल्ने स्पिड र मोबाइल-मैत्री डिजाइनका साथ वेबसाइट निर्माण।',
-    imgUrl: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg',
-    likes: 485,
-    category: 'Web Development',
-    date: 'Recent',
-    isUserUploaded: true,
-  },
-  {
-    id: 'post-2',
-    titleEn: 'Demystifying Artificial Intelligence & Practical Tools',
-    titleNe: 'आर्टिफिसियल इन्टेलिजेन्स (एआई) को सरल र व्यावहारिक व्याख्या',
-    descEn: 'A clear guide breaking down modern artificial intelligence, large language models, prompt automation, and how everyday people and creators can harness AI tools effectively.',
-    descNe: 'आधुनिक एआई, ल्याङ्ग्वेज मोडलहरू र अटोमेसनका उपकरणहरूलाई सरल भाषामा बुझाउँदै, जसले दैनिक कार्य तथा उत्पादकत्वमा नयाँ उचाइ थप्न मद्दत गर्दछ।',
-    imgUrl: '/brand-avatar.png',
-    likes: 542,
-    category: 'AI Explainer',
-    date: 'Recent',
-    isUserUploaded: true,
-  },
-  {
-    id: 'post-3',
-    titleEn: 'Progressive Web App (PWA) Standards & Ultra-Fast Loading',
-    titleNe: 'प्रोग्रेसिभ वेब एप (PWA) मापदण्ड र उच्च स्पिड अप्टिमाइजेसन',
-    descEn: 'Why mobile-first responsiveness, offline accessibility, and clean web architecture are crucial for modern business websites and verified personal portfolios.',
-    descNe: 'मोबाइल-मैत्री लेआउट, अफलाइन क्यासिङ तथा गुगल सर्च अप्टिमाइजेसन किन प्रत्येक आधुनिक वेबसाइट र व्यक्तिगत ब्रान्डका लागि अपरिहार्य छन्।',
-    imgUrl: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg',
-    likes: 418,
-    category: 'Technology',
-    date: 'Recent',
-    isUserUploaded: true,
-  },
-  {
-    id: 'post-4',
-    titleEn: '+2 Management Studies & Tech Passion in Birgunj',
-    titleNe: 'डेसिमल कलेज, वीरगञ्जमा +२ व्यवस्थापन अध्ययन र प्रविधि यात्रा',
-    descEn: 'Balancing +2 Management curriculum at Decimal College with over 7 years of deep technological curiosity, web design, and hands-on developer exploration.',
-    descNe: 'डेसिमल कलेज, वीरगञ्जमा +२ व्यवस्थापन अध्ययनसँगै ७ वर्षभन्दा लामो समयदेखिको प्रविधि अनुसन्धान, वेबसाइट विकास र निरन्तर सिकाइ यात्रा।',
-    imgUrl: '/brand-avatar.png',
-    likes: 624,
-    category: 'Milestone',
-    date: 'Recent',
-    isUserUploaded: true,
-  },
-];
+export const DEFAULT_MOMENTS: Moment[] = [];
 
 export const DEFAULT_COMMENTS_MAP: Record<string, Comment[]> = {};
 

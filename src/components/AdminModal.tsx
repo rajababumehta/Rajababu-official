@@ -26,8 +26,10 @@ import {
   MessageSquare,
   Clock,
   User,
+  FileText,
+  Send,
 } from 'lucide-react';
-import { Language, AdminUser, ClipzoneImage, SystemSettings, InquiryMessage } from '../types';
+import { Language, AdminUser, ClipzoneImage, SystemSettings, InquiryMessage, Moment } from '../types';
 import {
   loginAdmin,
   loginAsLocalAdmin,
@@ -50,6 +52,7 @@ interface AdminModalProps {
   language: Language;
   systemSettings: SystemSettings;
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
+  onAddMoment?: (moment: Moment) => void;
 }
 
 export const AdminModal: React.FC<AdminModalProps> = ({
@@ -58,6 +61,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   language,
   systemSettings,
   onShowToast,
+  onAddMoment,
 }) => {
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [activeTab, setActiveTab] = useState<'upload' | 'gallery' | 'inquiries' | 'settings'>('upload');
@@ -72,12 +76,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loginError, setLoginError] = useState('');
 
-  // Image URL & metadata state
+  // Image / Post creation state
   const [imageUrl, setImageUrl] = useState('');
   const [imageTitle, setImageTitle] = useState('');
   const [imageTitleNe, setImageTitleNe] = useState('');
   const [imageCategory, setImageCategory] = useState('Technology');
   const [imageDesc, setImageDesc] = useState('');
+  const [imageDescNe, setImageDescNe] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [previewError, setPreviewError] = useState(false);
   const [previewLoaded, setPreviewLoaded] = useState(false);
@@ -216,33 +221,44 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     }
   };
 
-  // Save Image URL & Metadata to Firestore
+  // Save Post / Article & Metadata to Firestore and App
   const handleSaveImageSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanUrl = imageUrl.trim();
-    if (!cleanUrl) {
-      onShowToast(
-        language === 'NE' ? 'तस्बिरको URL (Image Link) राख्नुहोस्।' : 'Please paste an Image URL.',
-        'error'
-      );
-      return;
-    }
     if (!imageTitle.trim()) {
       onShowToast(
-        language === 'NE' ? 'तस्बिरको शीर्षक लेख्नुहोस्।' : 'Please provide an image title.',
+        language === 'NE' ? 'कृपया पोस्टको शीर्षक लेख्नुहोस्।' : 'Please provide a post title.',
         'error'
       );
       return;
     }
 
     setIsSaving(true);
+    const cleanUrl = imageUrl.trim();
+
+    // Create a new Moment object for Rajababu Mehta's post
+    const newMoment: Moment = {
+      id: `post-${Date.now()}`,
+      titleEn: imageTitle.trim(),
+      titleNe: imageTitleNe.trim() || imageTitle.trim(),
+      descEn: imageDesc.trim(),
+      descNe: imageDescNe.trim() || imageDesc.trim(),
+      imgUrl: cleanUrl,
+      likes: 0,
+      category: imageCategory,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      isUserUploaded: true,
+    };
+
+    if (onAddMoment) {
+      onAddMoment(newMoment);
+    }
 
     try {
       await saveImageMetadataToFirestore({
         title: imageTitle.trim(),
         titleNe: imageTitleNe.trim() || undefined,
         description: imageDesc.trim() || undefined,
-        descNe: imageDesc.trim() || undefined,
+        descNe: imageDescNe.trim() || imageDesc.trim() || undefined,
         imgUrl: cleanUrl,
         category: imageCategory,
         uploadDate: new Date().toISOString(),
@@ -254,29 +270,31 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
       onShowToast(
         language === 'NE'
-          ? 'तस्बिर Firestore मा सफलतापूर्वक सुरक्षित भयो!'
-          : 'Image successfully saved to Firestore!',
+          ? 'पोस्ट सफलतापूर्वक सुरक्षित भयो!'
+          : 'Post published successfully!',
         'success'
       );
-
+    } catch (err: any) {
+      console.warn('Firestore optional sync error:', err);
+      onShowToast(
+        language === 'NE'
+          ? 'पोस्ट प्रकाशित भयो (स्थानीय रूपमा सुरक्षित)!'
+          : 'Post published locally!',
+        'success'
+      );
+    } finally {
+      setIsSaving(false);
       // Reset form
       setImageUrl('');
       setImageTitle('');
       setImageTitleNe('');
       setImageDesc('');
+      setImageDescNe('');
       setPreviewError(false);
       setPreviewLoaded(false);
 
-      // Switch to gallery tab to display newly added image
+      // Switch to gallery tab to display newly added post
       setActiveTab('gallery');
-    } catch (err: any) {
-      console.error('Firestore save error:', err);
-      onShowToast(
-        err?.message || 'Failed to save image to Firestore.',
-        'error'
-      );
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -491,68 +509,33 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     )}
                   </button>
                 </form>
-
-                <div className="relative my-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-800" />
-                  </div>
-                  <div className="relative flex justify-center text-[11px] uppercase">
-                    <span className="bg-slate-900 px-2 text-slate-500 font-mono">
-                      {language === 'NE' ? 'वा सिधै प्रवेश गर्नुहोस्' : 'Or direct bypass'}
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleQuickAccess}
-                  className="w-full py-2.5 px-4 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium text-xs flex items-center justify-center gap-2 transition-all"
-                >
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span>
-                    {language === 'NE'
-                      ? 'तत्काल एडमिन प्रवेश (Instant Access)'
-                      : '⚡ Instant Admin Access (support@rajababumehta.com.np)'}
-                  </span>
-                </button>
-
-                <div className="mt-5 pt-3 border-t border-slate-800 text-center text-xs text-slate-500 space-y-1">
-                  <div>
-                    Firebase Project: <span className="font-mono text-slate-300">rajababu-mehta</span>
-                  </div>
-                  <div className="text-[11px] text-slate-400">
-                    {language === 'NE'
-                      ? 'यदि Firebase Auth चालू छैन भने तत्काल प्रवेश बटनले काम गर्नेछ।'
-                      : 'Instant Access bypasses console provider errors so you can upload right away.'}
-                  </div>
-                </div>
               </div>
             ) : (
               /* Authenticated Admin Dashboard */
               <div className="space-y-5">
                 {/* Navigation Tabs */}
-                <div className="flex border-b border-slate-800 gap-2">
+                <div className="flex border-b border-slate-800 gap-2 overflow-x-auto no-scrollbar">
                   <button
                     onClick={() => setActiveTab('upload')}
-                    className={`pb-2.5 px-4 text-xs font-semibold flex items-center gap-1.5 transition-colors border-b-2 ${
+                    className={`pb-2.5 px-4 text-xs font-semibold flex items-center gap-1.5 transition-colors border-b-2 whitespace-nowrap ${
                       activeTab === 'upload'
                         ? 'border-blue-500 text-blue-400'
                         : 'border-transparent text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    <Link2 className="w-4 h-4" />
-                    {language === 'NE' ? 'तस्बिर थप्नुहोस् (URL)' : 'Add Image (URL)'}
+                    <FileText className="w-4 h-4" />
+                    {language === 'NE' ? 'नयाँ पोस्ट लेख्नुहोस्' : 'Create Post'}
                   </button>
                   <button
                     onClick={() => setActiveTab('gallery')}
-                    className={`pb-2.5 px-4 text-xs font-semibold flex items-center gap-1.5 transition-colors border-b-2 ${
+                    className={`pb-2.5 px-4 text-xs font-semibold flex items-center gap-1.5 transition-colors border-b-2 whitespace-nowrap ${
                       activeTab === 'gallery'
                         ? 'border-blue-500 text-blue-400'
                         : 'border-transparent text-slate-400 hover:text-slate-200'
                     }`}
                   >
                     <ImageIcon className="w-4 h-4" />
-                    {language === 'NE' ? `ग्यालरी (${uploadedImages.length})` : `Gallery (${uploadedImages.length})`}
+                    {language === 'NE' ? `पोस्ट सूची (${uploadedImages.length})` : `Posts (${uploadedImages.length})`}
                   </button>
                   <button
                     onClick={() => setActiveTab('inquiries')}
@@ -592,7 +575,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
                           <span className="flex items-center gap-1.5">
                             <Link2 className="w-3.5 h-3.5 text-blue-400" />
-                            <span>{language === 'NE' ? 'तस्बिरको URL (Image Link)' : 'Image URL'} *</span>
+                            <span>{language === 'NE' ? 'तस्बिरको URL (ऐच्छिक - खाली छोड्न सकिन्छ)' : 'Image URL (Optional)'}</span>
                           </span>
                           {imageUrl.trim() && (
                             <button
@@ -616,8 +599,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             setPreviewError(false);
                             setPreviewLoaded(false);
                           }}
-                          placeholder="https://i.ibb.co/... or any direct image URL"
-                          required
+                          placeholder="https://... (leave blank for pure text post)"
                           className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 placeholder:text-slate-500 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
@@ -780,31 +762,45 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                       <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1">
-                          {language === 'NE' ? 'विवरण' : 'Description (Optional)'}
+                          {language === 'NE' ? 'पोस्टको मुख्य लेख / विवरण (English)' : 'Post Content / Text (English)'} *
                         </label>
                         <textarea
                           value={imageDesc}
                           onChange={(e) => setImageDesc(e.target.value)}
                           rows={3}
-                          placeholder="Add context, achievements, or notes for this image..."
+                          placeholder="Write your article, update, or developer thoughts here..."
+                          required
+                          className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1">
+                          {language === 'NE' ? 'पोस्टको मुख्य लेख (नेपाली - ऐच्छिक)' : 'Post Content (Nepali - Optional)'}
+                        </label>
+                        <textarea
+                          value={imageDescNe}
+                          onChange={(e) => setImageDescNe(e.target.value)}
+                          rows={2}
+                          placeholder="नेपालीमा थप विवरण वा व्याख्या लेख्नुहोस्..."
                           className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                         />
                       </div>
 
                       <button
                         type="submit"
-                        disabled={isSaving || !imageUrl.trim() || !imageTitle.trim()}
-                        className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-all disabled:opacity-50"
+                        disabled={isSaving || !imageTitle.trim()}
+                        className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-all disabled:opacity-50 cursor-pointer"
                       >
                         {isSaving ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>{language === 'NE' ? 'सुरक्षित गरिँदैछ...' : 'Saving to Firestore...'}</span>
+                            <span>{language === 'NE' ? 'प्रकाशित गरिँदैछ...' : 'Publishing Post...'}</span>
                           </>
                         ) : (
                           <>
-                            <Database className="w-4 h-4" />
-                            <span>{language === 'NE' ? 'Firestore मा सुरक्षित गर्नुहोस्' : 'Save Image to Firestore'}</span>
+                            <Send className="w-4 h-4" />
+                            <span>{language === 'NE' ? '🚀 नयाँ पोस्ट प्रकाशित गर्नुहोस्' : '🚀 Publish Post'}</span>
                           </>
                         )}
                       </button>

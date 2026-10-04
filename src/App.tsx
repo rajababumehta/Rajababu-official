@@ -138,7 +138,7 @@ export default function App() {
     return DEFAULT_SYSTEM_SETTINGS;
   });
 
-  // 3. Moments Gallery State
+  // 3. Moments Gallery State (Clean empty slate for Rajababu Mehta's own posts)
   const [moments, setMoments] = useState<Moment[]>(() => {
     try {
       const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
@@ -148,27 +148,25 @@ export default function App() {
       if (saved !== null) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          // Filter out legacy unsplash mock images, ai generated images and deleted IDs
+          // Filter out legacy sample posts and deleted IDs
           const validMoments = parsed.filter(
             (m: Moment) =>
               !deletedIds.includes(m.id) &&
+              !['post-1', 'post-2', 'post-3', 'post-4', 'moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6', 'moment-rajababu-nature'].includes(m.id) &&
               !m.imgUrl?.includes('unsplash.com') &&
               !m.imgUrl?.includes('rajababu_nature_moment') &&
-              !['moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6', 'moment-rajababu-nature'].includes(m.id)
+              !m.id?.startsWith('post-') // Only custom posts created with timestamp/firebase
           );
-          const defaultUniques = DEFAULT_MOMENTS.filter(
-            (def) => !deletedIds.includes(def.id) && !validMoments.some((v) => v.id === def.id)
-          );
-          if (validMoments.length > 0 || defaultUniques.length > 0) {
-            return [...validMoments, ...defaultUniques];
+          if (validMoments.length > 0) {
+            return validMoments;
           }
         }
       }
-      return DEFAULT_MOMENTS.filter((m) => !deletedIds.includes(m.id));
+      return [];
     } catch (e) {
       console.error('Failed to load moments from localStorage', e);
     }
-    return DEFAULT_MOMENTS;
+    return [];
   });
 
   // 4. Comments Map State
@@ -394,6 +392,10 @@ export default function App() {
     }
   };
 
+  const handleAddMoment = (newMoment: Moment) => {
+    setMoments((prev) => [newMoment, ...prev.filter((m) => m.id !== newMoment.id)]);
+  };
+
   const handleEditMoment = (_moment: Moment) => {
     setIsAdminOpen(true);
   };
@@ -492,6 +494,7 @@ export default function App() {
         language={language}
         systemSettings={systemSettings}
         onShowToast={showToast}
+        onAddMoment={handleAddMoment}
       />
 
       {/* Floating Circle WhatsApp Button in Bottom Right */}
