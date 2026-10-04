@@ -1,17 +1,36 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig, Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+
+// In environments where HMR is disabled (DISABLE_HMR=true), Vite sets server.ws to undefined.
+// This guard ensures any plugins calling server.ws.on/send do not throw TypeError.
+const guardEmptyWsPlugin = (): Plugin => ({
+  name: 'guard-empty-ws',
+  enforce: 'pre',
+  configureServer(server) {
+    if (!server.ws) {
+      (server as any).ws = {
+        on: () => {},
+        off: () => {},
+        send: () => {},
+        close: () => {},
+        clients: new Set(),
+      };
+    }
+  },
+});
 
 export default defineConfig(() => {
   return {
     plugins: [
+      guardEmptyWsPlugin(),
       react(),
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        injectRegister: 'auto',
+        injectRegister: null,
         includeAssets: [
           'favicon.ico',
           'favicon.png',
@@ -68,8 +87,7 @@ export default defineConfig(() => {
           navigateFallbackDenylist: [/^\/api/],
         },
         devOptions: {
-          enabled: true,
-          type: 'module',
+          enabled: false,
         },
       }),
     ],

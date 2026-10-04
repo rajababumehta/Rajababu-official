@@ -6,7 +6,6 @@ import {
   Languages,
 } from 'lucide-react';
 import { Language, ProfileSettings } from '../types';
-import { PWAInstallButton } from './PWAInstallButton';
 
 interface NavbarProps {
   language: Language;
@@ -81,10 +80,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               ))}
             </nav>
 
-            {/* Right Action Controls: PWA Install + Language Switcher Pill */}
+            {/* Right Action Controls: Language Switcher Pill */}
             <div className="hidden md:flex items-center gap-2 shrink-0">
-              <PWAInstallButton language={language} variant="navbar" />
-
               <button
                 id="btn-language-toggle-desktop"
                 onClick={onToggleLanguage}
@@ -107,8 +104,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Mobile Controls */}
             <div className="flex items-center gap-1.5 md:hidden">
-              <PWAInstallButton language={language} variant="navbar" />
-
               <button
                 id="btn-language-toggle-mobile"
                 onClick={onToggleLanguage}
@@ -152,10 +147,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span>{language === 'NE' ? item.labelNe : item.labelEn}</span>
                   </a>
                 ))}
-                
-                <div className="pt-2 border-t border-slate-800/80 mt-1">
-                  <PWAInstallButton language={language} variant="mobile-menu" />
-                </div>
               </nav>
             </motion.div>
           )}
