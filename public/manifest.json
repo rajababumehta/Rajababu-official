@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
   "id": "/?source=pwa",
-  "name": "Ai Clipzone",
-  "short_name": "Clipzone",
-  "description": "Ai Clipzone - AI powered video and clip generation app",
+  "name": "Rajababu Mehta",
+  "short_name": "Rajababu",
+  "description": "Rajababu Mehta – Official website of the AI Website Developer & AI Explainer from Birgunj, Nepal.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

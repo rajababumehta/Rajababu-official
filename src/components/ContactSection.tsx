@@ -205,9 +205,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         {/* Section Heading & Live Status Indicator */}
         <div className="flex flex-col items-center text-center mb-16 sm:mb-20">
           
-          {/* Status Badge + Live Birgunj Clock */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 mb-5">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+          {/* Clean Editorial Status Bar (Zero-Pill Discipline) */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 text-xs text-slate-400 mb-4 font-medium">
+            <span className="text-blue-400 font-semibold">
+              {language === 'NE' ? 'सम्पर्क तथा सोधपुछ' : 'Direct Inquiry'}
+            </span>
+            <span aria-hidden="true" className="text-slate-700">·</span>
+            <span className="text-emerald-400 flex items-center gap-1.5">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -217,19 +221,16 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   ? 'नयाँ वेबसाइट परियोजनाका लागि उपलब्ध'
                   : 'Available for New Website Projects'}
               </span>
-            </div>
-
+            </span>
             {nepalTime && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-slate-300 text-xs font-medium">
-                <Clock className="w-3.5 h-3.5 text-blue-400" />
-                <span>Birgunj: {nepalTime}</span>
-              </div>
+              <>
+                <span aria-hidden="true" className="text-slate-700">·</span>
+                <span className="text-slate-300 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Birgunj: {nepalTime}</span>
+                </span>
+              </>
             )}
-          </div>
-
-          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-3">
-            <Mail className="w-3.5 h-3.5" />
-            <span>{language === 'NE' ? 'सम्पर्क तथा सोधपुछ' : 'Contact & Inquiry'}</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 font-heading tracking-tight max-w-3xl mb-4">

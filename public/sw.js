@@ -1,10 +1,13 @@
-// Ai Clipzone Service Worker
-const CACHE_NAME = 'ai-clipzone-cache-v1';
+// Rajababu Mehta Website Service Worker
+const CACHE_NAME = 'rajababu-mehta-cache-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/brand-avatar.png',
+  '/brand-logo.png',
   '/favicon.ico',
+  '/favicon.png',
   '/favicon-192x192.png',
   '/favicon-512x512.png',
   '/pwa-192x192.png',
