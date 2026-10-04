@@ -22,8 +22,12 @@ import {
   Link2,
   Copy,
   Check,
+  Mail,
+  MessageSquare,
+  Clock,
+  User,
 } from 'lucide-react';
-import { Language, AdminUser, ClipzoneImage, SystemSettings } from '../types';
+import { Language, AdminUser, ClipzoneImage, SystemSettings, InquiryMessage } from '../types';
 import {
   loginAdmin,
   loginAsLocalAdmin,
@@ -34,6 +38,8 @@ import {
   subscribeToClipzoneImages,
   deleteClipzoneImage,
   saveSystemSettingsToFirestore,
+  subscribeToInquiries,
+  deleteInquiryFromFirestore,
   firebaseConfig,
   getFirebaseInstances,
 } from '../services/firebase';
@@ -54,7 +60,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   onShowToast,
 }) => {
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
-  const [activeTab, setActiveTab] = useState<'upload' | 'gallery' | 'settings'>('upload');
+  const [activeTab, setActiveTab] = useState<'upload' | 'gallery' | 'inquiries' | 'settings'>('upload');
+
+  // Inquiries received from website
+  const [inquiries, setInquiries] = useState<InquiryMessage[]>([]);
+  const [isDeletingInquiryId, setIsDeletingInquiryId] = useState<string | null>(null);
 
   // Login form state
   const [email, setEmail] = useState('');
@@ -108,6 +118,34 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     );
     return () => unsubImages();
   }, [isOpen]);
+
+  // Listen to received inquiries
+  useEffect(() => {
+    if (!isOpen) return;
+    const unsubInquiries = subscribeToInquiries((items) => {
+      setInquiries(items);
+    });
+    return () => unsubInquiries();
+  }, [isOpen]);
+
+  const handleDeleteInquiry = async (id?: string) => {
+    if (!id) return;
+    setIsDeletingInquiryId(id);
+    try {
+      await deleteInquiryFromFirestore(id);
+      onShowToast(
+        language === 'NE' ? 'सन्देश हटाइयो!' : 'Inquiry deleted successfully.',
+        'info'
+      );
+    } catch {
+      onShowToast(
+        language === 'NE' ? 'हटाउन असफल भयो।' : 'Failed to delete inquiry.',
+        'error'
+      );
+    } finally {
+      setIsDeletingInquiryId(null);
+    }
+  };
 
   // Handle Login
   const handleLogin = async (e: React.FormEvent) => {
@@ -517,6 +555,22 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     {language === 'NE' ? `ग्यालरी (${uploadedImages.length})` : `Gallery (${uploadedImages.length})`}
                   </button>
                   <button
+                    onClick={() => setActiveTab('inquiries')}
+                    className={`pb-2.5 px-4 text-xs font-semibold flex items-center gap-1.5 transition-colors border-b-2 relative ${
+                      activeTab === 'inquiries'
+                        ? 'border-blue-500 text-blue-400'
+                        : 'border-transparent text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <Mail className="w-4 h-4" />
+                    <span>{language === 'NE' ? 'ग्राहक सन्देशहरू' : 'Inquiries'}</span>
+                    {inquiries.length > 0 && (
+                      <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white">
+                        {inquiries.length}
+                      </span>
+                    )}
+                  </button>
+                  <button
                     onClick={() => setActiveTab('settings')}
                     className={`pb-2.5 px-4 text-xs font-semibold flex items-center gap-1.5 transition-colors border-b-2 ${
                       activeTab === 'settings'
@@ -842,6 +896,86 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                 <span>{new Date(img.uploadDate).toLocaleDateString()}</span>
                                 <span className="text-amber-400">{img.likes || 0} likes</span>
                               </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Tab: Inquiries (Customer Inquiries) */}
+                {activeTab === 'inquiries' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-slate-400">
+                        {language === 'NE'
+                          ? `वेबसाइटबाट प्राप्त सोधपुछ सन्देशहरू (${inquiries.length})`
+                          : `Inquiries received directly from website (${inquiries.length})`}
+                      </div>
+                    </div>
+
+                    {inquiries.length === 0 ? (
+                      <div className="p-8 rounded-2xl bg-slate-950/60 border border-slate-800 text-center text-xs text-slate-500">
+                        <MessageSquare className="w-8 h-8 mx-auto mb-2 text-slate-600" />
+                        <div>{language === 'NE' ? 'अहिलेसम्म कुनै सन्देश प्राप्त भएको छैन।' : 'No customer inquiries yet.'}</div>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 max-h-[440px] overflow-y-auto pr-1">
+                        {inquiries.map((inq, idx) => (
+                          <div
+                            key={inq.id || idx}
+                            className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 hover:border-slate-700 space-y-2 text-xs transition-colors"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="font-semibold text-slate-100 text-sm flex items-center gap-1.5">
+                                  <User className="w-3.5 h-3.5 text-blue-400" />
+                                  <span>{inq.name}</span>
+                                </div>
+                                <div className="text-slate-400 text-[11px] mt-0.5">
+                                  {inq.email}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  <span>{new Date(inq.createdAt).toLocaleDateString()}</span>
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteInquiry(inq.id)}
+                                  disabled={isDeletingInquiryId === inq.id}
+                                  className="p-1 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
+                                  title="Delete message"
+                                >
+                                  {isDeletingInquiryId === inq.id ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+
+                            {inq.subject && (
+                              <div className="font-medium text-blue-300 text-[11px]">
+                                {inq.subject}
+                              </div>
+                            )}
+
+                            <p className="text-slate-300 text-xs bg-slate-900/60 p-2.5 rounded-lg whitespace-pre-wrap leading-relaxed">
+                              {inq.message}
+                            </p>
+
+                            <div className="pt-1 flex items-center justify-end">
+                              <a
+                                href={`mailto:${encodeURIComponent(inq.email)}?subject=Re: ${encodeURIComponent(inq.subject || 'Website Inquiry')}`}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-[11px] font-medium transition-colors"
+                              >
+                                <Mail className="w-3 h-3" />
+                                <span>{language === 'NE' ? 'इमेल मार्फत जवाफ दिनुहोस्' : 'Reply via Email'}</span>
+                              </a>
                             </div>
                           </div>
                         ))}

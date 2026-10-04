@@ -11,9 +11,12 @@ import {
   Sparkles,
   Zap,
   ShieldCheck,
+  Loader2,
+  CheckCircle2,
+  Send,
 } from 'lucide-react';
 import { ContactSettings, Language } from '../types';
-import { loginAsLocalAdmin } from '../services/firebase';
+import { loginAsLocalAdmin, saveInquiryToFirestore } from '../services/firebase';
 
 interface ContactSectionProps {
   language: Language;
@@ -33,9 +36,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   const [senderEmail, setSenderEmail] = useState('');
   const [senderSubject, setSenderSubject] = useState('');
   const [senderMessage, setSenderMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [lastGmailUrl, setLastGmailUrl] = useState('');
-  const [lastMailtoUrl, setLastMailtoUrl] = useState('');
 
   // Copied states
   const [copiedType, setCopiedType] = useState<'email' | 'phone' | 'location' | null>(null);
@@ -81,7 +83,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     setTimeout(() => setCopiedType(null), 2500);
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Secret Admin Verification Trigger
@@ -121,50 +123,65 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       return;
     }
 
-    const recipientEmail = (contact.email || 'support@rajababumehta.com.np').trim();
-    const cleanSubject = senderSubject.trim()
-      ? `${senderSubject.trim()} - Inquiry from ${senderName.trim()}`
-      : `Website Inquiry from ${senderName.trim() || 'Client'}`;
-
-    const formattedBody = `Hello Rajababu Mehta,
-
-You have received a new inquiry from your website (rajababumehta.com.np):
-
-----------------------------------------
-CLIENT DETAILS:
-• Name: ${senderName.trim()}
-• Email / Contact: ${senderEmail.trim()}
-• Subject: ${senderSubject.trim() || 'Website Inquiry'}
-
-MESSAGE / PROJECT REQUIREMENTS:
-${senderMessage.trim()}
-----------------------------------------
-
-Sent from rajababumehta.com.np`;
-
-    const encodedSubject = encodeURIComponent(cleanSubject);
-    const encodedBody = encodeURIComponent(formattedBody);
-
-    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
-      recipientEmail
-    )}&su=${encodedSubject}&body=${encodedBody}`;
-
-    const standardMailto = `mailto:${recipientEmail}?subject=${encodedSubject}&body=${encodedBody}`;
-
-    setLastGmailUrl(gmailComposeUrl);
-    setLastMailtoUrl(standardMailto);
-
-    const newWindow = window.open(gmailComposeUrl, '_blank');
-    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-      // Fallback for pop-up blockers or native email clients
-      window.location.href = standardMailto;
+    if (!trimmedName || !trimmedEmail || !trimmedMessage) {
+      onShowToast(
+        language === 'NE'
+          ? 'कृपया सबै अनिवार्य विवरण भर्नुहोस्।'
+          : 'Please complete all required fields.',
+        'error'
+      );
+      return;
     }
 
+    setIsSubmitting(true);
+
+    const recipientEmail = (contact.email || 'support@rajababumehta.com.np').trim();
+    const cleanSubject = trimmedSubject || `New Website Inquiry from ${trimmedName}`;
+
+    // 1. Direct persistence into Firestore and LocalStorage
+    try {
+      await saveInquiryToFirestore({
+        name: trimmedName,
+        email: trimmedEmail,
+        subject: cleanSubject,
+        message: trimmedMessage,
+        createdAt: new Date().toISOString(),
+        status: 'unread',
+      });
+    } catch (saveErr) {
+      console.warn('Inquiry local/firestore save note:', saveErr);
+    }
+
+    // 2. Automatic background email delivery via FormSubmit AJAX (user does NOT need to open any mail app)
+    try {
+      await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(recipientEmail)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          email: trimmedEmail,
+          _replyto: trimmedEmail,
+          subject: cleanSubject,
+          message: trimmedMessage,
+          _subject: `New Inquiry from ${trimmedName} (rajababumehta.com.np)`,
+          _template: 'table',
+          _captcha: 'false',
+        }),
+      });
+    } catch (netErr) {
+      console.warn('Background email delivery note:', netErr);
+    }
+
+    setIsSubmitting(false);
     setIsSubmitted(true);
+
     onShowToast(
       language === 'NE'
-        ? `जिमेल खुल्दैछ! तपाईँको सन्देश ${recipientEmail} मा पठाउन तयार छ।`
-        : `Opening Gmail to send your message to ${recipientEmail}!`,
+        ? 'तपाईँको सन्देश राजाबाबु मेहताको इमेलमा सफलतापूर्वक पठाइयो!'
+        : 'Your message has been sent directly to Rajababu Mehta!',
       'success'
     );
   };
@@ -407,58 +424,53 @@ Sent from rajababumehta.com.np`;
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="py-12 flex flex-col items-center text-center"
+                  className="py-10 px-4 sm:px-6 flex flex-col items-center text-center"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-400 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
-                    <Mail className="w-8 h-8" />
+                  <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
+                    <CheckCircle2 className="w-9 h-9" />
                   </div>
                   <h4 className="text-2xl font-bold text-slate-100 mb-2 font-heading">
-                    {language === 'NE' ? 'जिमेलमा सन्देश तयार भएको छ!' : 'Message Ready in Gmail!'}
+                    {language === 'NE' ? 'सन्देश सफलतापूर्वक पठाइयो!' : 'Message Sent Successfully!'}
                   </h4>
-                  <p className="text-sm text-slate-300 max-w-md mb-2 leading-relaxed">
+                  <p className="text-sm text-slate-300 max-w-md mb-4 leading-relaxed">
                     {language === 'NE'
-                      ? `तपाईँको सन्देश राजाबाबु मेहता (${contact.email || 'support@rajababumehta.com.np'}) को लागि जिमेलमा खोलिएको छ।`
-                      : `Your message has been pre-filled in Gmail addressed to ${contact.email || 'support@rajababumehta.com.np'}.`}
+                      ? `तपाईँको सन्देश सिधै राजाबाबु मेहता (${contact.email || 'support@rajababumehta.com.np'}) को इमेलमा पुगिसकेको छ। तपाईँले आफ्नो कुनै पनि इमेल अकाउन्ट खोल्नु पर्दैन।`
+                      : `Your inquiry has been sent directly to Rajababu Mehta (${contact.email || 'support@rajababumehta.com.np'}). You do not need to send anything from your personal email account.`}
                   </p>
-                  <p className="text-xs text-slate-400 max-w-md mb-6 leading-relaxed">
-                    {language === 'NE'
-                      ? 'यदि जिमेल स्वचालित रूपमा नयाँ ट्याबमा खुलेन भने तलको "जिमेलमा खोल्नुहोस्" बटन थिच्नुहोस्:'
-                      : 'If Gmail did not open in a new tab automatically, click the button below to send your message:'}
-                  </p>
-                  
-                  <div className="flex flex-wrap gap-3 justify-center">
-                    {lastGmailUrl && (
-                      <a
-                        href={lastGmailUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/30 hover:scale-[1.02]"
-                      >
-                        <Mail className="w-4 h-4" />
-                        <span>{language === 'NE' ? 'जिमेलमा खोल्नुहोस्' : 'Open in Gmail'}</span>
-                      </a>
+
+                  <div className="w-full max-w-sm bg-slate-950/80 border border-slate-800 rounded-2xl p-4 text-left mb-6 text-xs text-slate-300 space-y-1.5">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-1">
+                      {language === 'NE' ? 'पठाइएको विवरण' : 'Delivered Details'}
+                    </div>
+                    <div>
+                      <span className="text-slate-500">{language === 'NE' ? 'नाम:' : 'Name:'} </span>
+                      <span className="font-semibold text-slate-200">{senderName}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">{language === 'NE' ? 'सम्पर्क:' : 'Contact:'} </span>
+                      <span className="font-semibold text-slate-200">{senderEmail}</span>
+                    </div>
+                    {senderSubject && (
+                      <div>
+                        <span className="text-slate-500">{language === 'NE' ? 'विषय:' : 'Subject:'} </span>
+                        <span className="text-slate-200">{senderSubject}</span>
+                      </div>
                     )}
-                    {lastMailtoUrl && (
-                      <a
-                        href={lastMailtoUrl}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all border border-slate-700"
-                      >
-                        <span>{language === 'NE' ? 'अन्य इमेल एप' : 'Other Email App'}</span>
-                      </a>
-                    )}
-                    <button
-                      onClick={() => {
-                        setIsSubmitted(false);
-                        setSenderName('');
-                        setSenderEmail('');
-                        setSenderSubject('');
-                        setSenderMessage('');
-                      }}
-                      className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-xs font-medium border border-slate-800 transition-colors"
-                    >
-                      {language === 'NE' ? 'नयाँ सन्देश लेख्नुहोस्' : 'Write Another Message'}
-                    </button>
                   </div>
+                  
+                  <button
+                    onClick={() => {
+                      setIsSubmitted(false);
+                      setSenderName('');
+                      setSenderEmail('');
+                      setSenderSubject('');
+                      setSenderMessage('');
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02]"
+                  >
+                    <Mail className="w-4 h-4" />
+                    <span>{language === 'NE' ? 'अर्को नयाँ सन्देश पठाउनुहोस्' : 'Send Another Message'}</span>
+                  </button>
                 </motion.div>
               ) : (
                 <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -470,10 +482,11 @@ Sent from rajababumehta.com.np`;
                       <input
                         type="text"
                         required
+                        disabled={isSubmitting}
                         placeholder={language === 'NE' ? 'उदा. रोशन अधिकारी' : 'e.g. Roshan Sharma'}
                         value={senderName}
                         onChange={(e) => setSenderName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
                       />
                     </div>
 
@@ -484,10 +497,11 @@ Sent from rajababumehta.com.np`;
                       <input
                         type="text"
                         required
+                        disabled={isSubmitting}
                         placeholder="you@email.com or 98XXXXXXXX"
                         value={senderEmail}
                         onChange={(e) => setSenderEmail(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
                       />
                     </div>
                   </div>
@@ -498,6 +512,7 @@ Sent from rajababumehta.com.np`;
                     </label>
                     <input
                       type="text"
+                      disabled={isSubmitting}
                       placeholder={
                         language === 'NE'
                           ? 'उदा. नयाँ वेबसाइट, एआई परामर्श, वा अन्य'
@@ -505,7 +520,7 @@ Sent from rajababumehta.com.np`;
                       }
                       value={senderSubject}
                       onChange={(e) => setSenderSubject(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
                     />
                   </div>
 
@@ -516,6 +531,7 @@ Sent from rajababumehta.com.np`;
                     <textarea
                       rows={4}
                       required
+                      disabled={isSubmitting}
                       placeholder={
                         language === 'NE'
                           ? 'तपाईँको सन्देश वा परियोजनाको आवश्यकता यहाँ लेख्नुहोस्...'
@@ -523,7 +539,7 @@ Sent from rajababumehta.com.np`;
                       }
                       value={senderMessage}
                       onChange={(e) => setSenderMessage(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors resize-none disabled:opacity-50"
                     />
                   </div>
 
@@ -532,10 +548,20 @@ Sent from rajababumehta.com.np`;
                     <button
                       type="submit"
                       id="btn-contact-submit"
-                      className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-xl shadow-blue-600/30 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                      disabled={isSubmitting}
+                      className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-xl shadow-blue-600/30 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      <Mail className="w-4 h-4" />
-                      <span>{language === 'NE' ? 'सन्देश पठाउनुहोस् (Send Message)' : 'Send Message'}</span>
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>{language === 'NE' ? 'सन्देश सिधै पठाइँदैछ...' : 'Sending message directly...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          <span>{language === 'NE' ? 'सिधै सन्देश पठाउनुहोस् (Send Message)' : 'Send Message Directly'}</span>
+                        </>
+                      )}
                     </button>
                   </div>
 

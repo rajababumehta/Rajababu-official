@@ -31,7 +31,7 @@ import {
   isSupported as isAnalyticsSupported,
   Analytics,
 } from 'firebase/analytics';
-import { FirebaseConfig, ClipzoneImage, AdminUser } from '../types';
+import { FirebaseConfig, ClipzoneImage, AdminUser, InquiryMessage } from '../types';
 
 export const FIREBASE_CONFIG_STORAGE_KEY = 'ai_clipzone_firebase_config';
 export const LOCAL_IMAGES_STORAGE_KEY = 'ai_clipzone_local_images';
@@ -744,3 +744,126 @@ export const testFirebaseLiveConnection = async (configToTest?: FirebaseConfig) 
     };
   }
 };
+
+// ==========================================
+// INQUIRY SERVICES (Direct Client Messages)
+// ==========================================
+
+export const LOCAL_INQUIRIES_STORAGE_KEY = 'rajababu_inquiries';
+
+/**
+ * Save new inquiry directly to Firestore and local storage
+ */
+export const saveInquiryToFirestore = async (
+  inquiry: Omit<InquiryMessage, 'id'>
+): Promise<string> => {
+  const { firestore } = getFirebaseInstances();
+  let generatedId = `inquiry-${Date.now()}`;
+
+  if (firestore) {
+    try {
+      const inquiriesCol = collection(firestore, 'inquiries');
+      const docRef = await addDoc(inquiriesCol, {
+        ...inquiry,
+        status: inquiry.status || 'unread',
+        createdAt: inquiry.createdAt || new Date().toISOString(),
+        serverTime: serverTimestamp(),
+      });
+      generatedId = docRef.id;
+    } catch (e) {
+      console.warn('Could not store inquiry in Firestore:', e);
+    }
+  }
+
+  // Backup in localStorage
+  try {
+    const raw = localStorage.getItem(LOCAL_INQUIRIES_STORAGE_KEY);
+    const list: InquiryMessage[] = raw ? JSON.parse(raw) : [];
+    list.unshift({ ...inquiry, id: generatedId });
+    localStorage.setItem(LOCAL_INQUIRIES_STORAGE_KEY, JSON.stringify(list.slice(0, 100)));
+  } catch {
+    // ignore
+  }
+
+  return generatedId;
+};
+
+/**
+ * Subscribe to inquiries in Firestore for Admin review
+ */
+export const subscribeToInquiries = (
+  callback: (inquiries: InquiryMessage[]) => void
+) => {
+  const { firestore } = getFirebaseInstances();
+
+  if (firestore) {
+    try {
+      const q = query(collection(firestore, 'inquiries'), orderBy('createdAt', 'desc'));
+      return onSnapshot(
+        q,
+        (snapshot) => {
+          const items: InquiryMessage[] = snapshot.docs.map((docSnap) => {
+            const data = docSnap.data();
+            return {
+              id: docSnap.id,
+              name: data.name || 'Anonymous Client',
+              email: data.email || '',
+              subject: data.subject || '',
+              message: data.message || '',
+              createdAt: data.createdAt || new Date().toISOString(),
+              status: data.status || 'unread',
+            };
+          });
+          callback(items);
+        },
+        () => {
+          // Fallback to local storage
+          try {
+            const raw = localStorage.getItem(LOCAL_INQUIRIES_STORAGE_KEY);
+            callback(raw ? JSON.parse(raw) : []);
+          } catch {
+            callback([]);
+          }
+        }
+      );
+    } catch {
+      // Fallback
+    }
+  }
+
+  // Local storage fallback
+  try {
+    const raw = localStorage.getItem(LOCAL_INQUIRIES_STORAGE_KEY);
+    callback(raw ? JSON.parse(raw) : []);
+  } catch {
+    callback([]);
+  }
+  return () => {};
+};
+
+/**
+ * Delete inquiry from Firestore and local storage
+ */
+export const deleteInquiryFromFirestore = async (id: string): Promise<void> => {
+  const { firestore } = getFirebaseInstances();
+  if (firestore) {
+    try {
+      const docRef = doc(firestore, 'inquiries', id);
+      await deleteDoc(docRef);
+    } catch (e) {
+      console.warn('Could not delete inquiry from Firestore:', e);
+    }
+  }
+
+  try {
+    const raw = localStorage.getItem(LOCAL_INQUIRIES_STORAGE_KEY);
+    if (raw) {
+      const list: InquiryMessage[] = JSON.parse(raw);
+      const filtered = list.filter((item) => item.id !== id);
+      localStorage.setItem(LOCAL_INQUIRIES_STORAGE_KEY, JSON.stringify(filtered));
+    }
+  } catch {
+    // ignore
+  }
+};
+

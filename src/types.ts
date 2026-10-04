@@ -183,3 +183,13 @@ export interface NewsletterSubscriber {
   active: boolean;
 }
 
+export interface InquiryMessage {
+  id?: string;
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  createdAt: string;
+  status?: 'unread' | 'read';
+}
+
