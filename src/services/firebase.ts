@@ -752,48 +752,69 @@ export const testFirebaseLiveConnection = async (configToTest?: FirebaseConfig) 
 export const LOCAL_INQUIRIES_STORAGE_KEY = 'rajababu_inquiries';
 
 /**
- * Save new inquiry directly to Firestore and local storage
+ * Save new inquiry directly to localStorage first, then sync to Firestore with timeout
  */
 export const saveInquiryToFirestore = async (
   inquiry: Omit<InquiryMessage, 'id'>
 ): Promise<string> => {
-  const { firestore } = getFirebaseInstances();
   let generatedId = `inquiry-${Date.now()}`;
 
-  if (firestore) {
-    try {
-      const inquiriesCol = collection(firestore, 'inquiries');
-      const docRef = await addDoc(inquiriesCol, {
-        ...inquiry,
-        status: inquiry.status || 'unread',
-        createdAt: inquiry.createdAt || new Date().toISOString(),
-        serverTime: serverTimestamp(),
-      });
-      generatedId = docRef.id;
-    } catch (e) {
-      console.warn('Could not store inquiry in Firestore:', e);
-    }
-  }
-
-  // Backup in localStorage
+  // 1. Instant local persistence so messages are never lost
   try {
     const raw = localStorage.getItem(LOCAL_INQUIRIES_STORAGE_KEY);
     const list: InquiryMessage[] = raw ? JSON.parse(raw) : [];
     list.unshift({ ...inquiry, id: generatedId });
     localStorage.setItem(LOCAL_INQUIRIES_STORAGE_KEY, JSON.stringify(list.slice(0, 100)));
-  } catch {
-    // ignore
+  } catch (err) {
+    console.warn('LocalStorage save error:', err);
+  }
+
+  // 2. Sync to Firestore in the background with a strict 1500ms timeout
+  const { firestore } = getFirebaseInstances();
+  if (firestore) {
+    try {
+      const savePromise = (async () => {
+        const inquiriesCol = collection(firestore, 'inquiries');
+        const docRef = await addDoc(inquiriesCol, {
+          ...inquiry,
+          status: inquiry.status || 'unread',
+          createdAt: inquiry.createdAt || new Date().toISOString(),
+          serverTime: serverTimestamp(),
+        });
+        return docRef.id;
+      })();
+
+      const timeoutPromise = new Promise<string>((_, reject) =>
+        setTimeout(() => reject(new Error('Firestore timeout')), 1500)
+      );
+
+      const remoteId = await Promise.race([savePromise, timeoutPromise]);
+      generatedId = remoteId;
+    } catch (e) {
+      // Benign fallback: local storage is already recorded
+      console.warn('Firestore inquiry sync note (using local copy):', e);
+    }
   }
 
   return generatedId;
 };
 
 /**
- * Subscribe to inquiries in Firestore for Admin review
+ * Subscribe to inquiries with immediate local fallback
  */
 export const subscribeToInquiries = (
   callback: (inquiries: InquiryMessage[]) => void
 ) => {
+  // Always immediately feed local storage items first
+  try {
+    const raw = localStorage.getItem(LOCAL_INQUIRIES_STORAGE_KEY);
+    if (raw) {
+      callback(JSON.parse(raw));
+    }
+  } catch {
+    // ignore
+  }
+
   const { firestore } = getFirebaseInstances();
 
   if (firestore) {
@@ -802,22 +823,24 @@ export const subscribeToInquiries = (
       return onSnapshot(
         q,
         (snapshot) => {
-          const items: InquiryMessage[] = snapshot.docs.map((docSnap) => {
-            const data = docSnap.data();
-            return {
-              id: docSnap.id,
-              name: data.name || 'Anonymous Client',
-              email: data.email || '',
-              subject: data.subject || '',
-              message: data.message || '',
-              createdAt: data.createdAt || new Date().toISOString(),
-              status: data.status || 'unread',
-            };
-          });
-          callback(items);
+          if (!snapshot.empty) {
+            const items: InquiryMessage[] = snapshot.docs.map((docSnap) => {
+              const data = docSnap.data();
+              return {
+                id: docSnap.id,
+                name: data.name || 'Anonymous Client',
+                email: data.email || '',
+                subject: data.subject || '',
+                message: data.message || '',
+                createdAt: data.createdAt || new Date().toISOString(),
+                status: data.status || 'unread',
+              };
+            });
+            callback(items);
+          }
         },
         () => {
-          // Fallback to local storage
+          // Fallback to local storage on error
           try {
             const raw = localStorage.getItem(LOCAL_INQUIRIES_STORAGE_KEY);
             callback(raw ? JSON.parse(raw) : []);
@@ -831,13 +854,6 @@ export const subscribeToInquiries = (
     }
   }
 
-  // Local storage fallback
-  try {
-    const raw = localStorage.getItem(LOCAL_INQUIRIES_STORAGE_KEY);
-    callback(raw ? JSON.parse(raw) : []);
-  } catch {
-    callback([]);
-  }
   return () => {};
 };
 

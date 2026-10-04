@@ -89,13 +89,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     // Secret Admin Verification Trigger
     // Required: Name = "Admin_pannel", Email = "support@rajababumehta.com.np", Subject = "Admin_pannel", Message = "Admin_login"
     const trimmedName = senderName.trim();
-    const trimmedEmail = senderEmail.trim().toLowerCase();
+    const trimmedEmail = senderEmail.trim();
     const trimmedSubject = senderSubject.trim();
     const trimmedMessage = senderMessage.trim();
 
     const isSecretAdminMatch =
       (trimmedName === 'Admin_pannel' || trimmedName.toLowerCase() === 'admin_pannel') &&
-      trimmedEmail === 'support@rajababumehta.com.np' &&
+      trimmedEmail.toLowerCase() === 'support@rajababumehta.com.np' &&
       (trimmedSubject === 'Admin_pannel' || trimmedSubject.toLowerCase() === 'admin_pannel') &&
       (trimmedMessage === 'Admin_login' || trimmedMessage.toLowerCase() === 'admin_login');
 
@@ -136,10 +136,11 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     setIsSubmitting(true);
 
     const recipientEmail = (contact.email || 'support@rajababumehta.com.np').trim();
-    const cleanSubject = trimmedSubject || `New Website Inquiry from ${trimmedName}`;
+    const cleanSubject = trimmedSubject || `Website Inquiry from ${trimmedName}`;
+    const isEmailFormat = trimmedEmail.includes('@') && trimmedEmail.includes('.');
 
-    // 1. Direct persistence into Firestore and LocalStorage
     try {
+      // 1. Direct persistence into LocalStorage & Firestore
       await saveInquiryToFirestore({
         name: trimmedName,
         email: trimmedEmail,
@@ -148,42 +149,46 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         createdAt: new Date().toISOString(),
         status: 'unread',
       });
-    } catch (saveErr) {
-      console.warn('Inquiry local/firestore save note:', saveErr);
+
+      // 2. Automatic background email delivery via FormSubmit AJAX (user does NOT need an email client)
+      try {
+        const emailPromise = fetch(`https://formsubmit.co/ajax/${encodeURIComponent(recipientEmail)}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            name: trimmedName,
+            contact: trimmedEmail,
+            email: isEmailFormat ? trimmedEmail : recipientEmail,
+            subject: cleanSubject,
+            message: trimmedMessage,
+            _subject: `New Inquiry from ${trimmedName} (${trimmedEmail})`,
+            _replyto: isEmailFormat ? trimmedEmail : undefined,
+            _template: 'table',
+            _captcha: 'false',
+          }),
+        });
+
+        // Cap background email network request at 2.5s so user never waits
+        const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 2500));
+        await Promise.race([emailPromise, timeoutPromise]);
+      } catch (netErr) {
+        console.warn('Background email delivery note:', netErr);
+      }
+    } catch (generalErr) {
+      console.warn('Form processing error:', generalErr);
+    } finally {
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+      onShowToast(
+        language === 'NE'
+          ? 'तपाईँको सन्देश राजाबाबु मेहताको इमेलमा सफलतापूर्वक पठाइयो!'
+          : 'Your message has been sent directly to Rajababu Mehta!',
+        'success'
+      );
     }
-
-    // 2. Automatic background email delivery via FormSubmit AJAX (user does NOT need to open any mail app)
-    try {
-      await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(recipientEmail)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          name: trimmedName,
-          email: trimmedEmail,
-          _replyto: trimmedEmail,
-          subject: cleanSubject,
-          message: trimmedMessage,
-          _subject: `New Inquiry from ${trimmedName} (rajababumehta.com.np)`,
-          _template: 'table',
-          _captcha: 'false',
-        }),
-      });
-    } catch (netErr) {
-      console.warn('Background email delivery note:', netErr);
-    }
-
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-
-    onShowToast(
-      language === 'NE'
-        ? 'तपाईँको सन्देश राजाबाबु मेहताको इमेलमा सफलतापूर्वक पठाइयो!'
-        : 'Your message has been sent directly to Rajababu Mehta!',
-      'success'
-    );
   };
 
   return (
@@ -458,19 +463,45 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     )}
                   </div>
                   
-                  <button
-                    onClick={() => {
-                      setIsSubmitted(false);
-                      setSenderName('');
-                      setSenderEmail('');
-                      setSenderSubject('');
-                      setSenderMessage('');
-                    }}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02]"
-                  >
-                    <Mail className="w-4 h-4" />
-                    <span>{language === 'NE' ? 'अर्को नयाँ सन्देश पठाउनुहोस्' : 'Send Another Message'}</span>
-                  </button>
+                  <div className="flex flex-wrap items-center justify-center gap-3 w-full max-w-sm">
+                    <button
+                      onClick={() => {
+                        setIsSubmitted(false);
+                        setSenderName('');
+                        setSenderEmail('');
+                        setSenderSubject('');
+                        setSenderMessage('');
+                      }}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02]"
+                    >
+                      <Mail className="w-4 h-4" />
+                      <span>{language === 'NE' ? 'अर्को नयाँ सन्देश' : 'Send Another'}</span>
+                    </button>
+
+                    {contact.whatsappNumber && (
+                      <a
+                        href={`https://wa.me/977${contact.whatsappNumber.replace(/\D/g, '')}?text=${encodeURIComponent(
+                          `Namaste Rajababu, I sent an inquiry from your website (Name: ${senderName}).`
+                        )}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 text-xs font-semibold transition-all hover:scale-[1.02]"
+                      >
+                        <Zap className="w-3.5 h-3.5" />
+                        <span>WhatsApp</span>
+                      </a>
+                    )}
+
+                    {contact.phone && (
+                      <a
+                        href={`tel:${contact.phone.replace(/\s+/g, '')}`}
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-all hover:scale-[1.02]"
+                      >
+                        <Phone className="w-3.5 h-3.5 text-blue-400" />
+                        <span>{contact.phone}</span>
+                      </a>
+                    )}
+                  </div>
                 </motion.div>
               ) : (
                 <form onSubmit={handleFormSubmit} className="space-y-4">
