@@ -59,7 +59,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
               <div className="flex flex-col">
                 <span className="font-heading font-bold text-sm sm:text-base text-slate-100 tracking-tight flex items-center gap-1 group-hover:text-blue-400 transition-colors whitespace-nowrap">
-                  {profile.name}
+                  {profile.name || 'Rajababu Mehta'}
                 </span>
                 <span className="text-[10px] text-slate-400 font-medium tracking-wide hidden lg:inline-block">
                   {language === 'NE' ? 'एआई वेबसाइट डेभलपर' : 'AI Website Developer'}

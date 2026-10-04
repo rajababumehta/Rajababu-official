@@ -68,7 +68,7 @@ self.addEventListener('fetch', (event) => {
             if (cached) return cached;
             const fallback = await caches.match('/index.html');
             if (fallback) return fallback;
-            return new Response('Offline - Ai Clipzone', {
+            return new Response('Offline - Rajababu Mehta', {
               headers: { 'Content-Type': 'text/html' }
             });
           })
