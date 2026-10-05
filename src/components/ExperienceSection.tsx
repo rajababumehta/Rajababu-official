@@ -11,6 +11,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { ExperienceSettings, Language } from '../types';
+import { TiltCard } from './TiltCard';
 
 interface ExperienceSectionProps {
   language: Language;
@@ -32,7 +33,19 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       <div id="experience" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Heading */}
-        <div className="flex flex-col items-center text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center text-center mb-16"
+        >
+          {/* Level 03 Stage Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-blue-500/30 text-blue-400 font-mono text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-3 shadow-sm backdrop-blur-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+            <span>{language === 'NE' ? 'स्तर ०३ // प्राविधिक सीपहरू' : 'LEVEL 03 // TECHNICAL ARSENAL'}</span>
+          </div>
+
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-4">
             <Briefcase className="w-3.5 h-3.5" />
             <span>{language === 'NE' ? experience.badgeNe : experience.badgeEn}</span>
@@ -40,7 +53,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 font-heading tracking-tight max-w-3xl">
             {language === 'NE' ? experience.headingNe : experience.headingEn}
           </h2>
-        </div>
+        </motion.div>
 
         {/* Main Content Grid: Skills on Left, Milestones Timeline on Right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mb-16">
@@ -151,28 +164,30 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
                     <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
                   </div>
 
-                  <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800/90 group-hover:border-blue-500/30 transition-all shadow-lg">
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                      <span className="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono text-[11px] font-bold">
-                        {milestone.year}
-                      </span>
-                      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                        {milestone.roleType}
-                      </span>
+                  <TiltCard tiltMaxAngle={4}>
+                    <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800/90 group-hover:border-blue-500/30 transition-all shadow-lg">
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span className="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono text-[11px] font-bold">
+                          {milestone.year}
+                        </span>
+                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                          {milestone.roleType}
+                        </span>
+                      </div>
+
+                      <h4 className="font-heading font-bold text-base sm:text-lg text-slate-100 mb-1">
+                        {language === 'NE' ? milestone.titleNe : milestone.titleEn}
+                      </h4>
+
+                      <div className="text-xs font-semibold text-indigo-300 mb-3">
+                        {language === 'NE' ? milestone.orgNe : milestone.orgEn}
+                      </div>
+
+                      <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                        {language === 'NE' ? milestone.descNe : milestone.descEn}
+                      </p>
                     </div>
-
-                    <h4 className="font-heading font-bold text-base sm:text-lg text-slate-100 mb-1">
-                      {language === 'NE' ? milestone.titleNe : milestone.titleEn}
-                    </h4>
-
-                    <div className="text-xs font-semibold text-indigo-300 mb-3">
-                      {language === 'NE' ? milestone.orgNe : milestone.orgEn}
-                    </div>
-
-                    <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                      {language === 'NE' ? milestone.descNe : milestone.descEn}
-                    </p>
-                  </div>
+                  </TiltCard>
                 </motion.div>
               ))}
             </div>

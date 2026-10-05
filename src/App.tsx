@@ -32,7 +32,16 @@ import {
   loginAsLocalAdmin,
   logoutAdmin,
   LOCAL_ADMIN_STORAGE_KEY,
+  getFirebaseInstances,
 } from './services/firebase';
+import {
+  fetchPublicPosts,
+  publishPublicPost,
+  deletePublicPost,
+  likePublicPost,
+  fetchPublicComments,
+  addPublicComment,
+} from './services/api';
 
 const FIXED_HERO_IMAGE =
   'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg';
@@ -141,7 +150,7 @@ export default function App() {
     return DEFAULT_SYSTEM_SETTINGS;
   });
 
-  // 3. Moments Gallery State (Clean empty slate for Rajababu Mehta's own posts)
+  // 3. Moments Gallery State (Public Posts for Rajababu Mehta's channel)
   const [moments, setMoments] = useState<Moment[]>(() => {
     try {
       const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
@@ -150,26 +159,24 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEYS.CUSTOM_MOMENTS);
       if (saved !== null) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          // Filter out legacy sample posts and deleted IDs
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Filter out legacy sample mock posts and deleted IDs
           const validMoments = parsed.filter(
             (m: Moment) =>
               !deletedIds.includes(m.id) &&
-              !['post-1', 'post-2', 'post-3', 'post-4', 'moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6', 'moment-rajababu-nature'].includes(m.id) &&
+              !['moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6', 'moment-rajababu-nature'].includes(m.id) &&
               !m.imgUrl?.includes('unsplash.com') &&
-              !m.imgUrl?.includes('rajababu_nature_moment') &&
-              !m.id?.startsWith('post-') // Only custom posts created with timestamp/firebase
+              !m.imgUrl?.includes('rajababu_nature_moment')
           );
           if (validMoments.length > 0) {
             return validMoments;
           }
         }
       }
-      return [];
     } catch (e) {
       console.error('Failed to load moments from localStorage', e);
     }
-    return [];
+    return DEFAULT_MOMENTS;
   });
 
   // 4. Comments Map State
@@ -410,6 +417,37 @@ export default function App() {
     return () => unsubscribeImages();
   }, []);
 
+  // Load Global Public Posts & Comments from Server on initial load
+  useEffect(() => {
+    let isMounted = true;
+    fetchPublicPosts()
+      .then((serverPosts) => {
+        if (isMounted && serverPosts && serverPosts.length > 0) {
+          setMoments((prev) => {
+            const serverIdSet = new Set(serverPosts.map((p) => p.id));
+            const localOnly = prev.filter((p) => !serverIdSet.has(p.id));
+            return [...serverPosts, ...localOnly];
+          });
+        }
+      })
+      .catch((err) => console.warn('Could not load public posts:', err));
+
+    fetchPublicComments()
+      .then((serverComments) => {
+        if (isMounted && serverComments && Object.keys(serverComments).length > 0) {
+          setCommentsMap((prev) => ({
+            ...prev,
+            ...serverComments,
+          }));
+        }
+      })
+      .catch((err) => console.warn('Could not load public comments:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Handlers
   const handleToggleLanguage = () => {
     const nextLang = language === 'EN' ? 'NE' : 'EN';
@@ -425,6 +463,7 @@ export default function App() {
       setMoments((prev) =>
         prev.map((m) => (m.id === id ? { ...m, likes: Math.max(0, m.likes - 1) } : m))
       );
+      likePublicPost(id, 'unlike');
       showToast(language === 'NE' ? 'प्रतिक्रिया हटाइयो' : 'Like removed', 'info');
     } else {
       // Like
@@ -432,6 +471,7 @@ export default function App() {
       setMoments((prev) =>
         prev.map((m) => (m.id === id ? { ...m, likes: m.likes + 1 } : m))
       );
+      likePublicPost(id, 'like');
       showToast(language === 'NE' ? 'तपाईँको प्रतिक्रिया सुरक्षित भयो! ❤️' : 'Thanks for your like! ❤️', 'success');
     }
   };
@@ -460,7 +500,7 @@ export default function App() {
 
   const handleAddComment = (momentId: string, author: string, text: string) => {
     const newComment: Comment = {
-      id: `comment-${Date.now()}`,
+      id: `comment-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       momentId,
       author,
       text,
@@ -474,9 +514,11 @@ export default function App() {
         [momentId]: [newComment, ...currentList],
       };
     });
+
+    addPublicComment(momentId, author, text);
   };
 
-  const handleDeleteMoment = (id: string) => {
+  const handleDeleteMoment = async (id: string) => {
     try {
       const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
       const deletedIds: string[] = deletedIdsStr ? JSON.parse(deletedIdsStr) : [];
@@ -485,14 +527,23 @@ export default function App() {
         localStorage.setItem(STORAGE_KEYS.DELETED_MOMENT_IDS, JSON.stringify(deletedIds));
       }
       setMoments((prev) => prev.filter((m) => m.id !== id));
+      await deletePublicPost(id);
       showToast(language === 'NE' ? 'पोस्ट हटाइयो' : 'Post removed', 'info');
     } catch (e) {
       console.error('Delete post error:', e);
     }
   };
 
-  const handleAddMoment = (newMoment: Moment) => {
+  const handleAddMoment = async (newMoment: Moment) => {
+    // 1. Optimistic local state update so admin immediately sees the post
     setMoments((prev) => [newMoment, ...prev.filter((m) => m.id !== newMoment.id)]);
+
+    // 2. Persist to Global Backend API so every visitor worldwide sees it
+    try {
+      await publishPublicPost(newMoment);
+    } catch (e) {
+      console.warn('API post publish fallback:', e);
+    }
   };
 
   const handleEditMoment = (_moment: Moment) => {

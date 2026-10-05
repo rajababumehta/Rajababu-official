@@ -142,8 +142,12 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
       isUserUploaded: true,
     };
 
-    if (onAddMoment) {
-      onAddMoment(newMoment);
+    try {
+      if (onAddMoment) {
+        await Promise.resolve(onAddMoment(newMoment));
+      }
+    } catch (pubErr) {
+      console.warn('Error during onAddMoment:', pubErr);
     }
 
     onShowToast(

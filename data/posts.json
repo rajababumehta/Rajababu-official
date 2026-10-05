@@ -1,0 +1,38 @@
+[
+  {
+    "id": "post-rajababu-official-launch",
+    "titleEn": "Official News & Editorial Channel Launched by Rajababu Mehta",
+    "titleNe": "राजाबाबु मेहताद्वारा आधिकारिक न्युज तथा प्राविधिक लेख च्यानलको शुभारम्भ",
+    "descEn": "Welcome to my official news and tech editorial channel! Here, I will regularly share technical insights on AI tools, website design trends, modern web performance, and digital solutions for Nepal and beyond. Stay tuned for tutorials, project breakdowns, and tech updates.",
+    "descNe": "मेरो आधिकारिक न्युज तथा प्राविधिक लेख च्यानलमा यहाँहरूलाई हार्दिक स्वागत छ! यस च्यानलमा म नियमित रूपमा एआई उपकरणहरू, आधुनिक वेबसाइट डिजाइन, वेब कार्यसम्पादन र नेपालमा डिजिटल रूपान्तरण सम्बन्धी विचार र सूचनाहरू प्रस्तुत गर्नेछु। नयाँ प्रविधि र अनुसन्धानका अपडेटहरूका लागि जोडिनुहोस्।",
+    "imgUrl": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg",
+    "likes": 28,
+    "category": "Notice",
+    "date": "Oct 5, 2026",
+    "isUserUploaded": false
+  },
+  {
+    "id": "post-ai-technology-nepal",
+    "titleEn": "How Artificial Intelligence is Shaping the Future of Web Development",
+    "titleNe": "आर्टिफिसियल इन्टेलिजेन्स (AI) ले कसरी वेबसाइट विकासको भविष्य परिवर्तन गर्दैछ?",
+    "descEn": "From intelligent user interfaces to automated code optimization, AI tools have transformed how modern web applications are engineered. For students, entrepreneurs, and developers in Birgunj and throughout Nepal, mastering AI-assisted design and high-speed web standards opens unprecedented opportunities.",
+    "descNe": "इन्टेलिजेन्ट युजर इन्टरफेसदेखि स्वचालित कोड अप्टिमाइजेसनसम्म, एआईले आधुनिक वेब एप्लिकेसन निर्माणको तरिका बदलिदिएको छ। वीरगञ्ज र समग्र नेपालका विद्यार्थी, उद्यमी तथा डेभलपरहरूका लागि एआई-सहायक डिजाइन र उच्च-गतिका वेब प्रविधि सिक्नु ठूलो अवसर हो।",
+    "imgUrl": "",
+    "likes": 42,
+    "category": "AI & Technology",
+    "date": "Oct 4, 2026",
+    "isUserUploaded": false
+  },
+  {
+    "id": "post-birgunj-digital-business",
+    "titleEn": "Digital Transformation: Why Every Local Business Needs a High-Performance Website",
+    "titleNe": "डिजिटल रूपान्तरण: स्थानीय व्यवसाय तथा स्टार्टअपहरूका लागि आधुनिक वेबसाइट किन अनिवार्य छ?",
+    "descEn": "In today's fast-moving digital economy, a verified and responsive online presence creates trust, attracts new clients, and expands reach beyond local borders. A lightweight, mobile-optimized website is the foundation of digital credibility.",
+    "descNe": "आजको डिजिटल युगमा मोबाइल-अनुकूल र द्रुत गतिको वेबसाइटले व्यवसायको विश्वसनीयता बढाउनुका साथै ग्राहकलाई २४ सै घण्टा सेवाको जानकारी दिन मद्दत गर्दछ। आफ्नो ब्रान्डलाई स्थापित गर्न वेबसाइट पहिलो र भरपर्दो खुड्किलो हो।",
+    "imgUrl": "",
+    "likes": 35,
+    "category": "Web Development",
+    "date": "Oct 3, 2026",
+    "isUserUploaded": false
+  }
+]

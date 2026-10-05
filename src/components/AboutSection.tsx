@@ -1,10 +1,12 @@
 import React from 'react';
+import { motion } from 'motion/react';
 import {
   Compass,
   Sparkles,
   Quote,
 } from 'lucide-react';
 import { AboutSettings, Language } from '../types';
+import { TiltCard } from './TiltCard';
 
 interface AboutSectionProps {
   language: Language;
@@ -31,7 +33,19 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col items-center text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center text-center mb-16"
+        >
+          {/* Level 02 Stage Badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-blue-500/30 text-blue-400 font-mono text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-3 shadow-sm backdrop-blur-md">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+            <span>{language === 'NE' ? 'स्तर ०२ // परिचय तथा दर्शन' : 'LEVEL 02 // BIOGRAPHY & STORY'}</span>
+          </div>
+
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-4">
             <Compass className="w-3.5 h-3.5" />
             <span>{language === 'NE' ? about.badgeNe : about.badgeEn}</span>
@@ -39,11 +53,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 font-heading tracking-tight max-w-3xl">
             {language === 'NE' ? about.headingNe : about.headingEn}
           </h2>
-        </div>
+        </motion.div>
 
         {/* Narrative & Executive Bio */}
         <div className="max-w-4xl mx-auto">
-          <div className="p-8 sm:p-12 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm shadow-xl">
+          <TiltCard tiltMaxAngle={4} className="h-full">
+            <div className="p-8 sm:p-12 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm shadow-xl">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-4">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -106,7 +121,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 </a>
               </div>
             </div>
-          </div>
+            </div>
+          </TiltCard>
         </div>
 
       </div>
