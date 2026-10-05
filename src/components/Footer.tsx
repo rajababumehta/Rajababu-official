@@ -49,10 +49,6 @@ export const Footer: React.FC<FooterProps> = ({
               {language === 'NE' ? 'गृहपृष्ठ' : 'Home'}
             </a>
             <span>•</span>
-            <a href="#posts" className="hover:text-blue-400 transition-colors">
-              {language === 'NE' ? 'पोस्टहरू' : 'Posts'}
-            </a>
-            <span>•</span>
             <a href="#about" className="hover:text-blue-400 transition-colors">
               {language === 'NE' ? 'परिचय' : 'About'}
             </a>

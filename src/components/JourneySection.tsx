@@ -41,7 +41,6 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
   onAddComment,
   onShowToast,
   isAdmin = false,
-  onOpenAdminUpload,
   onEditMoment,
   onDeleteMoment,
 }) => {
@@ -179,21 +178,13 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
               <Newspaper className="w-8 h-8" />
             </div>
             <h3 className="text-xl font-bold text-slate-200 mb-2">
-              {language === 'NE' ? 'हाल कुनै नयाँ पोस्ट प्रकाशित भएको छैन' : 'No Posts Published Yet'}
+              {language === 'NE' ? 'पोस्टहरू चाँडै उपलब्ध हुनेछन्' : 'Articles & Posts'}
             </h3>
             <p className="text-sm sm:text-base text-slate-400 max-w-lg mx-auto leading-relaxed">
               {language === 'NE'
-                ? 'राजाबाबु मेहताका नयाँ प्राविधिक लेख, एआई गाइड र अपडेटहरू यहाँ चाँडै प्रकाशित गरिनेछ।'
-                : 'Articles, practical AI workflows, and tech engineering updates by Rajababu Mehta will appear here.'}
+                ? 'नयाँ वेब परियोजनाहरू, प्राविधिक लेख र एआई जानकारीहरू यहाँ चाँडै थपिनेछन्।'
+                : 'New articles, technical explanations, and AI guides will be posted here soon.'}
             </p>
-            {isAdmin && onOpenAdminUpload && (
-              <button
-                onClick={onOpenAdminUpload}
-                className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
-              >
-                <span>{language === 'NE' ? '✍️ नयाँ पोस्ट लेख्नुहोस्' : '✍️ Create New Post'}</span>
-              </button>
-            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">

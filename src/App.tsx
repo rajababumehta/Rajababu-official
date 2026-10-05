@@ -6,7 +6,6 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Header } from './components/Header';
-import { JourneySection } from './components/JourneySection';
 import { AboutSection } from './components/AboutSection';
 import { ExperienceSection } from './components/ExperienceSection';
 import { DeliverablesSection } from './components/DeliverablesSection';
@@ -138,7 +137,7 @@ export default function App() {
     return DEFAULT_SYSTEM_SETTINGS;
   });
 
-  // 3. Moments Gallery State (Clean empty slate for Rajababu Mehta's own posts)
+  // 3. Moments Gallery State
   const [moments, setMoments] = useState<Moment[]>(() => {
     try {
       const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
@@ -148,25 +147,27 @@ export default function App() {
       if (saved !== null) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          // Filter out legacy sample posts and deleted IDs
+          // Filter out legacy unsplash mock images, ai generated images and deleted IDs
           const validMoments = parsed.filter(
             (m: Moment) =>
               !deletedIds.includes(m.id) &&
-              !['post-1', 'post-2', 'post-3', 'post-4', 'moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6', 'moment-rajababu-nature'].includes(m.id) &&
               !m.imgUrl?.includes('unsplash.com') &&
               !m.imgUrl?.includes('rajababu_nature_moment') &&
-              !m.id?.startsWith('post-') // Only custom posts created with timestamp/firebase
+              !['moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6', 'moment-rajababu-nature'].includes(m.id)
           );
-          if (validMoments.length > 0) {
-            return validMoments;
+          const defaultUniques = DEFAULT_MOMENTS.filter(
+            (def) => !deletedIds.includes(def.id) && !validMoments.some((v) => v.id === def.id)
+          );
+          if (validMoments.length > 0 || defaultUniques.length > 0) {
+            return [...validMoments, ...defaultUniques].map((m) => ({ ...m, imgUrl: '' }));
           }
         }
       }
-      return [];
+      return DEFAULT_MOMENTS.filter((m) => !deletedIds.includes(m.id)).map((m) => ({ ...m, imgUrl: '' }));
     } catch (e) {
       console.error('Failed to load moments from localStorage', e);
     }
-    return [];
+    return DEFAULT_MOMENTS;
   });
 
   // 4. Comments Map State
@@ -392,10 +393,6 @@ export default function App() {
     }
   };
 
-  const handleAddMoment = (newMoment: Moment) => {
-    setMoments((prev) => [newMoment, ...prev.filter((m) => m.id !== newMoment.id)]);
-  };
-
   const handleEditMoment = (_moment: Moment) => {
     setIsAdminOpen(true);
   };
@@ -422,22 +419,6 @@ export default function App() {
         <Header
           language={language}
           profile={systemSettings.profile}
-        />
-
-        {/* Posts & Tech Updates Section (Right after Home) */}
-        <JourneySection
-          language={language}
-          moments={moments}
-          onLikeMoment={handleLikeMoment}
-          userLikedMoments={userLikedMoments}
-          onAutoBoostAllLikes={handleAutoBoostAllLikes}
-          commentsMap={commentsMap}
-          onAddComment={handleAddComment}
-          onShowToast={showToast}
-          isAdmin={isAdminOpen}
-          onOpenAdminUpload={() => setIsAdminOpen(true)}
-          onEditMoment={handleEditMoment}
-          onDeleteMoment={handleDeleteMoment}
         />
 
         {/* About Section */}
@@ -494,7 +475,6 @@ export default function App() {
         language={language}
         systemSettings={systemSettings}
         onShowToast={showToast}
-        onAddMoment={handleAddMoment}
       />
 
       {/* Floating Circle WhatsApp Button in Bottom Right */}
