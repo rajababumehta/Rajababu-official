@@ -29,6 +29,10 @@ import {
 import {
   subscribeToClipzoneImages,
   subscribeToSystemSettings,
+  subscribeToPublicPosts,
+  savePublicPostToFirestore,
+  deletePublicPostFromFirestore,
+  updatePostLikesInFirestore,
   loginAsLocalAdmin,
   logoutAdmin,
   LOCAL_ADMIN_STORAGE_KEY,
@@ -417,6 +421,25 @@ export default function App() {
     return () => unsubscribeImages();
   }, []);
 
+  // Realtime Firestore Public Posts (Live sync for every visitor across all devices)
+  useEffect(() => {
+    const unsubscribePosts = subscribeToPublicPosts((remotePosts) => {
+      if (remotePosts && remotePosts.length > 0) {
+        const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
+        const deletedIds: string[] = deletedIdsStr ? JSON.parse(deletedIdsStr) : [];
+        const validRemote = remotePosts.filter((p) => !deletedIds.includes(p.id));
+
+        setMoments((prev) => {
+          const remoteIdSet = new Set(validRemote.map((p) => p.id));
+          const localOnly = prev.filter((p) => !remoteIdSet.has(p.id) && !deletedIds.includes(p.id));
+          return [...validRemote, ...localOnly];
+        });
+      }
+    });
+
+    return () => unsubscribePosts();
+  }, []);
+
   // Load Global Public Posts & Comments from Server on initial load
   useEffect(() => {
     let isMounted = true;
@@ -463,6 +486,7 @@ export default function App() {
       setMoments((prev) =>
         prev.map((m) => (m.id === id ? { ...m, likes: Math.max(0, m.likes - 1) } : m))
       );
+      updatePostLikesInFirestore(id, -1);
       likePublicPost(id, 'unlike');
       showToast(language === 'NE' ? 'प्रतिक्रिया हटाइयो' : 'Like removed', 'info');
     } else {
@@ -471,6 +495,7 @@ export default function App() {
       setMoments((prev) =>
         prev.map((m) => (m.id === id ? { ...m, likes: m.likes + 1 } : m))
       );
+      updatePostLikesInFirestore(id, 1);
       likePublicPost(id, 'like');
       showToast(language === 'NE' ? 'तपाईँको प्रतिक्रिया सुरक्षित भयो! ❤️' : 'Thanks for your like! ❤️', 'success');
     }
@@ -527,6 +552,7 @@ export default function App() {
         localStorage.setItem(STORAGE_KEYS.DELETED_MOMENT_IDS, JSON.stringify(deletedIds));
       }
       setMoments((prev) => prev.filter((m) => m.id !== id));
+      await deletePublicPostFromFirestore(id);
       await deletePublicPost(id);
       showToast(language === 'NE' ? 'पोस्ट हटाइयो' : 'Post removed', 'info');
     } catch (e) {
@@ -538,7 +564,14 @@ export default function App() {
     // 1. Optimistic local state update so admin immediately sees the post
     setMoments((prev) => [newMoment, ...prev.filter((m) => m.id !== newMoment.id)]);
 
-    // 2. Persist to Global Backend API so every visitor worldwide sees it
+    // 2. Persist to live Firestore database so EVERY visitor in the world gets real-time sync!
+    try {
+      await savePublicPostToFirestore(newMoment);
+    } catch (e) {
+      console.warn('Firestore post save warning:', e);
+    }
+
+    // 3. Persist to Global Backend API so every visitor worldwide sees it
     try {
       await publishPublicPost(newMoment);
     } catch (e) {

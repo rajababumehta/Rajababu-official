@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "PublicPost": {
+      "title": "PublicPost",
+      "description": "Public post or news article published by Rajababu Mehta",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "titleEn": { "type": "string" },
+        "titleNe": { "type": "string" },
+        "descEn": { "type": "string" },
+        "descNe": { "type": "string" },
+        "imgUrl": { "type": "string" },
+        "likes": { "type": "number" },
+        "category": { "type": "string" },
+        "date": { "type": "string" },
+        "isUserUploaded": { "type": "boolean" },
+        "publishedAt": { "type": "string" }
+      },
+      "required": ["id", "titleEn"]
+    },
+    "ClipzoneImage": {
+      "title": "ClipzoneImage",
+      "description": "Image gallery post or portfolio moment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "titleNe": { "type": "string" },
+        "description": { "type": "string" },
+        "descNe": { "type": "string" },
+        "imgUrl": { "type": "string" },
+        "likes": { "type": "number" },
+        "category": { "type": "string" },
+        "uploadDate": { "type": "string" }
+      },
+      "required": ["title", "imgUrl"]
+    },
+    "PublicComment": {
+      "title": "PublicComment",
+      "description": "Reader comment on a published post",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "momentId": { "type": "string" },
+        "author": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["momentId", "text"]
+    }
+  },
+  "firestore": {
+    "/public_posts/{postId}": {
+      "schema": "PublicPost",
+      "description": "Public news and articles visible to everyone"
+    },
+    "/clipzone_images/{imageId}": {
+      "schema": "ClipzoneImage",
+      "description": "Public gallery moments"
+    },
+    "/public_comments/{commentId}": {
+      "schema": "PublicComment",
+      "description": "Visitor comments on posts"
+    }
+  }
+}
