@@ -643,16 +643,15 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
 
                     {/* Headline */}
                     <h3
-                      onClick={() => setActiveLightboxMoment(moment)}
-                      className="font-heading font-bold text-lg sm:text-xl text-slate-100 group-hover:text-blue-300 transition-colors mb-3 leading-snug cursor-pointer"
+                      className="font-heading font-bold text-lg sm:text-xl text-slate-100 mb-3 leading-snug"
                     >
                       {language === 'NE' ? moment.titleNe || moment.titleEn : moment.titleEn}
                     </h3>
 
-                    {/* Article Excerpt */}
-                    <p className="text-sm text-slate-300/90 leading-relaxed mb-5 line-clamp-4">
+                    {/* Full Article Content - Displayed directly so readers can read the whole article without clicking 'Read' */}
+                    <div className="text-sm sm:text-base text-slate-200/95 leading-relaxed mb-5 whitespace-pre-wrap break-words">
                       {language === 'NE' ? moment.descNe || moment.descEn : moment.descEn}
-                    </p>
+                    </div>
 
                     {/* Byline / Author Credit */}
                     <div className="flex items-center justify-between py-3 border-t border-slate-800/70 text-xs text-slate-400">
@@ -665,7 +664,7 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
 
                       <div className="flex items-center gap-1 text-[11px] text-slate-400">
                         <Clock className="w-3 h-3 text-slate-500" />
-                        <span>{language === 'NE' ? '२ मिनेट' : '2 min read'}</span>
+                        <span>{language === 'NE' ? 'आधिकारिक पोष्ट' : 'Official Post'}</span>
                       </div>
                     </div>
                   </div>
@@ -692,11 +691,11 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                       <button
                         type="button"
                         onClick={() => setActiveLightboxMoment(moment)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 text-xs font-medium transition-colors cursor-pointer"
-                        title="View comments"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-medium transition-colors cursor-pointer"
+                        title={language === 'NE' ? 'प्रतिक्रियाहरू हेर्नुहोस् वा लेख्नुहोस्' : 'Comments & Discussion'}
                       >
                         <MessageSquare className="w-3.5 h-3.5 text-blue-400" />
-                        <span>{momentComments.length}</span>
+                        <span>{momentComments.length} {language === 'NE' ? 'प्रतिक्रिया' : 'Comments'}</span>
                       </button>
 
                       <button
@@ -706,15 +705,6 @@ export const JourneySection: React.FC<JourneySectionProps> = ({
                         title="Copy article link"
                       >
                         <Share2 className="w-3.5 h-3.5" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setActiveLightboxMoment(moment)}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer ml-1"
-                      >
-                        <span>{language === 'NE' ? 'पूरा पढ्नुहोस्' : 'Read'}</span>
-                        <BookOpen className="w-3 h-3" />
                       </button>
                     </div>
                   </div>
