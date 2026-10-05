@@ -29,6 +29,9 @@ import {
 import {
   subscribeToClipzoneImages,
   subscribeToSystemSettings,
+  loginAsLocalAdmin,
+  logoutAdmin,
+  LOCAL_ADMIN_STORAGE_KEY,
 } from './services/firebase';
 
 const FIXED_HERO_IMAGE =
@@ -203,7 +206,103 @@ export default function App() {
   const handleOpenCv = () => setIsCvOpen(true);
   const handleCloseCv = () => setIsCvOpen(false);
 
-  // 8. Firebase Admin Modal State
+  // 8. Navigation & Current View State ('home' | 'posts')
+  const [currentView, setCurrentView] = useState<'home' | 'posts'>(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#posts') {
+      return 'posts';
+    }
+    return 'home';
+  });
+
+  // 9. Admin Logged-In State
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
+    try {
+      return Boolean(
+        localStorage.getItem(LOCAL_ADMIN_STORAGE_KEY) ||
+        localStorage.getItem('local_admin_session')
+      );
+    } catch {
+      return false;
+    }
+  });
+
+  // Listen to hashchange events for smooth back/forward browser navigation
+  useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === '#posts') {
+        setCurrentView('posts');
+      } else {
+        setCurrentView('home');
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
+  // Admin Logout Handler (invoked by clicking top circle photo or logout button)
+  const handleAdminLogout = async () => {
+    try {
+      await logoutAdmin();
+      localStorage.removeItem('local_admin_session');
+    } catch (e) {
+      console.warn('Logout warning:', e);
+    }
+    setIsAdminLoggedIn(false);
+    setIsAdminOpen(false);
+    showToast(
+      language === 'NE'
+        ? 'तपाईं एडमिनबाट सफलतापूर्वक लगआउट हुनुभयो।'
+        : 'Logged out of administrator session successfully.',
+      'info'
+    );
+  };
+
+  // Secret Admin Login Handler (triggered when contact form enters admin_login in all fields)
+  const handleAdminSecretLogin = () => {
+    loginAsLocalAdmin('support@rajababumehta.com.np');
+    localStorage.setItem(
+      'local_admin_session',
+      JSON.stringify({ email: 'support@rajababumehta.com.np', role: 'admin' })
+    );
+    setIsAdminLoggedIn(true);
+    // User requested: "first tehi bat photo upload garn nmilne banaunus tyo admin login hoss matra"
+    // So do NOT pop up the old photo upload modal!
+    setIsAdminOpen(false);
+
+    // Switch view to Post page so admin can write news articles immediately!
+    setCurrentView('posts');
+    window.location.hash = '#posts';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    showToast(
+      language === 'NE'
+        ? 'नमस्ते राजाबाबु मेहता! तपाईं एडमिन लगइन हुनुभयो। यहाँ समाचार तथा लेख लेखेर प्रकाशित गर्न सक्नुहुन्छ।'
+        : 'Welcome Rajababu Mehta! Logged in as Admin. You can now write and publish news articles directly here.',
+      'success'
+    );
+  };
+
+  // Navigation handler
+  const handleNavigate = (view: 'home' | 'posts', targetHash?: string) => {
+    setCurrentView(view);
+    if (targetHash) {
+      window.location.hash = targetHash;
+      if (view === 'posts') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        setTimeout(() => {
+          const el = document.querySelector(targetHash);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 100);
+      }
+    }
+  };
+
+  // 10. Firebase Admin Modal State (for optional settings / advanced sync)
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const handleOpenAdmin = () => setIsAdminOpen(true);
   const handleCloseAdmin = () => setIsAdminOpen(false);
@@ -414,69 +513,80 @@ export default function App() {
         onToggleLanguage={handleToggleLanguage}
         profile={systemSettings.profile}
         onOpenCv={handleOpenCv}
+        isAdmin={isAdminLoggedIn}
+        onAdminLogout={handleAdminLogout}
+        currentView={currentView}
+        onNavigate={handleNavigate}
       />
 
       {/* Main Page Content */}
       <main className="flex-1">
-        {/* Hero Section */}
-        <Header
-          language={language}
-          profile={systemSettings.profile}
-        />
+        {currentView === 'posts' ? (
+          /* Dedicated News Channel & Editorial Post Page */
+          <JourneySection
+            language={language}
+            moments={moments}
+            onLikeMoment={handleLikeMoment}
+            userLikedMoments={userLikedMoments}
+            onAutoBoostAllLikes={handleAutoBoostAllLikes}
+            commentsMap={commentsMap}
+            onAddComment={handleAddComment}
+            onShowToast={showToast}
+            isAdmin={isAdminLoggedIn}
+            onAddMoment={handleAddMoment}
+            onEditMoment={handleEditMoment}
+            onDeleteMoment={handleDeleteMoment}
+            onBackToHome={() => handleNavigate('home', '#home')}
+          />
+        ) : (
+          /* Home & Portfolio Sections (ZERO posts cluttering home section) */
+          <>
+            {/* Hero Section */}
+            <Header
+              language={language}
+              profile={systemSettings.profile}
+            />
 
-        {/* Posts & Tech Updates Section (Right after Home) */}
-        <JourneySection
-          language={language}
-          moments={moments}
-          onLikeMoment={handleLikeMoment}
-          userLikedMoments={userLikedMoments}
-          onAutoBoostAllLikes={handleAutoBoostAllLikes}
-          commentsMap={commentsMap}
-          onAddComment={handleAddComment}
-          onShowToast={showToast}
-          isAdmin={isAdminOpen}
-          onOpenAdminUpload={() => setIsAdminOpen(true)}
-          onEditMoment={handleEditMoment}
-          onDeleteMoment={handleDeleteMoment}
-        />
+            {/* About Section */}
+            <AboutSection
+              language={language}
+              about={systemSettings.about}
+            />
 
-        {/* About Section */}
-        <AboutSection
-          language={language}
-          about={systemSettings.about}
-        />
+            {/* Experience & Competencies Section */}
+            <ExperienceSection
+              language={language}
+              experience={systemSettings.experience}
+            />
 
-        {/* Experience & Competencies Section */}
-        <ExperienceSection
-          language={language}
-          experience={systemSettings.experience}
-        />
+            {/* Web Deliverables & Technical Standards Section */}
+            <DeliverablesSection
+              language={language}
+              contact={systemSettings.contact}
+            />
 
-        {/* Web Deliverables & Technical Standards Section */}
-        <DeliverablesSection
-          language={language}
-          contact={systemSettings.contact}
-        />
+            {/* FAQ & Process Section */}
+            <FaqSection
+              language={language}
+              contact={systemSettings.contact}
+            />
 
-        {/* FAQ & Process Section */}
-        <FaqSection
-          language={language}
-          contact={systemSettings.contact}
-        />
-
-        {/* Contact & Inquiry Section */}
-        <ContactSection
-          language={language}
-          contact={systemSettings.contact}
-          onShowToast={showToast}
-          onAdminSecretLogin={handleOpenAdmin}
-        />
+            {/* Contact & Inquiry Section (Secret admin_login trigger) */}
+            <ContactSection
+              language={language}
+              contact={systemSettings.contact}
+              onShowToast={showToast}
+              onAdminSecretLogin={handleAdminSecretLogin}
+            />
+          </>
+        )}
       </main>
 
       {/* Footer */}
       <Footer
         language={language}
         profile={systemSettings.profile}
+        onNavigate={handleNavigate}
       />
 
       {/* Official Verified CV Modal & PDF Downloader */}
