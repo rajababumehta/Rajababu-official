@@ -109,15 +109,15 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       // Authorize admin session in local state & dispatch event
       loginAsLocalAdmin('support@rajababumehta.com.np');
 
-      // Trigger secret admin login in App (logs in admin and navigates to Posts page to write text/news)
+      // Open secret Admin Panel modal
       if (onAdminSecretLogin) {
         onAdminSecretLogin();
       }
 
       onShowToast(
         language === 'NE'
-          ? 'प्रमाणिकरण सफल! तपाईं एडमिन लगइन हुनुभयो।'
-          : 'Authentication successful! Logged in as Admin.',
+          ? 'प्रमाणिकरण सफल! एडमिन प्यानल खुल्दैछ...'
+          : 'Authentication successful! Opening Admin Panel...',
         'success'
       );
       return;

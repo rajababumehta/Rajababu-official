@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   Sparkles,
   Lightbulb,
   Code,
   ChevronDown,
-  ArrowRight,
 } from 'lucide-react';
 import { Language, ProfileSettings } from '../types';
 
@@ -41,11 +40,6 @@ export const Header: React.FC<HeaderProps> = ({
   const roles = language === 'NE' ? rolesNe : rolesEn;
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
 
-  // Parallax scroll for hero background image
-  const { scrollY } = useScroll();
-  const yParallax = useTransform(scrollY, [0, 800], [0, 160]);
-  const opacityParallax = useTransform(scrollY, [0, 600], [1, 0.45]);
-
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentRoleIndex((prev) => (prev + 1) % roles.length);
@@ -58,18 +52,13 @@ export const Header: React.FC<HeaderProps> = ({
       id="home"
       className="relative min-h-[105vh] sm:min-h-[100vh] flex flex-col justify-end overflow-hidden bg-slate-950 pt-[380px] sm:pt-[480px] lg:pt-[540px] pb-10 sm:pb-16"
     >
-      {/* 1. HERO BACKGROUND COVER IMAGE WITH PARALLAX DEPTH */}
-      <motion.div
-        style={{ y: yParallax, opacity: opacityParallax }}
-        className="absolute inset-0 w-full h-full pointer-events-none will-change-transform"
-      >
-        <img
-          src={heroImageSrc}
-          alt="Rajababu Mehta – Official Website, AI Website Developer & AI Explainer from Birgunj, Nepal"
-          referrerPolicy="no-referrer"
-          className="w-full h-full object-cover object-top filter brightness-95 contrast-105"
-        />
-      </motion.div>
+      {/* 1. HERO BACKGROUND COVER IMAGE (Full-viewport, uncropped top face anchoring) */}
+      <img
+        src={heroImageSrc}
+        alt="Rajababu Mehta – Official Website, AI Website Developer & AI Explainer from Birgunj, Nepal"
+        referrerPolicy="no-referrer"
+        className="absolute inset-0 w-full h-full object-cover object-top filter brightness-95 contrast-105 pointer-events-none"
+      />
 
       {/* 2. DUAL-LAYER GRADIENTS OVERLAY & BACKDROP LIGHTING */}
       {/* Top-to-bottom subtle gradient: seamless transition with navbar, crystal clear center */}
@@ -85,17 +74,6 @@ export const Header: React.FC<HeaderProps> = ({
       {/* 3. HERO FOREGROUND CONTAINER (Deeply anchored at bottom, never blocks face) */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-auto">
         <div className="max-w-4xl">
-          {/* Level 01 Game-Style Stage Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-blue-500/30 text-blue-400 font-mono text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-3 shadow-sm shadow-blue-500/10 backdrop-blur-md"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
-            <span>{language === 'NE' ? 'स्तर ०१ // प्रारम्भ तथा लक्ष्य' : 'LEVEL 01 // ORIGIN & VISION'}</span>
-          </motion.div>
-
           {/* Name Title */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -150,34 +128,10 @@ export const Header: React.FC<HeaderProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.25 }}
-            className="text-sm sm:text-base lg:text-lg text-slate-300/95 max-w-2xl leading-relaxed mb-6 drop-shadow-md"
+            className="text-sm sm:text-base lg:text-lg text-slate-300/95 max-w-2xl leading-relaxed mb-4 drop-shadow-md"
           >
             {language === 'NE' ? profile.taglineNe : profile.taglineEn}
           </motion.p>
-
-          {/* Quick CTA Action Navigation Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-wrap items-center gap-3"
-          >
-            <a
-              href="#about"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
-            >
-              <span>{language === 'NE' ? 'अन्वेषण सुरु गर्नुहोस्' : 'Explore Digital World'}</span>
-              <ChevronDown className="w-4 h-4" />
-            </a>
-
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 text-slate-200 text-xs sm:text-sm font-semibold transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
-            >
-              <span>{language === 'NE' ? 'सम्पर्क गर्नुहोस्' : 'Connect Directly'}</span>
-              <ArrowRight className="w-3.5 h-3.5 text-blue-400" />
-            </a>
-          </motion.div>
         </div>
       </div>
 
@@ -194,4 +148,3 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
-

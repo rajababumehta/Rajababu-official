@@ -12,7 +12,6 @@ import {
   Layers,
 } from 'lucide-react';
 import { Language, ContactSettings } from '../types';
-import { TiltCard } from './TiltCard';
 
 interface DeliverablesSectionProps {
   language: Language;
@@ -110,19 +109,8 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col items-center text-center mb-16 sm:mb-20"
-        >
-          {/* Level 04 Stage Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-blue-500/30 text-blue-400 font-mono text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-3 shadow-sm backdrop-blur-md">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-            <span>{language === 'NE' ? 'स्तर ०४ // सेवा तथा गुणस्तर' : 'LEVEL 04 // CAPABILITIES & STANDARDS'}</span>
-          </div>
-
+        <div className="flex flex-col items-center text-center mb-16 sm:mb-20">
+          
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold mb-4">
             <Layers className="w-3.5 h-3.5" />
             <span>
@@ -164,7 +152,7 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
               <span>{language === 'NE' ? 'एसएसएल सुरक्षा' : 'HTTPS SSL Included'}</span>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* 4 Deliverables Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
@@ -177,35 +165,31 @@ export const DeliverablesSection: React.FC<DeliverablesSectionProps> = ({
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className="h-full"
+                className="p-6 sm:p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/40 hover:bg-slate-900 transition-all shadow-xl flex flex-col justify-between group"
               >
-                <TiltCard tiltMaxAngle={5} className="h-full">
-                  <div className="p-6 sm:p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/40 hover:bg-slate-900 transition-all shadow-xl flex flex-col justify-between group h-full">
-                    <div>
-                      <div className="flex items-center justify-between mb-5">
-                        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-500/20 transition-all">
-                          <IconComponent className="w-6 h-6" />
-                        </div>
-                        <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                          {language === 'NE' ? item.badgeNe : item.badgeEn}
-                        </span>
-                      </div>
-
-                      <h4 className="text-base sm:text-lg font-bold text-slate-100 font-heading mb-2.5 group-hover:text-blue-400 transition-colors">
-                        {language === 'NE' ? item.titleNe : item.titleEn}
-                      </h4>
-
-                      <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                        {language === 'NE' ? item.descNe : item.descEn}
-                      </p>
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-500/20 transition-all">
+                      <IconComponent className="w-6 h-6" />
                     </div>
-
-                    <div className="pt-5 mt-5 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-blue-400">
-                      <span>{language === 'NE' ? 'प्रत्येक वेबसाइटमा समावेश' : 'Included in Every Website'}</span>
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    </div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                      {language === 'NE' ? item.badgeNe : item.badgeEn}
+                    </span>
                   </div>
-                </TiltCard>
+
+                  <h4 className="text-base sm:text-lg font-bold text-slate-100 font-heading mb-2.5 group-hover:text-blue-400 transition-colors">
+                    {language === 'NE' ? item.titleNe : item.titleEn}
+                  </h4>
+
+                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                    {language === 'NE' ? item.descNe : item.descEn}
+                  </p>
+                </div>
+
+                <div className="pt-5 mt-5 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-blue-400">
+                  <span>{language === 'NE' ? 'प्रत्येक वेबसाइटमा समावेश' : 'Included in Every Website'}</span>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                </div>
               </motion.div>
             );
           })}

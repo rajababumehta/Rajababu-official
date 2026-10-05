@@ -4,8 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server.ts",
-    "start": "node server.ts",
+    "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
@@ -14,7 +13,6 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
-    "express": "^5.2.1",
     "firebase": "^12.18.0",
     "html2canvas": "^1.4.1",
     "html2canvas-pro": "^2.4.2",
@@ -22,11 +20,9 @@
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "react": "^19.0.1",
-    "react-dom": "^19.0.1",
-    "tsx": "^4.23.15"
+    "react-dom": "^19.0.1"
   },
   "devDependencies": {
-    "@types/express": "^5.0.6",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
     "tailwindcss": "^4.1.14",

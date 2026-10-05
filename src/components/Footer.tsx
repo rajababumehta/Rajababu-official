@@ -5,30 +5,12 @@ import { Language, ProfileSettings } from '../types';
 interface FooterProps {
   language: Language;
   profile: ProfileSettings;
-  onNavigate?: (view: 'home' | 'posts', targetHash?: string) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   language,
   profile,
-  onNavigate,
 }) => {
-  const handleLinkClick = (e: React.MouseEvent, href: string) => {
-    e.preventDefault();
-    if (href === '#posts') {
-      if (onNavigate) {
-        onNavigate('posts', '#posts');
-      } else {
-        window.location.hash = '#posts';
-      }
-    } else {
-      if (onNavigate) {
-        onNavigate('home', href);
-      } else {
-        window.location.hash = href;
-      }
-    }
-  };
   return (
     <footer className="bg-slate-950 border-t border-slate-900 py-10 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -63,59 +45,31 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Quick Internal Nav Links for Search Engines & Visitors */}
           <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-400">
-            <a
-              href="#home"
-              onClick={(e) => handleLinkClick(e, '#home')}
-              className="hover:text-blue-400 transition-colors cursor-pointer"
-            >
+            <a href="#home" className="hover:text-blue-400 transition-colors">
               {language === 'NE' ? 'गृहपृष्ठ' : 'Home'}
             </a>
             <span>•</span>
-            <a
-              href="#posts"
-              onClick={(e) => handleLinkClick(e, '#posts')}
-              className="hover:text-blue-400 transition-colors cursor-pointer"
-            >
+            <a href="#posts" className="hover:text-blue-400 transition-colors">
               {language === 'NE' ? 'पोस्टहरू' : 'Posts'}
             </a>
             <span>•</span>
-            <a
-              href="#about"
-              onClick={(e) => handleLinkClick(e, '#about')}
-              className="hover:text-blue-400 transition-colors cursor-pointer"
-            >
+            <a href="#about" className="hover:text-blue-400 transition-colors">
               {language === 'NE' ? 'परिचय' : 'About'}
             </a>
             <span>•</span>
-            <a
-              href="#skills"
-              onClick={(e) => handleLinkClick(e, '#skills')}
-              className="hover:text-blue-400 transition-colors cursor-pointer"
-            >
+            <a href="#skills" className="hover:text-blue-400 transition-colors">
               {language === 'NE' ? 'सीपहरू' : 'Skills'}
             </a>
             <span>•</span>
-            <a
-              href="#services"
-              onClick={(e) => handleLinkClick(e, '#services')}
-              className="hover:text-blue-400 transition-colors cursor-pointer"
-            >
+            <a href="#services" className="hover:text-blue-400 transition-colors">
               {language === 'NE' ? 'सेवाहरू' : 'Deliverables'}
             </a>
             <span>•</span>
-            <a
-              href="#faq"
-              onClick={(e) => handleLinkClick(e, '#faq')}
-              className="hover:text-blue-400 transition-colors cursor-pointer"
-            >
+            <a href="#faq" className="hover:text-blue-400 transition-colors">
               FAQ
             </a>
             <span>•</span>
-            <a
-              href="#contact"
-              onClick={(e) => handleLinkClick(e, '#contact')}
-              className="hover:text-blue-400 transition-colors cursor-pointer"
-            >
+            <a href="#contact" className="hover:text-blue-400 transition-colors">
               {language === 'NE' ? 'सम्पर्क' : 'Contact'}
             </a>
           </div>

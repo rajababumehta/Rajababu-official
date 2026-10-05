@@ -29,23 +29,7 @@ import {
 import {
   subscribeToClipzoneImages,
   subscribeToSystemSettings,
-  subscribeToPublicPosts,
-  savePublicPostToFirestore,
-  deletePublicPostFromFirestore,
-  updatePostLikesInFirestore,
-  loginAsLocalAdmin,
-  logoutAdmin,
-  LOCAL_ADMIN_STORAGE_KEY,
-  getFirebaseInstances,
 } from './services/firebase';
-import {
-  fetchPublicPosts,
-  publishPublicPost,
-  deletePublicPost,
-  likePublicPost,
-  fetchPublicComments,
-  addPublicComment,
-} from './services/api';
 
 const FIXED_HERO_IMAGE =
   'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg';
@@ -154,7 +138,7 @@ export default function App() {
     return DEFAULT_SYSTEM_SETTINGS;
   });
 
-  // 3. Moments Gallery State (Public Posts for Rajababu Mehta's channel)
+  // 3. Moments Gallery State (Clean empty slate for Rajababu Mehta's own posts)
   const [moments, setMoments] = useState<Moment[]>(() => {
     try {
       const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
@@ -163,24 +147,26 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEYS.CUSTOM_MOMENTS);
       if (saved !== null) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // Filter out legacy sample mock posts and deleted IDs
+        if (Array.isArray(parsed)) {
+          // Filter out legacy sample posts and deleted IDs
           const validMoments = parsed.filter(
             (m: Moment) =>
               !deletedIds.includes(m.id) &&
-              !['moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6', 'moment-rajababu-nature'].includes(m.id) &&
+              !['post-1', 'post-2', 'post-3', 'post-4', 'moment-1', 'moment-2', 'moment-3', 'moment-4', 'moment-5', 'moment-6', 'moment-rajababu-nature'].includes(m.id) &&
               !m.imgUrl?.includes('unsplash.com') &&
-              !m.imgUrl?.includes('rajababu_nature_moment')
+              !m.imgUrl?.includes('rajababu_nature_moment') &&
+              !m.id?.startsWith('post-') // Only custom posts created with timestamp/firebase
           );
           if (validMoments.length > 0) {
             return validMoments;
           }
         }
       }
+      return [];
     } catch (e) {
       console.error('Failed to load moments from localStorage', e);
     }
-    return DEFAULT_MOMENTS;
+    return [];
   });
 
   // 4. Comments Map State
@@ -217,103 +203,7 @@ export default function App() {
   const handleOpenCv = () => setIsCvOpen(true);
   const handleCloseCv = () => setIsCvOpen(false);
 
-  // 8. Navigation & Current View State ('home' | 'posts')
-  const [currentView, setCurrentView] = useState<'home' | 'posts'>(() => {
-    if (typeof window !== 'undefined' && window.location.hash === '#posts') {
-      return 'posts';
-    }
-    return 'home';
-  });
-
-  // 9. Admin Logged-In State
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
-    try {
-      return Boolean(
-        localStorage.getItem(LOCAL_ADMIN_STORAGE_KEY) ||
-        localStorage.getItem('local_admin_session')
-      );
-    } catch {
-      return false;
-    }
-  });
-
-  // Listen to hashchange events for smooth back/forward browser navigation
-  useEffect(() => {
-    const handleHash = () => {
-      if (window.location.hash === '#posts') {
-        setCurrentView('posts');
-      } else {
-        setCurrentView('home');
-      }
-    };
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
-
-  // Admin Logout Handler (invoked by clicking top circle photo or logout button)
-  const handleAdminLogout = async () => {
-    try {
-      await logoutAdmin();
-      localStorage.removeItem('local_admin_session');
-    } catch (e) {
-      console.warn('Logout warning:', e);
-    }
-    setIsAdminLoggedIn(false);
-    setIsAdminOpen(false);
-    showToast(
-      language === 'NE'
-        ? 'तपाईं एडमिनबाट सफलतापूर्वक लगआउट हुनुभयो।'
-        : 'Logged out of administrator session successfully.',
-      'info'
-    );
-  };
-
-  // Secret Admin Login Handler (triggered when contact form enters admin_login in all fields)
-  const handleAdminSecretLogin = () => {
-    loginAsLocalAdmin('support@rajababumehta.com.np');
-    localStorage.setItem(
-      'local_admin_session',
-      JSON.stringify({ email: 'support@rajababumehta.com.np', role: 'admin' })
-    );
-    setIsAdminLoggedIn(true);
-    // User requested: "first tehi bat photo upload garn nmilne banaunus tyo admin login hoss matra"
-    // So do NOT pop up the old photo upload modal!
-    setIsAdminOpen(false);
-
-    // Switch view to Post page so admin can write news articles immediately!
-    setCurrentView('posts');
-    window.location.hash = '#posts';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    showToast(
-      language === 'NE'
-        ? 'नमस्ते राजाबाबु मेहता! तपाईं एडमिन लगइन हुनुभयो। यहाँ समाचार तथा लेख लेखेर प्रकाशित गर्न सक्नुहुन्छ।'
-        : 'Welcome Rajababu Mehta! Logged in as Admin. You can now write and publish news articles directly here.',
-      'success'
-    );
-  };
-
-  // Navigation handler
-  const handleNavigate = (view: 'home' | 'posts', targetHash?: string) => {
-    setCurrentView(view);
-    if (targetHash) {
-      window.location.hash = targetHash;
-      if (view === 'posts') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        setTimeout(() => {
-          const el = document.querySelector(targetHash);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth' });
-          } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        }, 100);
-      }
-    }
-  };
-
-  // 10. Firebase Admin Modal State (for optional settings / advanced sync)
+  // 8. Firebase Admin Modal State
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const handleOpenAdmin = () => setIsAdminOpen(true);
   const handleCloseAdmin = () => setIsAdminOpen(false);
@@ -421,56 +311,6 @@ export default function App() {
     return () => unsubscribeImages();
   }, []);
 
-  // Realtime Firestore Public Posts (Live sync for every visitor across all devices)
-  useEffect(() => {
-    const unsubscribePosts = subscribeToPublicPosts((remotePosts) => {
-      if (remotePosts && remotePosts.length > 0) {
-        const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
-        const deletedIds: string[] = deletedIdsStr ? JSON.parse(deletedIdsStr) : [];
-        const validRemote = remotePosts.filter((p) => !deletedIds.includes(p.id));
-
-        setMoments((prev) => {
-          const remoteIdSet = new Set(validRemote.map((p) => p.id));
-          const localOnly = prev.filter((p) => !remoteIdSet.has(p.id) && !deletedIds.includes(p.id));
-          return [...validRemote, ...localOnly];
-        });
-      }
-    });
-
-    return () => unsubscribePosts();
-  }, []);
-
-  // Load Global Public Posts & Comments from Server on initial load
-  useEffect(() => {
-    let isMounted = true;
-    fetchPublicPosts()
-      .then((serverPosts) => {
-        if (isMounted && serverPosts && serverPosts.length > 0) {
-          setMoments((prev) => {
-            const serverIdSet = new Set(serverPosts.map((p) => p.id));
-            const localOnly = prev.filter((p) => !serverIdSet.has(p.id));
-            return [...serverPosts, ...localOnly];
-          });
-        }
-      })
-      .catch((err) => console.warn('Could not load public posts:', err));
-
-    fetchPublicComments()
-      .then((serverComments) => {
-        if (isMounted && serverComments && Object.keys(serverComments).length > 0) {
-          setCommentsMap((prev) => ({
-            ...prev,
-            ...serverComments,
-          }));
-        }
-      })
-      .catch((err) => console.warn('Could not load public comments:', err));
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
   // Handlers
   const handleToggleLanguage = () => {
     const nextLang = language === 'EN' ? 'NE' : 'EN';
@@ -486,8 +326,6 @@ export default function App() {
       setMoments((prev) =>
         prev.map((m) => (m.id === id ? { ...m, likes: Math.max(0, m.likes - 1) } : m))
       );
-      updatePostLikesInFirestore(id, -1);
-      likePublicPost(id, 'unlike');
       showToast(language === 'NE' ? 'प्रतिक्रिया हटाइयो' : 'Like removed', 'info');
     } else {
       // Like
@@ -495,8 +333,6 @@ export default function App() {
       setMoments((prev) =>
         prev.map((m) => (m.id === id ? { ...m, likes: m.likes + 1 } : m))
       );
-      updatePostLikesInFirestore(id, 1);
-      likePublicPost(id, 'like');
       showToast(language === 'NE' ? 'तपाईँको प्रतिक्रिया सुरक्षित भयो! ❤️' : 'Thanks for your like! ❤️', 'success');
     }
   };
@@ -525,7 +361,7 @@ export default function App() {
 
   const handleAddComment = (momentId: string, author: string, text: string) => {
     const newComment: Comment = {
-      id: `comment-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      id: `comment-${Date.now()}`,
       momentId,
       author,
       text,
@@ -539,11 +375,9 @@ export default function App() {
         [momentId]: [newComment, ...currentList],
       };
     });
-
-    addPublicComment(momentId, author, text);
   };
 
-  const handleDeleteMoment = async (id: string) => {
+  const handleDeleteMoment = (id: string) => {
     try {
       const deletedIdsStr = localStorage.getItem(STORAGE_KEYS.DELETED_MOMENT_IDS);
       const deletedIds: string[] = deletedIdsStr ? JSON.parse(deletedIdsStr) : [];
@@ -552,31 +386,14 @@ export default function App() {
         localStorage.setItem(STORAGE_KEYS.DELETED_MOMENT_IDS, JSON.stringify(deletedIds));
       }
       setMoments((prev) => prev.filter((m) => m.id !== id));
-      await deletePublicPostFromFirestore(id);
-      await deletePublicPost(id);
       showToast(language === 'NE' ? 'पोस्ट हटाइयो' : 'Post removed', 'info');
     } catch (e) {
       console.error('Delete post error:', e);
     }
   };
 
-  const handleAddMoment = async (newMoment: Moment) => {
-    // 1. Optimistic local state update so admin immediately sees the post
+  const handleAddMoment = (newMoment: Moment) => {
     setMoments((prev) => [newMoment, ...prev.filter((m) => m.id !== newMoment.id)]);
-
-    // 2. Persist to live Firestore database so EVERY visitor in the world gets real-time sync!
-    try {
-      await savePublicPostToFirestore(newMoment);
-    } catch (e) {
-      console.warn('Firestore post save warning:', e);
-    }
-
-    // 3. Persist to Global Backend API so every visitor worldwide sees it
-    try {
-      await publishPublicPost(newMoment);
-    } catch (e) {
-      console.warn('API post publish fallback:', e);
-    }
   };
 
   const handleEditMoment = (_moment: Moment) => {
@@ -597,80 +414,69 @@ export default function App() {
         onToggleLanguage={handleToggleLanguage}
         profile={systemSettings.profile}
         onOpenCv={handleOpenCv}
-        isAdmin={isAdminLoggedIn}
-        onAdminLogout={handleAdminLogout}
-        currentView={currentView}
-        onNavigate={handleNavigate}
       />
 
       {/* Main Page Content */}
       <main className="flex-1">
-        {currentView === 'posts' ? (
-          /* Dedicated News Channel & Editorial Post Page */
-          <JourneySection
-            language={language}
-            moments={moments}
-            onLikeMoment={handleLikeMoment}
-            userLikedMoments={userLikedMoments}
-            onAutoBoostAllLikes={handleAutoBoostAllLikes}
-            commentsMap={commentsMap}
-            onAddComment={handleAddComment}
-            onShowToast={showToast}
-            isAdmin={isAdminLoggedIn}
-            onAddMoment={handleAddMoment}
-            onEditMoment={handleEditMoment}
-            onDeleteMoment={handleDeleteMoment}
-            onBackToHome={() => handleNavigate('home', '#home')}
-          />
-        ) : (
-          /* Home & Portfolio Sections (ZERO posts cluttering home section) */
-          <>
-            {/* Hero Section */}
-            <Header
-              language={language}
-              profile={systemSettings.profile}
-            />
+        {/* Hero Section */}
+        <Header
+          language={language}
+          profile={systemSettings.profile}
+        />
 
-            {/* About Section */}
-            <AboutSection
-              language={language}
-              about={systemSettings.about}
-            />
+        {/* Posts & Tech Updates Section (Right after Home) */}
+        <JourneySection
+          language={language}
+          moments={moments}
+          onLikeMoment={handleLikeMoment}
+          userLikedMoments={userLikedMoments}
+          onAutoBoostAllLikes={handleAutoBoostAllLikes}
+          commentsMap={commentsMap}
+          onAddComment={handleAddComment}
+          onShowToast={showToast}
+          isAdmin={isAdminOpen}
+          onOpenAdminUpload={() => setIsAdminOpen(true)}
+          onEditMoment={handleEditMoment}
+          onDeleteMoment={handleDeleteMoment}
+        />
 
-            {/* Experience & Competencies Section */}
-            <ExperienceSection
-              language={language}
-              experience={systemSettings.experience}
-            />
+        {/* About Section */}
+        <AboutSection
+          language={language}
+          about={systemSettings.about}
+        />
 
-            {/* Web Deliverables & Technical Standards Section */}
-            <DeliverablesSection
-              language={language}
-              contact={systemSettings.contact}
-            />
+        {/* Experience & Competencies Section */}
+        <ExperienceSection
+          language={language}
+          experience={systemSettings.experience}
+        />
 
-            {/* FAQ & Process Section */}
-            <FaqSection
-              language={language}
-              contact={systemSettings.contact}
-            />
+        {/* Web Deliverables & Technical Standards Section */}
+        <DeliverablesSection
+          language={language}
+          contact={systemSettings.contact}
+        />
 
-            {/* Contact & Inquiry Section (Secret admin_login trigger) */}
-            <ContactSection
-              language={language}
-              contact={systemSettings.contact}
-              onShowToast={showToast}
-              onAdminSecretLogin={handleAdminSecretLogin}
-            />
-          </>
-        )}
+        {/* FAQ & Process Section */}
+        <FaqSection
+          language={language}
+          contact={systemSettings.contact}
+        />
+
+        {/* Contact & Inquiry Section */}
+        <ContactSection
+          language={language}
+          contact={systemSettings.contact}
+          onShowToast={showToast}
+          onAdminSecretLogin={handleOpenAdmin}
+        />
       </main>
 
       {/* Footer */}
       <Footer
         language={language}
         profile={systemSettings.profile}
-        onNavigate={handleNavigate}
       />
 
       {/* Official Verified CV Modal & PDF Downloader */}
