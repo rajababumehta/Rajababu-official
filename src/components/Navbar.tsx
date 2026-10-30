@@ -53,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center ring-1 ring-white/20">
                   <img
                     src="/brand-avatar.png"
-                    alt={`${profile.name || 'Rajababu Mehta'} – Founder of AI Clipzone`}
+                    alt={`${profile.name || 'Rajababu Mehta'} – Founder & CEO of AI Clipzone`}
                     className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-110"
                   />
                 </div>
@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {profile.name || 'Rajababu Mehta'}
                 </span>
                 <span className="text-[10px] text-blue-400 font-semibold tracking-wide hidden lg:inline-block">
-                  {language === 'NE' ? 'संस्थापक: AI Clipzone' : 'Founder of AI Clipzone'}
+                  {language === 'NE' ? 'संस्थापक तथा सीईओ: AI Clipzone' : 'Founder & CEO of AI Clipzone'}
                 </span>
               </div>
             </a>

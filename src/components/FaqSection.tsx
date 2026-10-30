@@ -18,14 +18,14 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
 
   const faqItems = [
     {
-      questionEn: 'Who is the founder of AI Clipzone?',
-      questionNe: 'एआई क्लिपजोन (AI Clipzone) का संस्थापक को हुनुहुन्छ?',
+      questionEn: 'Who is the Founder and CEO of AI Clipzone?',
+      questionNe: 'एआई क्लिपजोन (AI Clipzone) का संस्थापक तथा सीईओ को हुनुहुन्छ?',
       answerEn:
-        'Rajababu Mehta is the founder of AI Clipzone (https://aiclipzone.vercel.app/). He is an AI Website Developer, AI Explainer, and Student based in Birgunj, Nepal who designed, architected, and launched the AI Clipzone platform.',
+        'Rajababu Mehta is the Founder and CEO of AI Clipzone (https://aiclipzone.vercel.app/). He is an AI Website Developer, AI Explainer, and Student based in Birgunj, Nepal who architected, launched, and leads the AI Clipzone platform.',
       answerNe:
-        'राजाबाबु मेहता एआई क्लिपजोन (AI Clipzone - https://aiclipzone.vercel.app/) का संस्थापक हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर, एआई व्याख्याकर्ता तथा विद्यार्थी हुनुहुन्छ जसले एआई क्लिपजोन प्लेटफर्मको स्थापना र विकास गर्नुभएको हो।',
-      categoryEn: 'Founder & AI Clipzone',
-      categoryNe: 'संस्थापक तथा एआई क्लिपजोन',
+        'राजाबाबु मेहता एआई क्लिपजोन (AI Clipzone - https://aiclipzone.vercel.app/) का संस्थापक तथा प्रमुख कार्यकारी अधिकृत (Founder & CEO) हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर, एआई व्याख्याकर्ता तथा विद्यार्थी हुनुहुन्छ जसले एआई क्लिपजोन प्लेटफर्मको स्थापना र नेतृत्व गर्नुभएको हो।',
+      categoryEn: 'Founder & CEO',
+      categoryNe: 'संस्थापक तथा सीईओ',
       linkUrl: 'https://aiclipzone.vercel.app/',
     },
     {

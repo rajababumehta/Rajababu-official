@@ -238,8 +238,8 @@ export default function App() {
     localStorage.setItem(STORAGE_KEYS.LANGUAGE, language);
     document.title =
       language === 'NE'
-        ? 'राजाबाबु मेहता | एआई क्लिपजोनका संस्थापक तथा एआई वेबसाइट डेभलपर'
-        : 'Rajababu Mehta | Founder of AI Clipzone & AI Website Developer';
+        ? 'राजाबाबु मेहता | एआई क्लिपजोनका संस्थापक तथा सीईओ, एआई वेबसाइट डेभलपर'
+        : 'Rajababu Mehta | Founder & CEO of AI Clipzone & AI Website Developer';
   }, [language]);
 
   useEffect(() => {

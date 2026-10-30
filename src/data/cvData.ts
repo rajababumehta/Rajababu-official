@@ -39,15 +39,15 @@ export interface CvData {
 
 export const RAJABABU_CV_DATA: CvData = {
   name: 'RAJABABU MEHTA',
-  role: 'Founder of AI Clipzone | AI Web Developer | Student',
+  role: 'Founder & CEO of AI Clipzone | AI Web Developer | Student',
   location: 'Birgunj, Nepal',
   email: 'support@rajababumehta.com.np',
   website: 'https://rajababumehta.com.np',
   phone: '9816689232',
   summary:
-    'Rajababu Mehta is the founder of AI Clipzone (https://aiclipzone.vercel.app/), an AI Website Developer, and Student based in Birgunj, Nepal. Passionate about artificial intelligence, modern frontend engineering, and intuitive digital tools.',
+    'Rajababu Mehta is the Founder and CEO of AI Clipzone (https://aiclipzone.vercel.app/), an AI Website Developer, and Student based in Birgunj, Nepal. Passionate about artificial intelligence, modern frontend engineering, and intuitive digital tools.',
   objective:
-    'To lead and expand AI Clipzone while building high-performance modern websites, mastering emerging AI technologies, and delivering exceptional digital experiences.',
+    'To lead and expand AI Clipzone as Founder & CEO while building high-performance modern websites, mastering emerging AI technologies, and delivering exceptional digital experiences.',
   education: [
     {
       degree: '+2 Management',
@@ -70,17 +70,17 @@ export const RAJABABU_CV_DATA: CvData = {
   ],
   projects: [
     {
-      title: 'AI Clipzone (Founder & Creator)',
-      type: 'Founder • AI Learning Platform & Tool Hub',
+      title: 'AI Clipzone (Founder & CEO)',
+      type: 'Founder & CEO • AI Learning Platform & Tool Hub',
       url: 'https://aiclipzone.vercel.app/',
-      description: 'Interactive AI hub and creative showcase founded and developed by Rajababu Mehta, offering modern AI resources and digital tools.',
+      description: 'Interactive AI hub and creative showcase founded and led by Rajababu Mehta, offering modern AI resources and digital tools.',
     },
   ],
   experience: {
-    title: 'Founder of AI Clipzone & Web Developer',
+    title: 'Founder & CEO of AI Clipzone & Web Developer',
     duration: '7 Years of Hands-on Experience',
     description:
-      'Founder and creator of AI Clipzone (https://aiclipzone.vercel.app/) with over 7 years of deep experience in technology, AI tools, web engineering, and digital platforms.',
+      'Founder and CEO of AI Clipzone (https://aiclipzone.vercel.app/) with over 7 years of deep experience in technology, AI tools, web engineering, and digital platforms.',
   },
   languages: ['Nepali', 'Bhojpuri', 'Hindi', 'English'],
   socialMedia: [

@@ -48,12 +48,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         <div className="max-w-4xl mx-auto">
           <div className="p-8 sm:p-12 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm shadow-xl">
             
-            {/* Founder Verification Highlight Banner */}
+            {/* Founder & CEO Verification Highlight Banner */}
             <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-950/60 via-slate-900/90 to-indigo-950/60 border border-blue-500/30 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
               <div className="space-y-1">
                 <div className="inline-flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider">
                   <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                  <span>{language === 'NE' ? 'संस्थापक पहिचान' : 'Founder Identity'}</span>
+                  <span>{language === 'NE' ? 'संस्थापक तथा सीईओ पहिचान' : 'Founder & CEO Identity'}</span>
                 </div>
                 <p className="text-sm sm:text-base font-bold text-slate-100">
                   {language === 'NE' ? (
@@ -67,11 +67,11 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                       >
                         https://aiclipzone.vercel.app/
                       </a>
-                      ) का संस्थापक हुनुहुन्छ।
+                      ) का संस्थापक तथा प्रमुख कार्यकारी अधिकृत (Founder & CEO) हुनुहुन्छ।
                     </>
                   ) : (
                     <>
-                      Rajababu Mehta is the founder of AI Clipzone (
+                      Rajababu Mehta is the Founder and CEO of AI Clipzone (
                       <a
                         href="https://aiclipzone.vercel.app/"
                         target="_blank"
@@ -112,8 +112,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               </div>
               <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100 font-heading mb-4">
                 {language === 'NE'
-                  ? 'एआई क्लिपजोनका संस्थापक, एआई वेबसाइट निर्माण तथा प्रविधि अन्वेषण'
-                  : 'Founder of AI Clipzone, AI Web Development & Tech Exploration'}
+                  ? 'एआई क्लिपजोनका संस्थापक तथा सीईओ, एआई वेबसाइट निर्माण तथा प्रविधि अन्वेषण'
+                  : 'Founder & CEO of AI Clipzone, AI Web Development & Tech Exploration'}
               </h3>
               <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-6">
                 {language === 'NE' ? cleanBio1Ne : about.bioParagraph1En}
