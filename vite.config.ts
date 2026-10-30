@@ -44,7 +44,7 @@ export default defineConfig(() => {
           id: '/',
           name: 'Rajababu Mehta',
           short_name: 'Rajababu',
-          description: 'Rajababu Mehta – Official website of the AI Website Developer & AI Explainer from Birgunj, Nepal.',
+          description: 'Rajababu Mehta is the founder of AI Clipzone. He is an AI Website Developer and AI Explainer from Birgunj, Nepal.',
           theme_color: '#020617',
           background_color: '#020617',
           display: 'standalone',
@@ -79,6 +79,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
+          maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,woff,woff2}'],
           cleanupOutdatedCaches: true,
           clientsClaim: true,

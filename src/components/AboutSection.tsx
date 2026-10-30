@@ -3,6 +3,9 @@ import {
   Compass,
   Sparkles,
   Quote,
+  ExternalLink,
+  Cpu,
+  ShieldCheck,
 } from 'lucide-react';
 import { AboutSettings, Language } from '../types';
 
@@ -18,12 +21,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   const cleanBio1Ne =
     about.bioParagraph1Ne && !about.bioParagraph1Ne.includes('नेता')
       ? about.bioParagraph1Ne
-      : 'यो राजाबाबु मेहताको आधिकारिक व्यक्तिगत वेबसाइट हो। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर (AI Website Developer), विद्यार्थी (Student) तथा एआई व्याख्याकर्ता (AI Explainer) हुनुहुन्छ। आधुनिक वेब प्रविधिहरू तथा उदीयमान आर्टिफिसियल इन्टेलिजेन्स (एआई) का उपकरणहरूमा गहिरो रुचि राख्दै, उहाँले व्यवसाय, व्यक्तिगत ब्रान्ड तथा संस्थाहरूका लागि छिटो, सुरक्षित, आकर्षक र गुगल-अनुकूल वेबसाइटहरू निर्माण गर्दै आउनुभएको छ।';
+      : 'राजाबाबु मेहता एआई क्लिपजोन (AI Clipzone - https://aiclipzone.vercel.app/) का संस्थापक हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर (AI Website Developer), विद्यार्थी (Student) तथा एआई व्याख्याकर्ता (AI Explainer) हुनुहुन्छ। आधुनिक वेब प्रविधिहरू तथा उदीयमान आर्टिफिसियल इन्टेलिजेन्स (एआई) का उपकरणहरूमा गहिरो रुचि राख्दै, उहाँले व्यवसाय, व्यक्तिगत ब्रान्ड तथा संस्थाहरूका लागि छिटो, सुरक्षित, आकर्षक र गुगल-अनुकूल वेबसाइटहरू निर्माण गर्दै आउनुभएको छ।';
 
   const cleanBio2Ne =
     about.bioParagraph2Ne && !about.bioParagraph2Ne.includes('नेता')
       ? about.bioParagraph2Ne
-      : 'राजाबाबु मेहताको यस आधिकारिक वेबसाइटमार्फत तपाईँले उहाँका परियोजनाहरू, प्राविधिक सीपहरू र सेवाहरू प्रत्यक्ष अवलोकन गर्न सक्नुहुन्छ। व्यक्तिगत पोर्टफोलियो, व्यवसायिक पोर्टल, ल्यान्डिङ पेज वा कुनै पनि आधुनिक वेबसाइट बनाउन परेमा, अथवा एआई प्रविधिको व्यवहारिक प्रयोगबारे बुझ्न चाहेमा राजाबाबु मेहतासँग सिधै सम्पर्क गर्न सक्नुहुन्छ।';
+      : 'एआई क्लिपजोनका संस्थापक तथा प्रविधि अन्वेषकको रूपमा, राजाबाबु मेहताले यस आधिकारिक वेबसाइटमार्फत आफ्ना परियोजनाहरू, प्राविधिक सीपहरू र सेवाहरू प्रस्तुत गर्नुभएको छ। व्यक्तिगत पोर्टफोलियो, व्यवसायिक पोर्टल, ल्यान्डिङ पेज वा कुनै पनि आधुनिक वेबसाइट बनाउन परेमा, अथवा एआई प्रविधिको व्यवहारिक प्रयोगबारे बुझ्न चाहेमा राजाबाबु मेहतासँग सिधै सम्पर्क गर्न सक्नुहुन्छ।';
 
   return (
     <section id="about" className="py-20 sm:py-28 bg-slate-950/60 border-t border-slate-900 relative scroll-mt-24">
@@ -44,6 +47,60 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         {/* Narrative & Executive Bio */}
         <div className="max-w-4xl mx-auto">
           <div className="p-8 sm:p-12 rounded-3xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm shadow-xl">
+            
+            {/* Founder Verification Highlight Banner */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-950/60 via-slate-900/90 to-indigo-950/60 border border-blue-500/30 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                  <span>{language === 'NE' ? 'संस्थापक पहिचान' : 'Founder Identity'}</span>
+                </div>
+                <p className="text-sm sm:text-base font-bold text-slate-100">
+                  {language === 'NE' ? (
+                    <>
+                      राजाबाबु मेहता एआई क्लिपजोन (
+                      <a
+                        href="https://aiclipzone.vercel.app/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline font-semibold"
+                      >
+                        https://aiclipzone.vercel.app/
+                      </a>
+                      ) का संस्थापक हुनुहुन्छ।
+                    </>
+                  ) : (
+                    <>
+                      Rajababu Mehta is the founder of AI Clipzone (
+                      <a
+                        href="https://aiclipzone.vercel.app/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline font-semibold"
+                      >
+                        https://aiclipzone.vercel.app/
+                      </a>
+                      )
+                    </>
+                  )}
+                </p>
+                <p className="text-xs text-slate-400">
+                  {language === 'NE'
+                    ? 'वीरगञ्ज, नेपाल • एआई वेबसाइट डेभलपर, एआई व्याख्याकर्ता तथा विद्यार्थी'
+                    : 'Birgunj, Nepal • AI Website Developer, AI Explainer & Student'}
+                </p>
+              </div>
+              <a
+                href="https://aiclipzone.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/30 hover:scale-105"
+              >
+                <span>{language === 'NE' ? 'AI Clipzone खोल्नुहोस्' : 'Visit AI Clipzone'}</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-4">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -55,8 +112,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               </div>
               <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100 font-heading mb-4">
                 {language === 'NE'
-                  ? 'एआई वेबसाइट निर्माण, विद्यार्थी यात्रा तथा एआई प्रविधि अन्वेषण'
-                  : 'AI Web Development, Student Learning & Practical AI Insights'}
+                  ? 'एआई क्लिपजोनका संस्थापक, एआई वेबसाइट निर्माण तथा प्रविधि अन्वेषण'
+                  : 'Founder of AI Clipzone, AI Web Development & Tech Exploration'}
               </h3>
               <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-6">
                 {language === 'NE' ? cleanBio1Ne : about.bioParagraph1En}
@@ -80,6 +137,15 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 {language === 'NE' ? 'अन्य आधिकारिक सेक्सनहरू हेर्नुहोस्:' : 'Explore Official Sections:'}
               </span>
               <div className="flex flex-wrap gap-2">
+                <a
+                  href="https://aiclipzone.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 transition-all font-semibold inline-flex items-center gap-1"
+                >
+                  <span>AI Clipzone</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
                 <a
                   href="#services"
                   className="px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-blue-600/20 text-slate-300 hover:text-blue-400 border border-slate-700/80 transition-all font-medium"

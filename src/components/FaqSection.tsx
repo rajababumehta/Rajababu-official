@@ -18,6 +18,17 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
 
   const faqItems = [
     {
+      questionEn: 'Who is the founder of AI Clipzone?',
+      questionNe: 'एआई क्लिपजोन (AI Clipzone) का संस्थापक को हुनुहुन्छ?',
+      answerEn:
+        'Rajababu Mehta is the founder of AI Clipzone (https://aiclipzone.vercel.app/). He is an AI Website Developer, AI Explainer, and Student based in Birgunj, Nepal who designed, architected, and launched the AI Clipzone platform.',
+      answerNe:
+        'राजाबाबु मेहता एआई क्लिपजोन (AI Clipzone - https://aiclipzone.vercel.app/) का संस्थापक हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर, एआई व्याख्याकर्ता तथा विद्यार्थी हुनुहुन्छ जसले एआई क्लिपजोन प्लेटफर्मको स्थापना र विकास गर्नुभएको हो।',
+      categoryEn: 'Founder & AI Clipzone',
+      categoryNe: 'संस्थापक तथा एआई क्लिपजोन',
+      linkUrl: 'https://aiclipzone.vercel.app/',
+    },
+    {
       questionEn: 'How do we start a website project together?',
       questionNe: 'हामी सँगै वेबसाइट निर्माण कार्य कसरी सुरु गर्छौं?',
       answerEn:
@@ -159,6 +170,19 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                     >
                       <div className="px-5 sm:px-6 pb-6 pt-2 text-sm text-slate-300 border-t border-slate-800/80 leading-relaxed">
                         <p>{language === 'NE' ? faq.answerNe : faq.answerEn}</p>
+                        {faq.linkUrl && (
+                          <div className="mt-3">
+                            <a
+                              href={faq.linkUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-semibold transition-colors"
+                            >
+                              <span>{language === 'NE' ? 'AI Clipzone खोल्नुहोस्' : 'Visit AI Clipzone'}</span>
+                              <span>(aiclipzone.vercel.app) →</span>
+                            </a>
+                          </div>
+                        )}
                         <div className="mt-4 flex items-center gap-2">
                           <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                             {language === 'NE' ? 'वर्ग:' : 'Category:'}

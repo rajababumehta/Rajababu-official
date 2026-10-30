@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ExternalLink } from 'lucide-react';
 import { Language, ProfileSettings } from '../types';
 
 interface FooterProps {
@@ -22,7 +22,7 @@ export const Footer: React.FC<FooterProps> = ({
               <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center ring-1 ring-white/20">
                 <img
                   src="/brand-avatar.png"
-                  alt={`${profile.name || 'Rajababu Mehta'} – AI Website Developer & AI Explainer Official Avatar`}
+                  alt={`${profile.name || 'Rajababu Mehta'} – Founder of AI Clipzone, AI Website Developer & AI Explainer`}
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover object-center"
                 />
@@ -37,8 +37,8 @@ export const Footer: React.FC<FooterProps> = ({
               </div>
               <div className="text-xs text-slate-400">
                 {language === 'NE'
-                  ? 'आधिकारिक वेबसाइट • एआई वेबसाइट डेभलपर, एआई व्याख्याकर्ता तथा विद्यार्थी • वीरगञ्ज, नेपाल © २०२६'
-                  : 'Official Website • AI Website Developer, AI Explainer & Student • Birgunj, Nepal © 2026'}
+                  ? 'राजाबाबु मेहता • एआई क्लिपजोनका संस्थापक • एआई वेबसाइट डेभलपर, एआई व्याख्याकर्ता तथा विद्यार्थी • वीरगञ्ज, नेपाल © २०२६'
+                  : 'Rajababu Mehta • Founder of AI Clipzone • AI Website Developer, AI Explainer & Student • Birgunj, Nepal © 2026'}
               </div>
             </div>
           </div>
@@ -51,6 +51,16 @@ export const Footer: React.FC<FooterProps> = ({
             <span>•</span>
             <a href="#about" className="hover:text-blue-400 transition-colors">
               {language === 'NE' ? 'परिचय' : 'About'}
+            </a>
+            <span>•</span>
+            <a
+              href="https://aiclipzone.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 font-semibold inline-flex items-center gap-1"
+            >
+              <span>AI Clipzone</span>
+              <ExternalLink className="w-3 h-3" />
             </a>
             <span>•</span>
             <a href="#skills" className="hover:text-blue-400 transition-colors">

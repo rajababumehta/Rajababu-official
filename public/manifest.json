@@ -1,9 +1,9 @@
 {
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
   "id": "/",
-  "name": "Rajababu Mehta",
+  "name": "Rajababu Mehta | Founder of AI Clipzone",
   "short_name": "Rajababu",
-  "description": "Rajababu Mehta – Official website of the AI Website Developer & AI Explainer from Birgunj, Nepal.",
+  "description": "Rajababu Mehta is the founder of AI Clipzone. He is an AI Website Developer and AI Explainer from Birgunj, Nepal.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

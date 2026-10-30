@@ -39,15 +39,15 @@ export interface CvData {
 
 export const RAJABABU_CV_DATA: CvData = {
   name: 'RAJABABU MEHTA',
-  role: 'Student | AI Web Developer',
+  role: 'Founder of AI Clipzone | AI Web Developer | Student',
   location: 'Birgunj, Nepal',
   email: 'support@rajababumehta.com.np',
   website: 'https://rajababumehta.com.np',
   phone: '9816689232',
   summary:
-    'Motivated student and AI Web Developer passionate about technology, artificial intelligence, and modern web solutions. Interested in learning and growing in the technology field by creating innovative AI-based projects and digital solutions.',
+    'Rajababu Mehta is the founder of AI Clipzone (https://aiclipzone.vercel.app/), an AI Website Developer, and Student based in Birgunj, Nepal. Passionate about artificial intelligence, modern frontend engineering, and intuitive digital tools.',
   objective:
-    'To learn and grow in the technology field in AI by improving my skills, gaining practical experience, and contributing to innovative digital projects.',
+    'To lead and expand AI Clipzone while building high-performance modern websites, mastering emerging AI technologies, and delivering exceptional digital experiences.',
   education: [
     {
       degree: '+2 Management',
@@ -61,25 +61,26 @@ export const RAJABABU_CV_DATA: CvData = {
     },
   ],
   technicalSkills: [
+    'AI Clipzone Platform & AI Workflows',
     'AI Tools & AI Technology',
     'AI-based Website Design',
     'Website Development',
-    'Digital Marketing',
+    'Digital Marketing & SEO',
     'Communication Skills',
   ],
   projects: [
     {
-      title: 'AI Clipzone Website',
-      type: 'Portfolio / AI learning platform project',
-      url: 'https://aiclipzone.vercel.app',
-      description: 'Interactive AI learning hub, digital tool directory, and creative development showcase.',
+      title: 'AI Clipzone (Founder & Creator)',
+      type: 'Founder • AI Learning Platform & Tool Hub',
+      url: 'https://aiclipzone.vercel.app/',
+      description: 'Interactive AI hub and creative showcase founded and developed by Rajababu Mehta, offering modern AI resources and digital tools.',
     },
   ],
   experience: {
-    title: 'AI & Web Development Experience',
-    duration: '7 Years of Experience',
+    title: 'Founder of AI Clipzone & Web Developer',
+    duration: '7 Years of Hands-on Experience',
     description:
-      '7 Years of experience in learning and working with technology, AI tools, website creation, and digital projects.',
+      'Founder and creator of AI Clipzone (https://aiclipzone.vercel.app/) with over 7 years of deep experience in technology, AI tools, web engineering, and digital platforms.',
   },
   languages: ['Nepali', 'Bhojpuri', 'Hindi', 'English'],
   socialMedia: [

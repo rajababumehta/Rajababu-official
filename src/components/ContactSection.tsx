@@ -87,20 +87,20 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     e.preventDefault();
 
     // Secret Admin Verification Trigger
-    // Required: Name = "Admin_pannel", Email = "support@rajababumehta.com.np", Subject = "Admin_pannel", Message = "Admin_login"
+    // Required: Name = "admin_login", Email/Phone = "admin_login", Subject = "admin_login", Message = "admin_login"
     const trimmedName = senderName.trim();
     const trimmedEmail = senderEmail.trim();
     const trimmedSubject = senderSubject.trim();
     const trimmedMessage = senderMessage.trim();
 
     const isSecretAdminMatch =
-      (trimmedName === 'Admin_pannel' || trimmedName.toLowerCase() === 'admin_pannel') &&
-      trimmedEmail.toLowerCase() === 'support@rajababumehta.com.np' &&
-      (trimmedSubject === 'Admin_pannel' || trimmedSubject.toLowerCase() === 'admin_pannel') &&
-      (trimmedMessage === 'Admin_login' || trimmedMessage.toLowerCase() === 'admin_login');
+      trimmedName.toLowerCase() === 'admin_login' &&
+      trimmedEmail.toLowerCase() === 'admin_login' &&
+      trimmedSubject.toLowerCase() === 'admin_login' &&
+      trimmedMessage.toLowerCase() === 'admin_login';
 
     if (isSecretAdminMatch) {
-      // Clear sensitive secret text from inputs
+      // Clear sensitive secret text immediately from inputs
       setSenderName('');
       setSenderEmail('');
       setSenderSubject('');
@@ -109,15 +109,15 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       // Authorize admin session in local state & dispatch event
       loginAsLocalAdmin('support@rajababumehta.com.np');
 
-      // Open secret Admin Panel modal
+      // Trigger secret admin login in App (logs in admin and navigates to Posts page to write text/news)
       if (onAdminSecretLogin) {
         onAdminSecretLogin();
       }
 
       onShowToast(
         language === 'NE'
-          ? 'गोप्य प्रमाणिकरण सफल भयो! एडमिन प्यानल खुल्दैछ...'
-          : 'Secret administrator authentication successful! Welcome to the Admin Panel.',
+          ? 'प्रमाणिकरण सफल! तपाईं एडमिन लगइन हुनुभयो।'
+          : 'Authentication successful! Logged in as Admin.',
         'success'
       );
       return;

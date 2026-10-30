@@ -23,6 +23,7 @@ import {
   onSnapshot,
   query,
   orderBy,
+  increment,
   Firestore,
   serverTimestamp,
 } from 'firebase/firestore';
@@ -31,21 +32,23 @@ import {
   isSupported as isAnalyticsSupported,
   Analytics,
 } from 'firebase/analytics';
-import { FirebaseConfig, ClipzoneImage, AdminUser, InquiryMessage } from '../types';
+import { FirebaseConfig, ClipzoneImage, AdminUser, InquiryMessage, Moment } from '../types';
 
 export const FIREBASE_CONFIG_STORAGE_KEY = 'ai_clipzone_firebase_config';
 export const LOCAL_IMAGES_STORAGE_KEY = 'ai_clipzone_local_images';
 export const LOCAL_ADMIN_STORAGE_KEY = 'ai_clipzone_local_admin';
 
-// User's complete verified Firebase configuration
+// Live provisioned Firebase configuration
+export const FIRESTORE_DATABASE_ID = "ai-studio-rajababumehtadig-e31d8ee4-7431-4f52-a943-99ab02ac110a";
+
 export const firebaseConfig: FirebaseConfig = {
-  apiKey: "AIzaSyDvtn8knSP_KL_sODq5VgURDXM8skBOusQ",
-  authDomain: "rajababu-mehta.firebaseapp.com",
-  projectId: "rajababu-mehta",
-  storageBucket: "rajababu-mehta.firebasestorage.app",
-  messagingSenderId: "762200404229",
-  appId: "1:762200404229:web:816f1f018bceb14d63c76c",
-  measurementId: "G-QM9J2DNLXE",
+  apiKey: "AIzaSyC4G4zxJlahwFZgds5T_7JTgWNhwbmyDEI",
+  authDomain: "gen-lang-client-0360487518.firebaseapp.com",
+  projectId: "gen-lang-client-0360487518",
+  storageBucket: "gen-lang-client-0360487518.firebasestorage.app",
+  messagingSenderId: "822954278678",
+  appId: "1:822954278678:web:b3d9ef02cafaae3dedda37",
+  measurementId: "",
 };
 
 export const DEFAULT_FIREBASE_CONFIG = firebaseConfig;
@@ -61,8 +64,11 @@ try {
   // ignore
 }
 
-// Helper to initialize Firestore with auto-detect long polling for sandbox/proxy compatibility
-export const createConfiguredFirestore = (targetApp: FirebaseApp): Firestore => {
+// Helper to initialize Firestore with auto-detect long polling and dedicated database ID
+export const createConfiguredFirestore = (
+  targetApp: FirebaseApp,
+  databaseId: string = FIRESTORE_DATABASE_ID
+): Firestore => {
   try {
     setLogLevel('silent');
   } catch {
@@ -71,9 +77,9 @@ export const createConfiguredFirestore = (targetApp: FirebaseApp): Firestore => 
   try {
     return initializeFirestore(targetApp, {
       experimentalAutoDetectLongPolling: true,
-    });
+    }, databaseId);
   } catch {
-    return getFirestore(targetApp);
+    return getFirestore(targetApp, databaseId);
   }
 };
 
@@ -105,8 +111,15 @@ export const getStoredFirebaseConfig = (): FirebaseConfig => {
     const saved = localStorage.getItem(FIREBASE_CONFIG_STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed && typeof parsed === 'object' && parsed.apiKey && parsed.projectId) {
+      if (
+        parsed &&
+        typeof parsed === 'object' &&
+        parsed.apiKey &&
+        parsed.projectId === firebaseConfig.projectId
+      ) {
         return parsed;
+      } else {
+        localStorage.removeItem(FIREBASE_CONFIG_STORAGE_KEY);
       }
     }
   } catch (e) {
@@ -635,6 +648,145 @@ export const saveSystemSettingsToFirestore = async (
     } catch (e) {
       console.warn('Firestore system settings sync warning:', e);
     }
+  }
+};
+
+/**
+ * Save Public Post to live Firestore database `public_posts` collection
+ */
+export const savePublicPostToFirestore = async (post: Moment): Promise<void> => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) return;
+  try {
+    const docRef = doc(firestore, 'public_posts', post.id);
+    await setDoc(
+      docRef,
+      {
+        ...post,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch (e) {
+    console.warn('Firestore post save error:', e);
+  }
+};
+
+/**
+ * Subscribe to realtime updates for Public Posts from Firestore `public_posts`
+ */
+export const subscribeToPublicPosts = (
+  onPostsUpdate: (posts: Moment[]) => void,
+  onError?: (error: Error) => void
+) => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) return () => {};
+
+  try {
+    const q = collection(firestore, 'public_posts');
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const posts: Moment[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            titleEn: data.titleEn || '',
+            titleNe: data.titleNe || data.titleEn || '',
+            descEn: data.descEn || '',
+            descNe: data.descNe || data.descEn || '',
+            imgUrl: data.imgUrl || '',
+            likes: typeof data.likes === 'number' ? data.likes : 0,
+            category: data.category || 'AI & Technology',
+            date: data.date || '',
+            isUserUploaded: data.isUserUploaded ?? true,
+          };
+        });
+        if (posts.length > 0) {
+          onPostsUpdate(posts);
+        }
+      },
+      (err) => {
+        console.warn('Firestore public posts subscription notice:', err);
+        if (onError) onError(err);
+      }
+    );
+  } catch (err: any) {
+    console.warn('Failed to subscribe to public posts:', err);
+    return () => {};
+  }
+};
+
+/**
+ * Delete Public Post from Firestore permanently and broadcast deletion to all public visitors
+ */
+export const deletePublicPostFromFirestore = async (postId: string): Promise<void> => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) return;
+  try {
+    // 1. Delete document from public_posts collection
+    const docRef = doc(firestore, 'public_posts', postId);
+    await deleteDoc(docRef);
+
+    // 2. Also delete from clipzone_images if present
+    const clipRef = doc(firestore, 'clipzone_images', postId);
+    await deleteDoc(clipRef).catch(() => {});
+
+    // 3. Mark in deleted_posts collection so ALL public visitors and devices across the world filter it out
+    const delRef = doc(firestore, 'deleted_posts', postId);
+    await setDoc(delRef, {
+      id: postId,
+      deletedAt: serverTimestamp(),
+    });
+    console.log(`[Firestore] Post "${postId}" deleted permanently and broadcasted.`);
+  } catch (e) {
+    console.warn('Failed to delete post from Firestore:', e);
+  }
+};
+
+/**
+ * Subscribe to realtime deleted post IDs so all visitors in the world filter them out permanently
+ */
+export const subscribeToDeletedPostIds = (
+  onDeletedUpdate: (deletedIds: string[]) => void
+) => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) return () => {};
+
+  try {
+    const q = collection(firestore, 'deleted_posts');
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const deletedIds = snapshot.docs.map((docSnap) => docSnap.id);
+        if (deletedIds.length > 0) {
+          onDeletedUpdate(deletedIds);
+        }
+      },
+      (err) => {
+        console.warn('Deleted posts subscriber notice:', err);
+      }
+    );
+  } catch (err: any) {
+    console.warn('Failed to subscribe to deleted posts:', err);
+    return () => {};
+  }
+};
+
+/**
+ * Update post likes in Firestore
+ */
+export const updatePostLikesInFirestore = async (postId: string, delta: number): Promise<void> => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) return;
+  try {
+    const docRef = doc(firestore, 'public_posts', postId);
+    await updateDoc(docRef, {
+      likes: increment(delta),
+    });
+  } catch (e) {
+    console.warn('Failed to update likes in Firestore:', e);
   }
 };
 

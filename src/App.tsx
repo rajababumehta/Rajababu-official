@@ -238,8 +238,8 @@ export default function App() {
     localStorage.setItem(STORAGE_KEYS.LANGUAGE, language);
     document.title =
       language === 'NE'
-        ? 'राजाबाबु मेहता – आधिकारिक वेबसाइट | एआई वेबसाइट डेभलपर तथा एआई व्याख्याकर्ता'
-        : 'Rajababu Mehta – Official Website | AI Website Developer & AI Explainer';
+        ? 'राजाबाबु मेहता | एआई क्लिपजोनका संस्थापक तथा एआई वेबसाइट डेभलपर'
+        : 'Rajababu Mehta | Founder of AI Clipzone & AI Website Developer';
   }, [language]);
 
   useEffect(() => {

@@ -5,6 +5,7 @@ import {
   Lightbulb,
   Code,
   ChevronDown,
+  ExternalLink,
 } from 'lucide-react';
 import { Language, ProfileSettings } from '../types';
 
@@ -24,17 +25,17 @@ export const Header: React.FC<HeaderProps> = ({
     'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg';
 
   const rolesEn = [
+    'Founder of AI Clipzone',
     'AI Website Developer',
     'AI Explainer',
     'Student',
-    'Modern Web Creator',
   ];
 
   const rolesNe = [
+    'एआई क्लिपजोनका संस्थापक',
     'एआई वेबसाइट डेभलपर',
     'एआई व्याख्याकर्ता',
     'विद्यार्थी',
-    'आधुनिक वेब सिर्जनाकर्ता',
   ];
 
   const roles = language === 'NE' ? rolesNe : rolesEn;
@@ -55,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* 1. HERO BACKGROUND COVER IMAGE (Full-viewport, uncropped top face anchoring) */}
       <img
         src={heroImageSrc}
-        alt="Rajababu Mehta – Official Website, AI Website Developer & AI Explainer from Birgunj, Nepal"
+        alt="Rajababu Mehta | Founder of AI Clipzone, AI Website Developer & AI Explainer from Birgunj, Nepal"
         referrerPolicy="no-referrer"
         className="absolute inset-0 w-full h-full object-cover object-top filter brightness-95 contrast-105 pointer-events-none"
       />
@@ -100,13 +101,25 @@ export const Header: React.FC<HeaderProps> = ({
             </AnimatePresence>
           </div>
 
-          {/* 3 Tagline Badges (AI Web Developer, AI Explainer, Student) */}
+          {/* Tagline Badges (Founder of AI Clipzone, AI Web Developer, AI Explainer, Student) */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex flex-wrap items-center gap-2.5 sm:gap-3 mb-6"
           >
+            <a
+              href="https://aiclipzone.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600/25 hover:bg-blue-600/40 backdrop-blur-md border border-blue-400/40 shadow-sm text-xs font-bold text-blue-200 hover:text-white transition-all group cursor-pointer"
+              title="Visit AI Clipzone (aiclipzone.vercel.app)"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-blue-300 group-hover:scale-110 transition-transform" />
+              <span>{language === 'NE' ? 'संस्थापक: AI Clipzone' : 'Founder of AI Clipzone'}</span>
+              <ExternalLink className="w-3 h-3 text-blue-300 group-hover:translate-x-0.5 transition-transform" />
+            </a>
+
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/90 shadow-sm text-xs font-semibold text-blue-300">
               <Code className="w-3.5 h-3.5 text-blue-400" />
               <span>{language === 'NE' ? 'एआई वेबसाइट डेभलपर' : 'AI Website Developer'}</span>
