@@ -5,7 +5,6 @@ import {
   Lightbulb,
   Code,
   ChevronDown,
-  ExternalLink,
 } from 'lucide-react';
 import { Language, ProfileSettings } from '../types';
 
@@ -108,18 +107,6 @@ export const Header: React.FC<HeaderProps> = ({
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex flex-wrap items-center gap-2.5 sm:gap-3 mb-6"
           >
-            <a
-              href="https://aiclipzone.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600/25 hover:bg-blue-600/40 backdrop-blur-md border border-blue-400/40 shadow-sm text-xs font-bold text-blue-200 hover:text-white transition-all group cursor-pointer"
-              title="Visit AI Clipzone (aiclipzone.vercel.app)"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-blue-300 group-hover:scale-110 transition-transform" />
-              <span>{language === 'NE' ? 'संस्थापक तथा सीईओ: AI Clipzone' : 'Founder & CEO of AI Clipzone'}</span>
-              <ExternalLink className="w-3 h-3 text-blue-300 group-hover:translate-x-0.5 transition-transform" />
-            </a>
-
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-800/90 shadow-sm text-xs font-semibold text-blue-300">
               <Code className="w-3.5 h-3.5 text-blue-400" />
               <span>{language === 'NE' ? 'एआई वेबसाइट डेभलपर' : 'AI Website Developer'}</span>

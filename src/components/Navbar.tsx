@@ -4,7 +4,6 @@ import {
   Menu,
   X,
   Languages,
-  ExternalLink,
 } from 'lucide-react';
 import { Language, ProfileSettings } from '../types';
 
@@ -53,7 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 flex items-center justify-center ring-1 ring-white/20">
                   <img
                     src="/brand-avatar.png"
-                    alt={`${profile.name || 'Rajababu Mehta'} – Founder & CEO of AI Clipzone`}
+                    alt={`${profile.name || 'Rajababu Mehta'} – AI Website Developer`}
                     className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-110"
                   />
                 </div>
@@ -63,7 +62,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {profile.name || 'Rajababu Mehta'}
                 </span>
                 <span className="text-[10px] text-blue-400 font-semibold tracking-wide hidden lg:inline-block">
-                  {language === 'NE' ? 'संस्थापक तथा सीईओ: AI Clipzone' : 'Founder & CEO of AI Clipzone'}
+                  {language === 'NE' ? 'एआई वेबसाइट डेभलपर' : 'AI Website Developer'}
                 </span>
               </div>
             </a>
@@ -81,19 +80,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               ))}
             </nav>
 
-            {/* Right Action Controls: AI Clipzone Link & Language Switcher Pill */}
+            {/* Right Action Controls: Language Switcher Pill */}
             <div className="hidden md:flex items-center gap-2 shrink-0">
-              <a
-                href="https://aiclipzone.vercel.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden lg:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-xs font-semibold text-blue-300 hover:text-white transition-all shadow-sm"
-                title="AI Clipzone by Rajababu Mehta"
-              >
-                <span>AI Clipzone</span>
-                <ExternalLink className="w-3 h-3 text-blue-400" />
-              </a>
-
               <button
                 id="btn-language-toggle-desktop"
                 onClick={onToggleLanguage}
@@ -159,15 +147,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span>{language === 'NE' ? item.labelNe : item.labelEn}</span>
                   </a>
                 ))}
-                <a
-                  href="https://aiclipzone.vercel.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold text-blue-300 bg-blue-600/10 border border-blue-500/20 hover:bg-blue-600/20 transition-colors flex items-center justify-between"
-                >
-                  <span>AI Clipzone (Founder Project)</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-blue-400" />
-                </a>
               </nav>
             </motion.div>
           )}
