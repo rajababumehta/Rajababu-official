@@ -20,7 +20,7 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
     taglineNe: 'वीरगञ्ज, नेपालका राजाबाबु मेहता – एआई क्लिपजोन (AI Clipzone) का संस्थापक तथा सीईओ, एआई वेबसाइट डेभलपर, एआई व्याख्याकर्ता तथा विद्यार्थी। आधुनिक, सुरक्षित र आकर्षक वेबसाइट निर्माण तथा एआई प्रविधि अन्वेषण।',
     welcomeBadgeEn: 'Founder & CEO of AI Clipzone • Available for Projects',
     welcomeBadgeNe: 'एआई क्लिपजोनका संस्थापक तथा सीईओ • नयाँ परियोजनाका लागि उपलब्ध',
-    heroImage: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg',
+    heroImage: '/hero-portrait.png',
     ctaPrimaryEn: '',
     ctaPrimaryNe: '',
     ctaSecondaryEn: '',

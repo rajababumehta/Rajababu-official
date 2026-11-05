@@ -42,9 +42,9 @@ export default defineConfig(() => {
         ],
         manifest: {
           id: '/',
-          name: 'Rajababu Mehta',
+          name: 'Rajababu Mehta | Founder & CEO of AI Clipzone',
           short_name: 'Rajababu',
-          description: 'Rajababu Mehta is the founder of AI Clipzone. He is an AI Website Developer and AI Explainer from Birgunj, Nepal.',
+          description: 'Rajababu Mehta is the Founder & CEO of AI Clipzone. He is an AI Website Developer, AI Explainer, and Student from Birgunj, Nepal.',
           theme_color: '#020617',
           background_color: '#020617',
           display: 'standalone',
@@ -79,8 +79,9 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+          maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,woff,woff2}'],
+          globIgnores: ['**/assets/aistudio/**'],
           cleanupOutdatedCaches: true,
           clientsClaim: true,
           skipWaiting: true,

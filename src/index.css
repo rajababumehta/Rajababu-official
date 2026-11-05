@@ -1,12 +1,49 @@
 @import "tailwindcss";
 
+:root {
+  /* canvas — near-black with a warm cast matching dhruvrathee.com */
+  --bg: #0a0b0e;
+  --bg-2: #101216;
+  --panel: rgba(255, 255, 255, 0.035);
+  --panel-2: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 240, 238, 0.09);
+  --line-2: rgba(255, 240, 238, 0.17);
+
+  /* ink */
+  --ink: #f6f3f2;
+  --ink-2: rgba(246, 243, 242, 0.70);
+  --ink-3: rgba(246, 243, 242, 0.44);
+
+  /* signal — signature red worked through its range */
+  --tq: #e4342f;        /* primary red */
+  --tq-2: #ff8175;      /* light tint */
+  --tq-deep: #a3221d;   /* deep shade */
+  --ember: #ff6a4d;     /* warm secondary */
+  --sand: #ffb08e;      /* soft tertiary */
+  --rose: #ff7a6b;
+  --on-tq: #220604;
+
+  --disp: 'Instrument Serif', Georgia, serif;
+  --body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --r: 20px;
+  --max: 1180px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-family: var(--body);
+    background-color: var(--bg);
+    color: var(--ink);
   }
   
   h1, h2, h3, h4, .font-heading {
-    font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: var(--body);
+    letter-spacing: -0.035em;
+  }
+
+  .font-serif, .editorial-serif {
+    font-family: var(--disp);
   }
 
   code, pre, .font-mono {
@@ -14,23 +51,379 @@
   }
 }
 
+/* Animations matching dhruvrathee.com */
+@keyframes halo {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes halo-reverse {
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes sweep {
+  from { transform: translateX(-140%); }
+  to { transform: translateX(140%); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(228, 52, 47, 0.7); }
+  50% { transform: scale(1.15); opacity: 0.85; box-shadow: 0 0 0 6px rgba(228, 52, 47, 0); }
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-halo {
+  animation: halo 22s linear infinite;
+}
+
+.animate-orbit {
+  animation: halo-reverse 46s linear infinite;
+}
+
+.animate-bob {
+  animation: bob 6s ease-in-out infinite;
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 35s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
 /* Custom sleek scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: #0a0b0e;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #23262d;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #373b45;
+}
+
+/* ============================================================
+   DHRUV RATHEE DESIGN SYSTEM - WHO AM I COMPONENTS
+   ============================================================ */
+.who-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 44px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .who-grid {
+    grid-template-columns: 1fr;
+    gap: 34px;
+  }
+}
+
+.who-photo {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  box-shadow: 0 40px 80px -34px rgba(0, 0, 0, 0.95);
+  aspect-ratio: 4 / 4.6;
+}
+
+.who-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+  display: block;
+  transition: transform 1.4s var(--ease);
+}
+
+.who-photo:hover img {
+  transform: scale(1.04);
+}
+
+.who-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 52%, rgba(10, 11, 14, 0.88));
+}
+
+.who-cap {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 18px;
+  z-index: 2;
+  font-size: 13px;
+  color: var(--ink-2);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.photo-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.photo-strip figure {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  aspect-ratio: 3 / 4;
+  display: block;
+  transition: transform 0.4s var(--ease), border-color 0.3s;
+}
+
+.photo-strip figure:hover {
+  transform: translateY(-5px);
+  border-color: rgba(228, 52, 47, 0.45);
+}
+
+.photo-strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s var(--ease);
+}
+
+.photo-strip figure:hover img {
+  transform: scale(1.08);
+}
+
+.photo-strip figure::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 55%, rgba(10, 11, 14, 0.7));
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+@media (max-width: 620px) {
+  .stat-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.stat {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 16px;
+  background: var(--panel);
+  transition: border-color 0.3s, background 0.3s, transform 0.35s var(--ease);
+}
+
+.stat:hover {
+  border-color: var(--line-2);
+  background: var(--panel-2);
+  transform: translateY(-3px);
+}
+
+.stat-num {
+  display: block;
+  font-size: clamp(22px, 2.5vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--tq-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-3);
+  font-weight: 700;
+  margin-top: 6px;
+  letter-spacing: 0.03em;
+}
+
+.awards {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.award {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: baseline;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: var(--panel);
+  transition: border-color 0.3s, background 0.3s, transform 0.35s var(--ease);
+}
+
+.award:hover {
+  border-color: rgba(228, 52, 47, 0.4);
+  background: var(--panel-2);
+  transform: translateX(4px);
+}
+
+.award-year {
+  font-family: var(--disp);
+  font-size: 19px;
+  color: var(--tq);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.award b {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 3px;
+  color: var(--ink);
+}
+
+.award span {
+  display: block;
+  font-size: 12.8px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.who-note {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 16px;
+  line-height: 1.55;
+}
+
+/* Featured Platform Showcase (DR Academy style .ac) */
+.ac {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(228, 52, 47, 0.3);
+  border-radius: 26px;
+  background: linear-gradient(125deg, rgba(228, 52, 47, 0.12), rgba(255, 106, 77, 0.07) 58%, rgba(255, 255, 255, 0.02));
+  padding: 42px 46px;
+  margin-top: 50px;
+}
+
+@media (max-width: 768px) {
+  .ac {
+    padding: 28px 22px;
+    margin-top: 36px;
+  }
+}
+
+.ac::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  background: conic-gradient(from 0deg, transparent 0%, rgba(228, 52, 47, 0.12) 12%, transparent 26%);
+  animation: halo 14s linear infinite;
+}
+
+.ac-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tq-2);
+  background: rgba(228, 52, 47, 0.12);
+  border: 1px solid rgba(228, 52, 47, 0.28);
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.ac-h {
+  font-size: clamp(26px, 3.4vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.ac-p {
+  font-size: clamp(14px, 1.2vw, 16px);
+  color: var(--ink-2);
+  line-height: 1.65;
+  max-width: 680px;
+  margin-bottom: 24px;
+}
+
+.ac-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 26px;
+}
+
+.ac-chip {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  padding: 5px 12px;
+  border-radius: 10px;
+}
+
+.ac-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--tq);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 13px 26px;
+  border-radius: 14px;
+  transition: transform 0.3s var(--ease), background 0.3s, box-shadow 0.3s;
+  box-shadow: 0 10px 28px -8px rgba(228, 52, 47, 0.7);
+  text-decoration: none;
+}
+
+.ac-btn:hover {
+  background: #ff3d38;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px -8px rgba(228, 52, 47, 0.85);
+  color: #ffffff;
 }
 
 /* Professional Print Styles for 1-Page CV / PDF Download */

@@ -86,8 +86,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Secret Admin Verification Trigger
-    // Required: Name = "admin_login", Email/Phone = "admin_login", Subject = "admin_login", Message = "admin_login"
     const trimmedName = senderName.trim();
     const trimmedEmail = senderEmail.trim();
     const trimmedSubject = senderSubject.trim();
@@ -100,16 +98,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       trimmedMessage.toLowerCase() === 'admin_login';
 
     if (isSecretAdminMatch) {
-      // Clear sensitive secret text immediately from inputs
       setSenderName('');
       setSenderEmail('');
       setSenderSubject('');
       setSenderMessage('');
 
-      // Authorize admin session in local state & dispatch event
       loginAsLocalAdmin('support@rajababumehta.com.np');
 
-      // Trigger secret admin login in App (logs in admin and navigates to Posts page to write text/news)
       if (onAdminSecretLogin) {
         onAdminSecretLogin();
       }
@@ -140,7 +135,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     const isEmailFormat = trimmedEmail.includes('@') && trimmedEmail.includes('.');
 
     try {
-      // 1. Direct persistence into LocalStorage & Firestore
       await saveInquiryToFirestore({
         name: trimmedName,
         email: trimmedEmail,
@@ -150,7 +144,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         status: 'unread',
       });
 
-      // 2. Automatic background email delivery via FormSubmit AJAX (user does NOT need an email client)
       try {
         const emailPromise = fetch(`https://formsubmit.co/ajax/${encodeURIComponent(recipientEmail)}`, {
           method: 'POST',
@@ -171,7 +164,6 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
           }),
         });
 
-        // Cap background email network request at 2.5s so user never waits
         const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 2500));
         await Promise.race([emailPromise, timeoutPromise]);
       } catch (netErr) {
@@ -194,105 +186,79 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   return (
     <section
       id="contact"
-      className="py-24 sm:py-32 bg-slate-950 relative border-t border-slate-900 overflow-hidden scroll-mt-20"
+      className="py-20 sm:py-28 bg-[#0a0b0e] relative border-t border-[rgba(255,240,238,0.08)] overflow-hidden scroll-mt-20"
     >
-      {/* Subtle Background Glow Elements */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[400px] h-[250px] bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
+      <div id="work-with-me" className="absolute -top-20" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Section Heading & Live Status Indicator */}
-        <div className="flex flex-col items-center text-center mb-16 sm:mb-20">
-          
-          {/* Clean Editorial Status Bar (Zero-Pill Discipline) */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 text-xs text-slate-400 mb-4 font-medium">
-            <span className="text-blue-400 font-semibold">
-              {language === 'NE' ? 'सम्पर्क तथा सोधपुछ' : 'Direct Inquiry'}
-            </span>
-            <span aria-hidden="true" className="text-slate-700">·</span>
-            <span className="text-emerald-400 flex items-center gap-1.5">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span>
-                {language === 'NE'
-                  ? 'नयाँ वेबसाइट परियोजनाका लागि उपलब्ध'
-                  : 'Available for New Website Projects'}
-              </span>
-            </span>
-            {nepalTime && (
-              <>
-                <span aria-hidden="true" className="text-slate-700">·</span>
-                <span className="text-slate-300 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Birgunj: {nepalTime}</span>
-                </span>
-              </>
-            )}
+        {/* Section Header matching dhruvrathee.com Work With Me */}
+        <div className="mb-12 sm:mb-16">
+          <div className="flex items-center gap-2 mb-3 text-xs font-bold tracking-widest uppercase text-[#f6f3f2]/50">
+            <span className="w-2 h-2 rounded-full bg-[#e4342f]" />
+            <span>{language === 'NE' ? 'सम्पर्क तथा सहकार्य' : 'Work With Me'}</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 font-heading tracking-tight max-w-3xl mb-4">
-            {language === 'NE'
-              ? 'आफ्नो विचारलाई वास्तविकतामा बदल्नुहोस्'
-              : 'Let’s Build Something Exceptional Together'}
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-[-0.035em] text-[#f6f3f2]">
+            {language === 'NE' ? (
+              <>
+                आफ्नो विचारलाई <span className="font-serif italic font-normal text-[#e4342f]">वास्तविकतामा बदल्नुहोस्</span>
+              </>
+            ) : (
+              <>
+                Let's Build Something <span className="font-serif italic font-normal text-[#e4342f]">Exceptional</span>
+              </>
+            )}
           </h2>
-          
-          <p className="text-slate-400 text-sm sm:text-base max-w-2xl leading-relaxed">
+
+          <p className="mt-4 text-base sm:text-lg text-[#f6f3f2]/70 max-w-2xl leading-relaxed">
             {language === 'NE'
               ? 'नयाँ वेबसाइट, व्यापारिक सोधपुछ वा एआई परामर्शका लागि तलको फारम भरेर सन्देश पठाउनुहोस्।'
               : 'Ready to take your business or personal brand online? Send a direct inquiry below to discuss your project.'}
           </p>
 
-          {/* Value Props Pill Strip */}
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 mt-6 text-xs text-slate-400">
-            <div className="flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-              <span>{language === 'NE' ? 'द्रुत प्रतिक्रिया' : 'Fast Response'}</span>
-            </div>
-            <span className="text-slate-700">•</span>
-            <div className="flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-blue-400" />
-              <span>{language === 'NE' ? 'आधिकारिक इमेल' : 'Official Email'}</span>
-            </div>
-            <span className="text-slate-700">•</span>
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{language === 'NE' ? 'निःशुल्क परामर्श' : 'Free Consultation'}</span>
-            </div>
-            <span className="text-slate-700">•</span>
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
-              <span>{language === 'NE' ? 'पारदर्शी सहकार्य' : 'Direct Collaboration'}</span>
-            </div>
+          {/* Clean Unboxed Status Line */}
+          <div className="flex flex-wrap items-center gap-3 mt-4 text-xs text-[#f6f3f2]/60">
+            <span className="text-[#ff8175] font-semibold flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#ff8175] animate-pulse" />
+              <span>{language === 'NE' ? 'नयाँ परियोजनाका लागि उपलब्ध' : 'Available for New Projects'}</span>
+            </span>
+            {nepalTime && (
+              <>
+                <span className="text-[#f6f3f2]/30">·</span>
+                <span className="flex items-center gap-1 text-[#f6f3f2]/70">
+                  <Clock className="w-3.5 h-3.5 text-[#e4342f]" />
+                  <span>Birgunj, Nepal: {nepalTime}</span>
+                </span>
+              </>
+            )}
           </div>
         </div>
 
-        {/* 2-Column Contact & Inquiry Layout */}
+        {/* 2-Column Contact Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           
-          {/* Left Column: Direct Contact Hub & Instant Connect Cards */}
-          <div className="lg:col-span-5 space-y-5">
+          {/* Left Column: Direct Channels */}
+          <div className="lg:col-span-5 space-y-4">
             
-            {/* Phone / Voice Call Card */}
+            {/* Phone Card */}
             <div
               onClick={() => handleCopy(contact.phone, 'phone')}
-              className="p-5 sm:p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/40 hover:bg-slate-900 transition-all cursor-pointer group shadow-xl"
+              className="p-5 sm:p-6 rounded-[20px] bg-[#101216] border border-[rgba(255,240,238,0.08)] hover:border-[#e4342f]/40 transition-all cursor-pointer group shadow-lg"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 group-hover:scale-105 transition-transform">
-                    <Phone className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,240,238,0.08)] text-[#e4342f] flex items-center justify-center group-hover:scale-105 group-hover:bg-[#e4342f]/10 transition-all">
+                    <Phone className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
+                    <div className="text-[10.5px] font-bold text-[#f6f3f2]/40 uppercase tracking-wider mb-0.5">
                       {language === 'NE' ? 'फोन सम्पर्क' : 'Direct Phone'}
                     </div>
-                    <div className="text-sm sm:text-base font-bold text-slate-100 group-hover:text-blue-400 transition-colors">
+                    <div className="text-sm sm:text-base font-bold text-[#f6f3f2] group-hover:text-[#ff8175] transition-colors">
                       {contact.phone}
                     </div>
-                    <span className="text-[11px] text-slate-500">
+                    <span className="text-[11px] text-[#f6f3f2]/50">
                       {language === 'NE' ? 'प्रत्यक्ष कुराकानी वा सोधपुछ' : 'Voice Call & Direct Inquiry'}
                     </span>
                   </div>
@@ -301,19 +267,19 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   <a
                     href={`tel:+977${contact.phone.replace(/[^0-9]/g, '')}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="p-2 rounded-xl bg-slate-950 text-blue-400 hover:text-blue-300 border border-slate-800 hover:border-blue-500/50 transition-colors"
+                    className="p-2 rounded-lg bg-[rgba(255,255,255,0.04)] text-[#ff8175] hover:text-white border border-[rgba(255,240,238,0.08)] transition-colors"
                     title={language === 'NE' ? 'कल गर्नुहोस्' : 'Make Call'}
                   >
-                    <Phone className="w-4 h-4" />
+                    <Phone className="w-3.5 h-3.5" />
                   </a>
                   <button
-                    className="p-2 rounded-xl bg-slate-950 text-slate-400 group-hover:text-slate-200 border border-slate-800"
+                    className="p-2 rounded-lg bg-[rgba(255,255,255,0.04)] text-[#f6f3f2]/60 hover:text-white border border-[rgba(255,240,238,0.08)]"
                     title="Copy phone"
                   >
                     {copiedType === 'phone' ? (
-                      <Check className="w-4 h-4 text-emerald-400" />
+                      <Check className="w-3.5 h-3.5 text-[#ff8175]" />
                     ) : (
-                      <Copy className="w-4 h-4" />
+                      <Copy className="w-3.5 h-3.5" />
                     )}
                   </button>
                 </div>
@@ -323,27 +289,27 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             {/* Email Card */}
             <div
               onClick={() => handleCopy(contact.email, 'email')}
-              className="p-5 sm:p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/40 hover:bg-slate-900 transition-all cursor-pointer group shadow-xl"
+              className="p-5 sm:p-6 rounded-[20px] bg-[#101216] border border-[rgba(255,240,238,0.08)] hover:border-[#e4342f]/40 transition-all cursor-pointer group shadow-lg"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 group-hover:scale-105 transition-transform">
-                    <Mail className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,240,238,0.08)] text-[#e4342f] flex items-center justify-center group-hover:scale-105 group-hover:bg-[#e4342f]/10 transition-all">
+                    <Mail className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
+                    <div className="text-[10.5px] font-bold text-[#f6f3f2]/40 uppercase tracking-wider mb-0.5">
                       {language === 'NE' ? 'आधिकारिक इमेल' : 'Email Address'}
                     </div>
-                    <div className="text-sm sm:text-base font-bold text-slate-100 group-hover:text-blue-400 transition-colors">
+                    <div className="text-sm sm:text-base font-bold text-[#f6f3f2] group-hover:text-[#ff8175] transition-colors">
                       {contact.email}
                     </div>
-                    <span className="text-[11px] text-slate-500">
+                    <span className="text-[11px] text-[#f6f3f2]/50">
                       {language === 'NE' ? 'परियोजना सोधपुछ तथा सन्देश' : 'Official Inquiries & Proposals'}
                     </span>
                   </div>
                 </div>
-                <button className="p-2 rounded-xl bg-slate-950 text-slate-400 group-hover:text-slate-200 border border-slate-800">
-                  {copiedType === 'email' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                <button className="p-2 rounded-lg bg-[rgba(255,255,255,0.04)] text-[#f6f3f2]/60 hover:text-white border border-[rgba(255,240,238,0.08)]">
+                  {copiedType === 'email' ? <Check className="w-3.5 h-3.5 text-[#ff8175]" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
             </div>
@@ -351,44 +317,44 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             {/* Location Card */}
             <div
               onClick={() => handleCopy(language === 'NE' ? contact.locationNe : contact.locationEn, 'location')}
-              className="p-5 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-purple-500/40 hover:bg-slate-900 transition-all cursor-pointer group shadow-xl"
+              className="p-5 sm:p-6 rounded-[20px] bg-[#101216] border border-[rgba(255,240,238,0.08)] hover:border-[#e4342f]/40 transition-all cursor-pointer group shadow-lg"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 group-hover:scale-105 transition-transform">
-                    <MapPin className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.04)] border border-[rgba(255,240,238,0.08)] text-[#ff6a4d] flex items-center justify-center group-hover:scale-105 group-hover:bg-[#ff6a4d]/10 transition-all">
+                    <MapPin className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">
-                      {language === 'NE' ? 'स्थान' : 'Location & Headquarters'}
+                    <div className="text-[10.5px] font-bold text-[#f6f3f2]/40 uppercase tracking-wider mb-0.5">
+                      {language === 'NE' ? 'स्थान' : 'Location'}
                     </div>
-                    <div className="text-sm sm:text-base font-bold text-slate-100 group-hover:text-purple-400 transition-colors">
+                    <div className="text-sm sm:text-base font-bold text-[#f6f3f2] group-hover:text-[#ff8175] transition-colors">
                       {language === 'NE' ? contact.locationNe : contact.locationEn}
                     </div>
-                    <span className="text-[11px] text-slate-500">Madhesh Province, Nepal</span>
+                    <span className="text-[11px] text-[#f6f3f2]/50">Madhesh Province, Nepal</span>
                   </div>
                 </div>
-                <button className="p-2 rounded-xl bg-slate-950 text-slate-400 group-hover:text-slate-200 border border-slate-800">
-                  {copiedType === 'location' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                <button className="p-2 rounded-lg bg-[rgba(255,255,255,0.04)] text-[#f6f3f2]/60 hover:text-white border border-[rgba(255,240,238,0.08)]">
+                  {copiedType === 'location' ? <Check className="w-3.5 h-3.5 text-[#ff8175]" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
             </div>
 
-            {/* Social Channels Row */}
-            <div className="p-5 rounded-3xl bg-slate-900/60 border border-slate-800">
-              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">
+            {/* Social Channels */}
+            <div className="p-5 rounded-[20px] bg-[#101216] border border-[rgba(255,240,238,0.08)]">
+              <div className="text-[10.5px] font-bold text-[#f6f3f2]/40 uppercase tracking-wider mb-3">
                 {language === 'NE' ? 'सामाजिक सञ्जालमा जोडिनुहोस्' : 'Connect on Social Platforms'}
               </div>
-              <div className="flex flex-wrap gap-2.5">
+              <div className="flex flex-wrap gap-2">
                 {contact.facebookUrl && (
                   <a
                     href={contact.facebookUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950 hover:bg-blue-600/20 border border-slate-800 hover:border-blue-500 text-xs font-medium text-slate-200 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(255,255,255,0.03)] hover:bg-[rgba(255,255,255,0.07)] border border-[rgba(255,240,238,0.08)] hover:border-[#e4342f]/40 text-xs font-medium text-[#f6f3f2] transition-all"
                   >
                     <span>Facebook</span>
-                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                    <ExternalLink className="w-3 h-3 text-[#f6f3f2]/40" />
                   </a>
                 )}
                 {contact.instagramUrl && (
@@ -400,10 +366,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     }
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950 hover:bg-pink-600/20 border border-slate-800 hover:border-pink-500 text-xs font-medium text-slate-200 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(255,255,255,0.03)] hover:bg-[rgba(255,255,255,0.07)] border border-[rgba(255,240,238,0.08)] hover:border-[#e4342f]/40 text-xs font-medium text-[#f6f3f2] transition-all"
                   >
                     <span>Instagram (@mr.rajababumehta)</span>
-                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                    <ExternalLink className="w-3 h-3 text-[#f6f3f2]/40" />
                   </a>
                 )}
                 {contact.linkedinUrl && (
@@ -411,10 +377,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     href={contact.linkedinUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950 hover:bg-sky-600/20 border border-slate-800 hover:border-sky-500 text-xs font-medium text-slate-200 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(255,255,255,0.03)] hover:bg-[rgba(255,255,255,0.07)] border border-[rgba(255,240,238,0.08)] hover:border-[#e4342f]/40 text-xs font-medium text-[#f6f3f2] transition-all"
                   >
                     <span>LinkedIn</span>
-                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                    <ExternalLink className="w-3 h-3 text-[#f6f3f2]/40" />
                   </a>
                 )}
               </div>
@@ -422,9 +388,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
           </div>
 
-          {/* Right Column: Interactive Project Planner & Blueprint Dispatcher */}
+          {/* Right Column: Modern Dark Form */}
           <div className="lg:col-span-7">
-            <div className="p-6 sm:p-9 rounded-3xl bg-slate-900/90 border border-slate-800 backdrop-blur-md shadow-2xl relative">
+            <div className="p-6 sm:p-9 rounded-[24px] bg-[#101216] border border-[rgba(255,240,238,0.09)] shadow-2xl relative">
               
               {isSubmitted ? (
                 <motion.div
@@ -432,39 +398,19 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   className="py-10 px-4 sm:px-6 flex flex-col items-center text-center"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/20">
-                    <CheckCircle2 className="w-9 h-9" />
+                  <div className="w-14 h-14 rounded-2xl bg-[#e4342f]/15 border border-[#e4342f]/30 text-[#ff8175] flex items-center justify-center mb-4">
+                    <CheckCircle2 className="w-8 h-8" />
                   </div>
-                  <h4 className="text-2xl font-bold text-slate-100 mb-2 font-heading">
+                  <h4 className="text-2xl font-bold text-[#f6f3f2] mb-2">
                     {language === 'NE' ? 'सन्देश सफलतापूर्वक पठाइयो!' : 'Message Sent Successfully!'}
                   </h4>
-                  <p className="text-sm text-slate-300 max-w-md mb-4 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#f6f3f2]/70 max-w-md mb-4 leading-relaxed">
                     {language === 'NE'
-                      ? `तपाईँको सन्देश सिधै राजाबाबु मेहता (${contact.email || 'support@rajababumehta.com.np'}) को इमेलमा पुगिसकेको छ। तपाईँले आफ्नो कुनै पनि इमेल अकाउन्ट खोल्नु पर्दैन।`
-                      : `Your inquiry has been sent directly to Rajababu Mehta (${contact.email || 'support@rajababumehta.com.np'}). You do not need to send anything from your personal email account.`}
+                      ? `तपाईँको सन्देश सिधै राजाबाबु मेहता (${contact.email || 'support@rajababumehta.com.np'}) को इमेलमा पुगिसकेको छ।`
+                      : `Your inquiry has been sent directly to Rajababu Mehta (${contact.email || 'support@rajababumehta.com.np'}).`}
                   </p>
 
-                  <div className="w-full max-w-sm bg-slate-950/80 border border-slate-800 rounded-2xl p-4 text-left mb-6 text-xs text-slate-300 space-y-1.5">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-1">
-                      {language === 'NE' ? 'पठाइएको विवरण' : 'Delivered Details'}
-                    </div>
-                    <div>
-                      <span className="text-slate-500">{language === 'NE' ? 'नाम:' : 'Name:'} </span>
-                      <span className="font-semibold text-slate-200">{senderName}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500">{language === 'NE' ? 'सम्पर्क:' : 'Contact:'} </span>
-                      <span className="font-semibold text-slate-200">{senderEmail}</span>
-                    </div>
-                    {senderSubject && (
-                      <div>
-                        <span className="text-slate-500">{language === 'NE' ? 'विषय:' : 'Subject:'} </span>
-                        <span className="text-slate-200">{senderSubject}</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex flex-wrap items-center justify-center gap-3 w-full max-w-sm">
+                  <div className="flex flex-wrap items-center justify-center gap-3 w-full max-w-sm mt-3">
                     <button
                       onClick={() => {
                         setIsSubmitted(false);
@@ -473,10 +419,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         setSenderSubject('');
                         setSenderMessage('');
                       }}
-                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02]"
+                      className="px-5 py-2.5 rounded-xl bg-[#e4342f] hover:bg-[#ff3d38] text-white text-xs font-bold transition-all shadow-md shadow-[#e4342f]/30 cursor-pointer"
                     >
-                      <Mail className="w-4 h-4" />
-                      <span>{language === 'NE' ? 'अर्को नयाँ सन्देश' : 'Send Another'}</span>
+                      <span>{language === 'NE' ? 'अर्को नयाँ सन्देश' : 'Send Another Message'}</span>
                     </button>
 
                     {contact.whatsappNumber && (
@@ -486,20 +431,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         )}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 text-xs font-semibold transition-all hover:scale-[1.02]"
+                        className="px-4 py-2.5 rounded-xl bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.08)] border border-[rgba(255,240,238,0.12)] text-[#f6f3f2] text-xs font-bold transition-all"
                       >
-                        <Zap className="w-3.5 h-3.5" />
-                        <span>WhatsApp</span>
-                      </a>
-                    )}
-
-                    {contact.phone && (
-                      <a
-                        href={`tel:${contact.phone.replace(/\s+/g, '')}`}
-                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition-all hover:scale-[1.02]"
-                      >
-                        <Phone className="w-3.5 h-3.5 text-blue-400" />
-                        <span>{contact.phone}</span>
+                        <span>WhatsApp →</span>
                       </a>
                     )}
                   </div>
@@ -508,7 +442,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 <form onSubmit={handleFormSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                      <label className="block text-xs font-semibold text-[#f6f3f2]/80 mb-1.5">
                         {language === 'NE' ? 'तपाईँको नाम' : 'Your Name'} *
                       </label>
                       <input
@@ -518,12 +452,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         placeholder={language === 'NE' ? 'उदा. रोशन अधिकारी' : 'e.g. Roshan Sharma'}
                         value={senderName}
                         onChange={(e) => setSenderName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#0a0b0e] border border-[rgba(255,240,238,0.1)] text-[#f6f3f2] text-xs focus:outline-none focus:border-[#e4342f] transition-colors disabled:opacity-50"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                      <label className="block text-xs font-semibold text-[#f6f3f2]/80 mb-1.5">
                         {language === 'NE' ? 'इमेल वा फोन नम्बर' : 'Email or Phone Number'} *
                       </label>
                       <input
@@ -533,13 +467,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         placeholder="you@email.com or 98XXXXXXXX"
                         value={senderEmail}
                         onChange={(e) => setSenderEmail(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#0a0b0e] border border-[rgba(255,240,238,0.1)] text-[#f6f3f2] text-xs focus:outline-none focus:border-[#e4342f] transition-colors disabled:opacity-50"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-[#f6f3f2]/80 mb-1.5">
                       {language === 'NE' ? 'विषय' : 'Subject'}
                     </label>
                     <input
@@ -552,12 +486,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       }
                       value={senderSubject}
                       onChange={(e) => setSenderSubject(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#0a0b0e] border border-[rgba(255,240,238,0.1)] text-[#f6f3f2] text-xs focus:outline-none focus:border-[#e4342f] transition-colors disabled:opacity-50"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-[#f6f3f2]/80 mb-1.5">
                       {language === 'NE' ? 'सन्देश वा परियोजना विवरण' : 'Message or Project Details'} *
                     </label>
                     <textarea
@@ -571,7 +505,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       }
                       value={senderMessage}
                       onChange={(e) => setSenderMessage(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-100 text-xs focus:outline-none focus:border-blue-500 transition-colors resize-none disabled:opacity-50"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#0a0b0e] border border-[rgba(255,240,238,0.1)] text-[#f6f3f2] text-xs focus:outline-none focus:border-[#e4342f] transition-colors resize-none disabled:opacity-50"
                     />
                   </div>
 
@@ -581,7 +515,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       type="submit"
                       id="btn-contact-submit"
                       disabled={isSubmitting}
-                      className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-xl shadow-blue-600/30 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-[#e4342f] hover:bg-[#ff3d38] text-white font-bold text-xs tracking-tight shadow-[0_8px_22px_-6px_rgba(228,52,47,0.7)] transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                     >
                       {isSubmitting ? (
                         <>

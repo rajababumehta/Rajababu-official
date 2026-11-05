@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   HelpCircle,
   ChevronDown,
+  ExternalLink,
 } from 'lucide-react';
 import { Language, ContactSettings } from '../types';
 
@@ -93,30 +94,30 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
   return (
     <section
       id="faq"
-      className="py-24 sm:py-32 bg-slate-950 relative border-t border-slate-900 overflow-hidden scroll-mt-20"
+      className="py-20 sm:py-28 bg-[#0a0b0e] relative border-t border-[rgba(255,240,238,0.08)] overflow-hidden scroll-mt-20"
     >
-      {/* Ambient background glow */}
-      <div className="absolute top-1/4 right-1/4 w-[600px] h-[300px] bg-indigo-600/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-[400px] h-[250px] bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Section Header */}
-        <div className="flex flex-col items-center text-center mb-16 sm:mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold mb-4">
-            <HelpCircle className="w-3.5 h-3.5" />
-            <span>
-              {language === 'NE' ? 'प्रायः सोधिने प्रश्न तथा प्रक्रिया' : 'FAQ & Process Guide'}
-            </span>
+        {/* Section Header matching dhruvrathee.com (.sh) */}
+        <div className="mb-12 sm:mb-16">
+          <div className="flex items-center gap-2 mb-3 text-xs font-bold tracking-widest uppercase text-[#f6f3f2]/50">
+            <span className="w-2 h-2 rounded-full bg-[#e4342f]" />
+            <span>{language === 'NE' ? 'प्रक्रिया र उत्तर' : 'Clear Answers'}</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-100 font-heading tracking-tight max-w-2xl mb-4">
-            {language === 'NE'
-              ? 'तपाईँका जिज्ञासाहरूको स्पष्ट उत्तर'
-              : 'Clear Answers to Frequent Inquiries'}
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-[-0.035em] text-[#f6f3f2]">
+            {language === 'NE' ? (
+              <>
+                प्रायः सोधिने <span className="font-serif italic font-normal text-[#e4342f]">प्रश्न तथा उत्तर</span>
+              </>
+            ) : (
+              <>
+                Frequently Asked <span className="font-serif italic font-normal text-[#e4342f]">Questions</span>
+              </>
+            )}
           </h2>
 
-          <p className="text-slate-400 text-sm sm:text-base max-w-xl leading-relaxed">
+          <p className="mt-4 text-base sm:text-lg text-[#f6f3f2]/70 max-w-2xl leading-relaxed">
             {language === 'NE'
               ? 'परियोजना सुरु गर्ने प्रक्रिया, समय, मोबाइल अनुकूलता र सहकार्य सम्बन्धी सबै विवरणहरू यहाँ पाउन सक्नुहुन्छ।'
               : 'Everything you need to know about starting a project, technical standards, project timelines, and remote communication.'}
@@ -124,36 +125,36 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
         </div>
 
         {/* FAQ Accordion List */}
-        <div className="space-y-4">
+        <div className="space-y-3.5 max-w-4xl">
           {faqItems.map((faq, index) => {
             const isOpen = expandedFaq === index;
             return (
               <div
                 key={index}
-                className={`rounded-2xl border transition-all overflow-hidden ${
+                className={`rounded-[20px] border transition-all duration-300 overflow-hidden ${
                   isOpen
-                    ? 'bg-slate-900/90 border-blue-500/40 shadow-xl shadow-blue-950/20'
-                    : 'bg-slate-900/50 border-slate-800/90 hover:border-slate-700 hover:bg-slate-900/70'
+                    ? 'bg-[#101216] border-[#e4342f]/40 shadow-[0_16px_40px_-15px_rgba(0,0,0,0.8)]'
+                    : 'bg-[#101216]/60 border-[rgba(255,240,238,0.08)] hover:border-[rgba(255,240,238,0.18)] hover:bg-[#101216]'
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => setExpandedFaq(isOpen ? null : index)}
-                  className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 text-slate-200 hover:text-white transition-colors"
+                  className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 text-[#f6f3f2] hover:text-white transition-colors cursor-pointer"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-blue-400 font-mono hidden sm:inline-block">
+                  <div className="flex items-center gap-3.5">
+                    <span className="font-serif italic text-base sm:text-lg text-[#e4342f] font-normal shrink-0">
                       0{index + 1}
                     </span>
-                    <span className="text-base sm:text-lg font-bold font-heading">
+                    <span className="text-sm sm:text-base font-bold text-[#f6f3f2]">
                       {language === 'NE' ? faq.questionNe : faq.questionEn}
                     </span>
                   </div>
                   <div
-                    className={`p-2 rounded-xl border transition-all shrink-0 ${
+                    className={`w-7 h-7 rounded-lg border transition-all shrink-0 flex items-center justify-center ${
                       isOpen
-                        ? 'bg-blue-600/20 border-blue-500/30 text-blue-400 rotate-180'
-                        : 'bg-slate-950 border-slate-800 text-slate-400'
+                        ? 'bg-[#e4342f] border-[#e4342f] text-white rotate-180 shadow-[0_2px_10px_rgba(228,52,47,0.6)]'
+                        : 'bg-[rgba(255,255,255,0.04)] border-[rgba(255,240,238,0.08)] text-[#f6f3f2]/60'
                     }`}
                   >
                     <ChevronDown className="w-4 h-4 transition-transform duration-200" />
@@ -168,26 +169,26 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.25 }}
                     >
-                      <div className="px-5 sm:px-6 pb-6 pt-2 text-sm text-slate-300 border-t border-slate-800/80 leading-relaxed">
+                      <div className="px-5 sm:px-6 pb-6 pt-2 text-xs sm:text-sm text-[#f6f3f2]/75 border-t border-[rgba(255,240,238,0.06)] leading-relaxed space-y-3">
                         <p>{language === 'NE' ? faq.answerNe : faq.answerEn}</p>
+                        
                         {faq.linkUrl && (
-                          <div className="mt-3">
+                          <div>
                             <a
                               href={faq.linkUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-semibold transition-colors"
+                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#e4342f] hover:bg-[#ff3d38] text-white text-xs font-bold transition-all shadow-md shadow-[#e4342f]/30"
                             >
                               <span>{language === 'NE' ? 'AI Clipzone खोल्नुहोस्' : 'Visit AI Clipzone'}</span>
-                              <span>(aiclipzone.vercel.app) →</span>
+                              <ExternalLink className="w-3 h-3" />
                             </a>
                           </div>
                         )}
-                        <div className="mt-4 flex items-center gap-2">
-                          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                            {language === 'NE' ? 'वर्ग:' : 'Category:'}
-                          </span>
-                          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+
+                        <div className="flex items-center gap-2 text-xs text-[#f6f3f2]/40 pt-1">
+                          <span>{language === 'NE' ? 'वर्ग:' : 'Category:'}</span>
+                          <span className="text-[#ff8175] font-semibold">
                             {language === 'NE' ? faq.categoryNe : faq.categoryEn}
                           </span>
                         </div>
@@ -200,21 +201,22 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
           })}
         </div>
 
-        {/* Contact CTA internal link under FAQ */}
-        <div className="mt-12 text-center">
-          <p className="text-slate-400 text-sm mb-3">
+        {/* Contact CTA under FAQ */}
+        <div className="mt-12">
+          <p className="text-[#f6f3f2]/60 text-xs sm:text-sm mb-3">
             {language === 'NE'
               ? 'के तपाईँको कुनै अन्य विशेष प्रश्न वा परियोजना सम्बन्धी सोधपुछ छ?'
               : 'Have another specific question or custom website requirement?'}
           </p>
           <a
             href="#contact"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 font-semibold text-xs sm:text-sm transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.08)] border border-[rgba(255,240,238,0.12)] text-[#f6f3f2] font-semibold text-xs sm:text-sm transition-all"
           >
             <span>{language === 'NE' ? 'राजाबाबु मेहतालाई सन्देश पठाउनुहोस्' : 'Send a Message to Rajababu Mehta'}</span>
-            <span>→</span>
+            <span className="text-[#e4342f]">→</span>
           </a>
         </div>
+
       </div>
     </section>
   );

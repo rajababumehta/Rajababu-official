@@ -30,8 +30,7 @@ import {
   subscribeToSystemSettings,
 } from './services/firebase';
 
-const FIXED_HERO_IMAGE =
-  'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg';
+const FIXED_HERO_IMAGE = '/hero-portrait.png';
 
 // Helper converter functions
 const clipzoneImageToMoment = (img: ClipzoneImage): Moment => ({
@@ -401,7 +400,7 @@ export default function App() {
   const totalLikes = moments.reduce((acc, m) => acc + (m.likes || 0), 0);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-[#0a0b0e] text-[#f6f3f2] flex flex-col selection:bg-[#e4342f] selection:text-white relative overflow-x-hidden">
       {/* Toast Notification Container */}
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
