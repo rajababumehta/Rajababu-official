@@ -3,8 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowLeft,
   Share2,
-  Heart,
-  MessageCircle,
   Image as ImageIcon,
   Send,
   Trash2,
@@ -17,40 +15,39 @@ import {
   ExternalLink,
   Shield,
   Clock,
-  ChevronRight,
   Maximize2,
-  Tag,
   Loader2,
+  Copy,
+  Check,
+  BookOpen,
+  ArrowRight,
 } from 'lucide-react';
-import { FeedPost, PostComment, Language, AdminUser } from '../types';
+import { FeedPost, Language, AdminUser } from '../types';
 import {
   subscribeToFeedPosts,
   createFeedPost,
   deleteFeedPost,
-  toggleFeedPostLike,
-  checkUserLikedPost,
-  subscribeToPostComments,
-  addPostComment,
   signInWithGoogle,
   logoutAdmin,
   subscribeToAuth,
   isUserAdmin,
   compressImageFile,
   testFirestoreConnection,
-  ADMIN_EMAILS,
 } from '../services/firebase';
+import { updatePostSeo, resetPostSeo } from '../utils/seo';
 
 interface PostsFeedViewProps {
   language: Language;
   onBackToHome: () => void;
   onShowToast: (message: string, type: 'success' | 'info' | 'warning' | 'error') => void;
+  initialPostId?: string | null;
 }
 
 const CATEGORIES = [
-  { id: 'Announcement', en: '📢 Announcement', ne: '📢 घोषणा' },
+  { id: 'Announcement', en: '📢 Announcement', ne: '📢 मुख्य घोषणा' },
   { id: 'Article', en: '💡 Thoughts & Article', ne: '💡 विचार र लेख' },
-  { id: 'Clipzone', en: '🚀 AI Clipzone Updates', ne: '🚀 एआई क्लिपजोन अपडेट' },
-  { id: 'Tech', en: '💻 Tech & Innovation', ne: '💻 प्रविधि र विकास' },
+  { id: 'Clipzone', en: '🚀 AI Clipzone News', ne: '🚀 एआई क्लिपजोन समाचार' },
+  { id: 'Tech', en: '💻 Tech & Innovation', ne: '💻 प्रविधि तथा विकास' },
   { id: 'Personal', en: '📸 Behind The Scenes', ne: '📸 व्यक्तिगत पलहरू' },
 ];
 
@@ -58,12 +55,17 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   language,
   onBackToHome,
   onShowToast,
+  initialPostId,
 }) => {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
 
-  // Composer State
+  // Active Selected Post for Dedicated News View
+  const [activePostId, setActivePostId] = useState<string | null>(initialPostId || null);
+
+  // Composer State (for Admin)
+  const [postTitle, setPostTitle] = useState('');
   const [postContent, setPostContent] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Article');
   const [imageFiles, setImageFiles] = useState<string[]>([]);
@@ -74,25 +76,40 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   // Active Lightbox Image
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
-  // Track liked posts by current visitor ID
-  const [visitorId, setVisitorId] = useState<string>('');
-  const [likedPostIds, setLikedPostIds] = useState<Record<string, boolean>>({});
-
-  // Active comments drawer state (postId -> boolean)
-  const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
+  // Track copied link state for visual feedback
+  const [copiedPostId, setCopiedPostId] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize Visitor ID and test connection
+  // Read URL query param ?post=ID or hash #post-ID on load
   useEffect(() => {
-    let vid = localStorage.getItem('rajababu_visitor_id');
-    if (!vid) {
-      vid = `guest_${Math.random().toString(36).substring(2, 9)}_${Date.now()}`;
-      localStorage.setItem('rajababu_visitor_id', vid);
-    }
-    setVisitorId(vid);
+    const handleUrlPostParam = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const postParam = urlParams.get('post');
+      const hash = window.location.hash;
+      let targetId: string | null = null;
 
-    testFirestoreConnection();
+      if (postParam) {
+        targetId = postParam;
+      } else if (hash.startsWith('#post-')) {
+        targetId = hash.replace('#post-', '');
+      } else if (hash.startsWith('#post/')) {
+        targetId = hash.replace('#post/', '');
+      }
+
+      if (targetId) {
+        setActivePostId(targetId);
+      }
+    };
+
+    handleUrlPostParam();
+    window.addEventListener('popstate', handleUrlPostParam);
+    window.addEventListener('hashchange', handleUrlPostParam);
+
+    return () => {
+      window.removeEventListener('popstate', handleUrlPostParam);
+      window.removeEventListener('hashchange', handleUrlPostParam);
+    };
   }, []);
 
   // Subscribe to Auth state
@@ -100,6 +117,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     const unsub = subscribeToAuth((user) => {
       setCurrentUser(user);
     });
+    testFirestoreConnection();
     return () => unsub();
   }, []);
 
@@ -112,23 +130,33 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
         setLoadingPosts(false);
       },
       (err) => {
-        console.warn('Posts listener:', err);
+        console.warn('Posts listener error:', err);
         setLoadingPosts(false);
       }
     );
     return () => unsub();
   }, []);
 
-  // Check which posts the visitor has liked
-  useEffect(() => {
-    if (!visitorId || posts.length === 0) return;
-    posts.forEach(async (post) => {
-      const liked = await checkUserLikedPost(post.id, visitorId);
-      setLikedPostIds((prev) => ({ ...prev, [post.id]: liked }));
-    });
-  }, [posts, visitorId]);
+  // Active Post Object
+  const currentActivePost = activePostId ? posts.find((p) => p.id === activePostId) || null : null;
 
-  // Handle Google Login
+  // Dynamically update SEO structured data and title for Google search
+  useEffect(() => {
+    if (currentActivePost) {
+      updatePostSeo(currentActivePost);
+    } else if (posts.length > 0 && !activePostId) {
+      // In the feed, update to latest post's news summary or general news
+      updatePostSeo(posts[0]);
+    } else {
+      resetPostSeo();
+    }
+
+    return () => {
+      resetPostSeo();
+    };
+  }, [currentActivePost, posts, activePostId]);
+
+  // Google Login for Admin
   const handleGoogleSignIn = async () => {
     try {
       const user = await signInWithGoogle();
@@ -159,7 +187,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     }
   };
 
-  // Quick fallback Admin authentication
+  // Quick PIN Fallback
   const handleAdminPinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (adminPinInput.trim() === 'rajababu2026' || adminPinInput.trim() === '426') {
@@ -182,14 +210,11 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
         'success'
       );
     } else {
-      onShowToast(
-        language === 'NE' ? 'गलत पासकोड!' : 'Invalid admin passcode!',
-        'error'
-      );
+      onShowToast(language === 'NE' ? 'गलत पासकोड!' : 'Invalid admin passcode!', 'error');
     }
   };
 
-  // Handle Image Upload Selection
+  // Image Upload Selection
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -215,7 +240,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
       }
       setImageFiles((prev) => [...prev, ...newImages]);
     } catch (err) {
-      console.error('Image upload compression error:', err);
+      console.error('Image compression error:', err);
       onShowToast(
         language === 'NE' ? 'तस्विर प्रोसेस गर्दा त्रुटि भयो।' : 'Failed to process image.',
         'error'
@@ -229,7 +254,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     setImageFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Submit Post
+  // Create Post
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!postContent.trim() && imageFiles.length === 0) {
@@ -242,22 +267,36 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
 
     setIsSubmitting(true);
     try {
-      await createFeedPost({
+      // Combine title and content if title provided
+      const fullContent = postTitle.trim()
+        ? `${postTitle.trim()}\n\n${postContent.trim()}`
+        : postContent.trim();
+
+      const newId = await createFeedPost({
         authorId: currentUser?.uid || 'admin-rajababu',
         authorName: 'Rajababu Mehta',
         authorEmail: currentUser?.email || 'rajababum426@gmail.com',
         authorPhoto: '/assets/aistudio/hero_photo.jpg',
-        content: postContent.trim(),
+        content: fullContent,
         images: imageFiles,
         category: selectedCategory,
       });
 
+      setPostTitle('');
       setPostContent('');
       setImageFiles([]);
       onShowToast(
-        language === 'NE' ? 'पोस्ट सफलतापूर्वक प्रकाशित भयो!' : 'Post published successfully to feed!',
+        language === 'NE'
+          ? 'समाचार/लेख प्रकाशित भयो र गुगल सर्चका लागि उपलब्ध छ!'
+          : 'Post published and direct article link created!',
         'success'
       );
+
+      // Open new post directly
+      if (newId) {
+        window.history.pushState(null, '', `?post=${newId}#post-${newId}`);
+        setActivePostId(newId);
+      }
     } catch (err: any) {
       console.error('Create post error:', err);
       onShowToast(
@@ -271,103 +310,140 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
 
   // Delete Post
   const handleDeletePost = async (postId: string) => {
-    if (!window.confirm(language === 'NE' ? 'के तपाईं यो पोस्ट मेटाउन निश्चित हुनुहुन्छ?' : 'Are you sure you want to delete this post?')) {
+    if (
+      !window.confirm(
+        language === 'NE'
+          ? 'के तपाईं यो पोस्ट मेटाउन निश्चित हुनुहुन्छ?'
+          : 'Are you sure you want to delete this post?'
+      )
+    ) {
       return;
     }
     try {
       await deleteFeedPost(postId);
-      onShowToast(
-        language === 'NE' ? 'पोस्ट हटाइयो।' : 'Post deleted successfully.',
-        'info'
-      );
+      if (activePostId === postId) {
+        setActivePostId(null);
+        window.history.pushState(null, '', window.location.pathname);
+      }
+      onShowToast(language === 'NE' ? 'पोस्ट हटाइयो।' : 'Post deleted successfully.', 'info');
     } catch (err) {
-      onShowToast(
-        language === 'NE' ? 'पोस्ट मेटाउन असफल भयो।' : 'Failed to delete post.',
-        'error'
-      );
+      onShowToast(language === 'NE' ? 'पोस्ट मेटाउन असफल भयो।' : 'Failed to delete post.', 'error');
     }
   };
 
-  // Toggle Like
-  const handleLikePost = async (postId: string) => {
-    const isCurrentlyLiked = likedPostIds[postId];
-    // Optimistic UI update
-    setLikedPostIds((prev) => ({ ...prev, [postId]: !isCurrentlyLiked }));
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? { ...p, likesCount: Math.max(0, p.likesCount + (isCurrentlyLiked ? -1 : 1)) }
-          : p
-      )
-    );
+  // Direct Post URL Generator
+  const getDirectPostUrl = (postId: string) => {
+    return `${window.location.origin}/?post=${postId}#post-${postId}`;
+  };
 
+  // Share Actions specifically for this post
+  const handleCopyPostLink = async (post: FeedPost) => {
+    const directUrl = getDirectPostUrl(post.id);
     try {
-      const visitorName = currentUser?.displayName || 'Visitor';
-      await toggleFeedPostLike(postId, visitorId, visitorName);
-    } catch (err) {
-      // Revert optimistic
-      setLikedPostIds((prev) => ({ ...prev, [postId]: isCurrentlyLiked }));
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId
-            ? { ...p, likesCount: Math.max(0, p.likesCount + (isCurrentlyLiked ? 1 : -1)) }
-            : p
-        )
+      await navigator.clipboard.writeText(directUrl);
+      setCopiedPostId(post.id);
+      setTimeout(() => setCopiedPostId(null), 2500);
+      onShowToast(
+        language === 'NE'
+          ? 'यस पोस्टको प्रत्यक्ष लिङ्क कपी भयो!'
+          : 'Direct Article Link copied to clipboard!',
+        'success'
       );
+    } catch {
+      onShowToast(language === 'NE' ? 'लिङ्क कपी हुन सकेन।' : 'Could not copy link.', 'warning');
     }
   };
 
-  // Share Post
-  const handleSharePost = async (post: FeedPost) => {
-    const shareUrl = window.location.href;
-    const shareText = `${post.content.slice(0, 100)}... - Rajababu Mehta (Founder & CEO, AI Clipzone)`;
+  const handleNativeShare = async (post: FeedPost) => {
+    const directUrl = getDirectPostUrl(post.id);
+    const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
+    const headline = firstLine || 'Rajababu Mehta Post';
+    const summary = post.content.slice(0, 140).replace(/\n/g, ' ');
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Rajababu Mehta Feed Post',
-          text: shareText,
-          url: shareUrl,
+          title: headline,
+          text: `${headline}\n\n${summary}...`,
+          url: directUrl,
         });
         return;
       } catch (err) {
-        // Fallback to clipboard
+        // user cancelled or fallback
       }
     }
 
-    try {
-      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-      onShowToast(
-        language === 'NE' ? 'पोस्ट लिङ्क क्लिपबोर्डमा कपी भयो!' : 'Post link copied to clipboard!',
-        'success'
-      );
-    } catch {
-      onShowToast(
-        language === 'NE' ? 'कपी गर्न सकिएन।' : 'Could not copy link.',
-        'warning'
-      );
-    }
+    handleCopyPostLink(post);
+  };
+
+  const handleWhatsAppShare = (post: FeedPost) => {
+    const directUrl = getDirectPostUrl(post.id);
+    const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
+    const text = encodeURIComponent(
+      `*${firstLine}*\n\nRead the full update by Rajababu Mehta (Founder & CEO, AI Clipzone):\n${directUrl}`
+    );
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  };
+
+  const handleFacebookShare = (post: FeedPost) => {
+    const directUrl = getDirectPostUrl(post.id);
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(directUrl)}`,
+      '_blank'
+    );
+  };
+
+  const handleTwitterShare = (post: FeedPost) => {
+    const directUrl = getDirectPostUrl(post.id);
+    const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
+    const text = encodeURIComponent(`${firstLine}\n\nBy @mrrajababumehta`);
+    window.open(
+      `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(directUrl)}`,
+      '_blank'
+    );
+  };
+
+  const handleOpenSinglePost = (postId: string) => {
+    setActivePostId(postId);
+    window.history.pushState(null, '', `?post=${postId}#post-${postId}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackToFeed = () => {
+    setActivePostId(null);
+    window.history.pushState(null, '', window.location.pathname);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const isAdmin = isUserAdmin(currentUser);
 
   return (
     <div className="min-h-screen bg-[#0d0b0a] text-[#f6f3f2] font-sans selection:bg-[#e4342f] selection:text-white pb-24">
-      {/* Top Sticky Navigation Bar */}
+      {/* Top Sticky Header */}
       <header className="sticky top-0 z-40 bg-[#141211]/90 backdrop-blur-md border-b border-[rgba(255,240,238,0.08)]">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
-          <button
-            onClick={onBackToHome}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.05)] hover:bg-[#e4342f] hover:text-white transition-all text-sm font-semibold cursor-pointer border border-[rgba(255,240,238,0.1)]"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>{language === 'NE' ? 'गृहपृष्ठमा फर्कनुहोस्' : 'Back to Portfolio'}</span>
-          </button>
+          {currentActivePost ? (
+            <button
+              onClick={handleBackToFeed}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.05)] hover:bg-[#e4342f] hover:text-white transition-all text-sm font-semibold cursor-pointer border border-[rgba(255,240,238,0.1)]"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>{language === 'NE' ? 'सबै पोस्टहरू' : 'All Articles'}</span>
+            </button>
+          ) : (
+            <button
+              onClick={onBackToHome}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.05)] hover:bg-[#e4342f] hover:text-white transition-all text-sm font-semibold cursor-pointer border border-[rgba(255,240,238,0.1)]"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>{language === 'NE' ? 'गृहपृष्ठमा फर्कनुहोस्' : 'Back to Portfolio'}</span>
+            </button>
+          )}
 
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#e4342f] animate-pulse"></span>
             <span className="text-xs uppercase tracking-wider font-bold text-[#ff8175]">
-              {language === 'NE' ? 'आधिकारिक पोस्टहरू' : 'Official Feed'}
+              {language === 'NE' ? 'समाचार तथा विचार' : 'News & Articles'}
             </span>
           </div>
 
@@ -396,219 +472,410 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgba(228,52,47,0.12)] border border-[rgba(228,52,47,0.3)] hover:bg-[#e4342f] hover:text-white text-xs font-semibold text-[#ff8175] transition-all cursor-pointer"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                <span>{language === 'NE' ? 'एडमिन लगइन' : 'Admin Post'}</span>
+                <span>{language === 'NE' ? 'एडमिन' : 'Admin'}</span>
               </button>
             )}
           </div>
         </div>
       </header>
 
-      {/* Main Feed Container */}
-      <main className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
+      {/* Main Container */}
+      <main className="max-w-3xl mx-auto px-4 pt-6 space-y-6">
 
-        {/* Facebook-style Composer (Visible to Admin or with Access Prompt) */}
-        {isAdmin ? (
-          <div className="bg-[#171514] border border-[rgba(255,240,238,0.12)] rounded-2xl p-4 sm:p-5 shadow-xl">
-            {/* Author Topline */}
-            <div className="flex items-center gap-3 mb-3">
+        {/* ------------------------------------------------------------- */}
+        {/* SINGLE ARTICLE VIEW (News Portal Reader Mode with Direct Link) */}
+        {/* ------------------------------------------------------------- */}
+        {currentActivePost ? (
+          <article className="bg-[#171514] border border-[rgba(255,240,238,0.12)] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+            {/* Breadcrumb & Category */}
+            <div className="flex items-center justify-between gap-3 text-xs flex-wrap border-b border-[rgba(255,240,238,0.08)] pb-4">
+              <div className="flex items-center gap-2 text-[#f6f3f2]/60">
+                <span className="text-[#ff8175] font-semibold">
+                  {currentActivePost.category || 'News'}
+                </span>
+                <span>/</span>
+                <span>Direct Link</span>
+              </div>
+
+              {/* Direct Post URL Indicator */}
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  <Globe className="w-3 h-3" />
+                  Indexed on Google
+                </span>
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDeletePost(currentActivePost.id)}
+                    title="Delete article"
+                    className="p-1 rounded text-stone-500 hover:text-rose-400 hover:bg-rose-950/40 cursor-pointer"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Author Header Bar */}
+            <div className="flex items-center gap-3.5">
               <img
-                src="/assets/aistudio/hero_photo.jpg"
-                alt="Rajababu Mehta"
-                className="w-11 h-11 rounded-full object-cover border-2 border-[#e4342f]"
+                src={currentActivePost.authorPhoto || '/assets/aistudio/hero_photo.jpg'}
+                alt={currentActivePost.authorName}
+                className="w-12 h-12 rounded-full object-cover border-2 border-[#e4342f]"
               />
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-sm text-[#f6f3f2]">Rajababu Mehta</span>
+                  <span className="font-bold text-base text-[#f6f3f2]">
+                    {currentActivePost.authorName}
+                  </span>
                   <CheckCircle2 className="w-4 h-4 text-[#e4342f] fill-[#e4342f] text-black" />
                 </div>
-                <div className="flex items-center gap-1 text-[11px] text-[#f6f3f2]/60">
+                <div className="text-xs text-[#f6f3f2]/60 flex items-center gap-2 mt-0.5">
                   <span>Founder & CEO, AI Clipzone</span>
                   <span>·</span>
-                  <span className="flex items-center gap-0.5 text-emerald-400">
-                    <Globe className="w-3 h-3" /> Public
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    {new Date(currentActivePost.createdAt).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Post Content Input */}
-            <form onSubmit={handleCreatePost} className="space-y-3">
-              <textarea
-                value={postContent}
-                onChange={(e) => setPostContent(e.target.value)}
-                placeholder={
-                  language === 'NE'
-                    ? 'तपाईंको मनमा के छ राजाबाबु? (कुनै नयाँ लेख, विचार वा जानकारी लेख्नुहोस्...)'
-                    : "What's on your mind, Rajababu? (Share an article, thought, or announcement...)"
-                }
-                rows={3}
-                className="w-full bg-[#12100f] border border-[rgba(255,240,238,0.08)] focus:border-[#e4342f] rounded-xl p-3 text-sm text-[#f6f3f2] placeholder-[#f6f3f2]/40 resize-none outline-none transition-colors"
-              />
-
-              {/* Attached Photos Preview */}
-              {imageFiles.length > 0 && (
-                <div className="grid grid-cols-3 gap-2 pt-1">
-                  {imageFiles.map((img, idx) => (
-                    <div key={idx} className="relative group rounded-lg overflow-hidden border border-[rgba(255,240,238,0.1)] aspect-video bg-black">
-                      <img src={img} alt="Preview" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(idx)}
-                        className="absolute top-1 right-1 p-1 rounded-full bg-black/70 hover:bg-[#e4342f] text-white transition-colors cursor-pointer"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
+            {/* Post Images Gallery (News Style) */}
+            {currentActivePost.images && currentActivePost.images.length > 0 && (
+              <div className="space-y-3 pt-2">
+                <div
+                  onClick={() => setLightboxImage(currentActivePost.images[0])}
+                  className="rounded-2xl overflow-hidden cursor-pointer group relative bg-black border border-[rgba(255,240,238,0.1)]"
+                >
+                  <img
+                    src={currentActivePost.images[0]}
+                    alt="Article Featured Attachment"
+                    className="w-full max-h-[500px] object-cover group-hover:scale-[1.01] transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="px-3.5 py-1.5 rounded-full bg-black/75 text-white text-xs font-semibold flex items-center gap-1.5">
+                      <Maximize2 className="w-3.5 h-3.5" /> Full View
+                    </span>
+                  </div>
                 </div>
-              )}
 
-              {/* Category Pills Selector */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                {CATEGORIES.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer border ${
-                      selectedCategory === cat.id
-                        ? 'bg-[#e4342f] text-white border-[#e4342f]'
-                        : 'bg-[rgba(255,255,255,0.04)] text-[#f6f3f2]/70 border-[rgba(255,240,238,0.08)] hover:bg-[rgba(255,255,255,0.08)]'
-                    }`}
-                  >
-                    {language === 'NE' ? cat.ne : cat.en}
-                  </button>
-                ))}
+                {/* Additional photos if any */}
+                {currentActivePost.images.length > 1 && (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                    {currentActivePost.images.slice(1).map((img, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => setLightboxImage(img)}
+                        className="aspect-square rounded-xl overflow-hidden cursor-pointer bg-black border border-[rgba(255,240,238,0.08)] group"
+                      >
+                        <img
+                          src={img}
+                          alt={`Gallery photo ${idx + 2}`}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Article Content / Lekh */}
+            <div className="pt-2">
+              <div className="text-base text-[#f6f3f2]/95 leading-relaxed font-sans whitespace-pre-line space-y-4">
+                {currentActivePost.content}
+              </div>
+            </div>
+
+            {/* DIRECT NEWS PORTAL SHARE BAR (ONLY SHARE, NO LIKE, NO COMMENT) */}
+            <div className="pt-6 border-t border-[rgba(255,240,238,0.12)] space-y-3">
+              <div className="flex items-center justify-between text-xs text-[#f6f3f2]/60">
+                <span className="font-semibold uppercase tracking-wider text-[#ff8175] flex items-center gap-1.5">
+                  <Share2 className="w-3.5 h-3.5" />
+                  {language === 'NE' ? 'यो समाचार / लेख सेयर गर्नुहोस्:' : 'Share this news article:'}
+                </span>
+                <span className="text-[11px] font-mono opacity-60">
+                  ID: {currentActivePost.id.slice(0, 10)}
+                </span>
               </div>
 
-              {/* Composer Action Toolbar */}
-              <div className="pt-2 border-t border-[rgba(255,240,238,0.08)] flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageSelect}
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.08)] text-xs font-semibold text-[#f6f3f2] border border-[rgba(255,240,238,0.08)] transition-colors cursor-pointer"
-                  >
-                    <ImageIcon className="w-4 h-4 text-emerald-400" />
-                    <span>{language === 'NE' ? 'फोटो थप्नुहोस्' : 'Photo / Image'}</span>
-                  </button>
-                  <span className="text-[11px] text-[#f6f3f2]/40 hidden sm:inline">
-                    {language === 'NE' ? 'डाटाबेसमा सुरक्षित हुन्छ' : 'Saved in Firestore'}
-                  </span>
-                </div>
-
+              {/* Direct Social Share Buttons */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {/* WhatsApp Direct Share */}
                 <button
-                  type="submit"
-                  disabled={isSubmitting || (!postContent.trim() && imageFiles.length === 0)}
-                  className="px-5 py-2 rounded-xl bg-[#e4342f] hover:bg-[#c92823] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold tracking-wide transition-all flex items-center gap-1.5 shadow-lg shadow-[#e4342f]/20 cursor-pointer"
+                  type="button"
+                  onClick={() => handleWhatsAppShare(currentActivePost)}
+                  className="py-2.5 px-3 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/30 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
-                  {isSubmitting ? (
+                  <span className="text-base leading-none">💬</span>
+                  <span>WhatsApp</span>
+                </button>
+
+                {/* Facebook Share */}
+                <button
+                  type="button"
+                  onClick={() => handleFacebookShare(currentActivePost)}
+                  className="py-2.5 px-3 rounded-xl bg-[#1877F2]/15 hover:bg-[#1877F2] text-[#1877F2] hover:text-white border border-[#1877F2]/30 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                >
+                  <span className="text-base leading-none">📘</span>
+                  <span>Facebook</span>
+                </button>
+
+                {/* X / Twitter Share */}
+                <button
+                  type="button"
+                  onClick={() => handleTwitterShare(currentActivePost)}
+                  className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                >
+                  <span className="text-sm font-black">𝕏</span>
+                  <span>X / Twitter</span>
+                </button>
+
+                {/* Copy Direct Post URL */}
+                <button
+                  type="button"
+                  onClick={() => handleCopyPostLink(currentActivePost)}
+                  className="py-2.5 px-3 rounded-xl bg-[#e4342f]/15 hover:bg-[#e4342f] text-[#ff8175] hover:text-white border border-[#e4342f]/30 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                >
+                  {copiedPostId === currentActivePost.id ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>{language === 'NE' ? 'पोस्ट हुँदैछ...' : 'Posting...'}</span>
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      <span>{language === 'NE' ? 'कपी भयो!' : 'Copied!'}</span>
                     </>
                   ) : (
                     <>
-                      <Send className="w-3.5 h-3.5" />
-                      <span>{language === 'NE' ? 'पोस्ट गर्नुहोस्' : 'Post'}</span>
+                      <Copy className="w-4 h-4" />
+                      <span>{language === 'NE' ? 'लिङ्क कपी' : 'Copy Link'}</span>
                     </>
                   )}
                 </button>
               </div>
-            </form>
-          </div>
+
+              {/* Direct URL Preview Box */}
+              <div className="bg-[#100e0d] p-3 rounded-xl border border-[rgba(255,240,238,0.06)] flex items-center justify-between gap-2 text-xs font-mono text-[#f6f3f2]/60">
+                <span className="truncate">{getDirectPostUrl(currentActivePost.id)}</span>
+                <button
+                  onClick={() => handleNativeShare(currentActivePost)}
+                  className="shrink-0 px-2.5 py-1 rounded-lg bg-[rgba(255,255,255,0.06)] hover:bg-[#e4342f] hover:text-white text-[#f6f3f2] font-sans text-xs font-semibold cursor-pointer transition-colors"
+                >
+                  Share
+                </button>
+              </div>
+            </div>
+
+            {/* Back to all posts footer */}
+            <div className="pt-2 text-center">
+              <button
+                onClick={handleBackToFeed}
+                className="inline-flex items-center gap-2 text-xs font-bold text-[#ff8175] hover:text-white transition-colors cursor-pointer"
+              >
+                <span>← {language === 'NE' ? 'सबै समाचार र पोस्टहरू हेर्नुहोस्' : 'Browse All News & Posts'}</span>
+              </button>
+            </div>
+          </article>
         ) : (
-          /* Subtle Admin Hint for Rajababu */
-          <div className="bg-[#171514]/60 border border-[rgba(255,240,238,0.08)] rounded-2xl p-4 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <img
-                src="/assets/aistudio/hero_photo.jpg"
-                alt="Rajababu Mehta"
-                className="w-10 h-10 rounded-full object-cover border border-[#e4342f]"
-              />
+          /* ------------------------------------------------------------- */
+          /* ALL POSTS FEED LIST VIEW (News Portal List) */
+          /* ------------------------------------------------------------- */
+          <>
+            {/* Admin News Article Composer */}
+            {isAdmin ? (
+              <div className="bg-[#171514] border border-[rgba(255,240,238,0.12)] rounded-3xl p-5 sm:p-6 shadow-xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <img
+                    src="/assets/aistudio/hero_photo.jpg"
+                    alt="Rajababu Mehta"
+                    className="w-11 h-11 rounded-full object-cover border-2 border-[#e4342f]"
+                  />
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-sm text-[#f6f3f2]">Rajababu Mehta</span>
+                      <CheckCircle2 className="w-4 h-4 text-[#e4342f] fill-[#e4342f] text-black" />
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] text-[#f6f3f2]/60">
+                      <span>Publisher & Founder, AI Clipzone</span>
+                      <span>·</span>
+                      <span className="text-emerald-400 flex items-center gap-0.5">
+                        <Globe className="w-3 h-3" /> Public & Google Searchable
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleCreatePost} className="space-y-3.5">
+                  {/* Article Title Input (Optional Headline) */}
+                  <input
+                    type="text"
+                    value={postTitle}
+                    onChange={(e) => setPostTitle(e.target.value)}
+                    placeholder={
+                      language === 'NE'
+                        ? 'शीर्षक वा मुख्य समाचार (वैकल्पिक)...'
+                        : 'Article Headline / News Title (Optional)...'
+                    }
+                    className="w-full bg-[#12100f] border border-[rgba(255,240,238,0.1)] focus:border-[#e4342f] rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#f6f3f2] placeholder-[#f6f3f2]/40 outline-none transition-colors"
+                  />
+
+                  {/* Body Textarea */}
+                  <textarea
+                    value={postContent}
+                    onChange={(e) => setPostContent(e.target.value)}
+                    placeholder={
+                      language === 'NE'
+                        ? 'समाचार, लेख वा विस्तृत जानकारी लेख्नुहोस् (यो गुगल सर्चमा पनि देखिनेछ)...'
+                        : 'Write the complete article, announcement, or news information (Google search indexed)...'
+                    }
+                    rows={4}
+                    className="w-full bg-[#12100f] border border-[rgba(255,240,238,0.1)] focus:border-[#e4342f] rounded-xl p-3.5 text-sm text-[#f6f3f2] placeholder-[#f6f3f2]/40 resize-none outline-none transition-colors"
+                  />
+
+                  {/* Attached Photos Preview */}
+                  {imageFiles.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                      {imageFiles.map((img, idx) => (
+                        <div
+                          key={idx}
+                          className="relative group rounded-lg overflow-hidden border border-[rgba(255,240,238,0.1)] aspect-video bg-black"
+                        >
+                          <img src={img} alt="Preview" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(idx)}
+                            className="absolute top-1 right-1 p-1 rounded-full bg-black/75 hover:bg-[#e4342f] text-white transition-colors cursor-pointer"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Category Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    {CATEGORIES.map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer border ${
+                          selectedCategory === cat.id
+                            ? 'bg-[#e4342f] text-white border-[#e4342f]'
+                            : 'bg-[rgba(255,255,255,0.04)] text-[#f6f3f2]/70 border-[rgba(255,240,238,0.08)] hover:bg-[rgba(255,255,255,0.08)]'
+                        }`}
+                      >
+                        {language === 'NE' ? cat.ne : cat.en}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Toolbar */}
+                  <div className="pt-2 border-t border-[rgba(255,240,238,0.08)] flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageSelect}
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.08)] text-xs font-semibold text-[#f6f3f2] border border-[rgba(255,240,238,0.08)] transition-colors cursor-pointer"
+                      >
+                        <ImageIcon className="w-4 h-4 text-emerald-400" />
+                        <span>{language === 'NE' ? 'तस्विर जोड्नुहोस्' : 'Attach Photos'}</span>
+                      </button>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || (!postContent.trim() && imageFiles.length === 0)}
+                      className="px-5 py-2.5 rounded-xl bg-[#e4342f] hover:bg-[#c92823] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold tracking-wide transition-all flex items-center gap-1.5 shadow-lg shadow-[#e4342f]/20 cursor-pointer"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>{language === 'NE' ? 'प्रकाशित हुँदैछ...' : 'Publishing...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3.5 h-3.5" />
+                          <span>{language === 'NE' ? 'समाचार प्रकाशित गर्नुहोस्' : 'Publish Article'}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            ) : null}
+
+            {/* Posts Feed Header */}
+            <div className="flex items-center justify-between pb-1">
               <div>
-                <p className="text-xs font-semibold text-[#f6f3f2]">
-                  {language === 'NE' ? 'राजाबाबु मेहताको आधिकारिक फिड' : "Rajababu Mehta's Official Feed"}
-                </p>
-                <p className="text-[11px] text-[#f6f3f2]/50">
-                  {language === 'NE' ? 'नयाँ पोस्ट गर्न एडमिन लगइन गर्नुहोस्' : 'Sign in as admin to publish updates'}
+                <h2 className="text-xl sm:text-2xl font-black text-[#f6f3f2] tracking-tight">
+                  {language === 'NE' ? 'समाचार तथा आधिकारिक लेखहरू' : 'News, Articles & Official Updates'}
+                </h2>
+                <p className="text-xs text-[#f6f3f2]/60 mt-0.5">
+                  {language === 'NE'
+                    ? 'राजाबाबु मेहताद्वारा प्रकाशित सामग्रीहरू (प्रत्यक्ष सेयर गर्न मिल्ने)'
+                    : 'Directly shareable news articles & insights by Rajababu Mehta'}
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setShowAdminLoginModal(true)}
-              className="px-3 py-1.5 rounded-lg bg-[rgba(255,255,255,0.06)] hover:bg-[#e4342f] hover:text-white text-xs font-bold transition-all text-[#f6f3f2] cursor-pointer"
-            >
-              {language === 'NE' ? 'लगइन' : 'Sign In'}
-            </button>
-          </div>
-        )}
 
-        {/* Posts Feed List */}
-        {loadingPosts ? (
-          <div className="py-16 text-center space-y-3">
-            <Loader2 className="w-8 h-8 text-[#e4342f] animate-spin mx-auto" />
-            <p className="text-xs text-[#f6f3f2]/60">
-              {language === 'NE' ? 'डाटाबेसबाट पोस्टहरू लोड हुँदैछ...' : 'Fetching posts from Firestore database...'}
-            </p>
-          </div>
-        ) : posts.length === 0 ? (
-          <div className="bg-[#171514] border border-[rgba(255,240,238,0.08)] rounded-2xl p-8 text-center space-y-4">
-            <div className="w-14 h-14 rounded-full bg-[rgba(228,52,47,0.1)] border border-[rgba(228,52,47,0.2)] flex items-center justify-center mx-auto text-[#ff8175]">
-              <Sparkles className="w-7 h-7" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-[#f6f3f2]">
-                {language === 'NE' ? 'अहिलेसम्म कुनै पोस्ट छैन' : 'No Posts Yet'}
-              </h3>
-              <p className="text-xs text-[#f6f3f2]/60 max-w-sm mx-auto mt-1">
-                {language === 'NE'
-                  ? 'राजाबाबु मेहताले पहिलो पोस्ट गरेपछि यहाँ फेसबुक जस्तै देखिनेछ।'
-                  : 'Posts published by Rajababu Mehta will appear here in Facebook-style feed with images and discussions.'}
-              </p>
-            </div>
-            {isAdmin && (
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="px-4 py-2 rounded-xl bg-[#e4342f] text-white text-xs font-bold cursor-pointer"
-              >
-                {language === 'NE' ? 'पहिलो पोस्ट गर्नुहोस्' : 'Write First Post'}
-              </button>
+            {/* Posts List */}
+            {loadingPosts ? (
+              <div className="py-20 text-center space-y-3">
+                <Loader2 className="w-8 h-8 text-[#e4342f] animate-spin mx-auto" />
+                <p className="text-xs text-[#f6f3f2]/60">
+                  {language === 'NE' ? 'समाचार तथा लेखहरू लोड हुँदैछ...' : 'Loading articles from database...'}
+                </p>
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="bg-[#171514] border border-[rgba(255,240,238,0.08)] rounded-3xl p-10 text-center space-y-4">
+                <div className="w-14 h-14 rounded-full bg-[rgba(228,52,47,0.1)] border border-[rgba(228,52,47,0.2)] flex items-center justify-center mx-auto text-[#ff8175]">
+                  <Sparkles className="w-7 h-7" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#f6f3f2]">
+                    {language === 'NE' ? 'कुनै समाचार उपलब्ध छैन' : 'No Articles Published Yet'}
+                  </h3>
+                  <p className="text-xs text-[#f6f3f2]/60 max-w-sm mx-auto mt-1">
+                    {language === 'NE'
+                      ? 'राजाबाबु मेहताले यहाँ पहिलो समाचार वा लेख प्रकाशित गरेपछि प्रत्यक्ष रूपमा सेयर गर्न सकिनेछ।'
+                      : 'Articles published here will generate direct shareable links and Google search metadata.'}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              posts.map((post) => (
+                <NewsPostCard
+                  key={post.id}
+                  post={post}
+                  language={language}
+                  isAdmin={isAdmin}
+                  onOpenPost={() => handleOpenSinglePost(post.id)}
+                  onDelete={() => handleDeletePost(post.id)}
+                  onCopyLink={() => handleCopyPostLink(post)}
+                  onWhatsAppShare={() => handleWhatsAppShare(post)}
+                  onFacebookShare={() => handleFacebookShare(post)}
+                  onTwitterShare={() => handleTwitterShare(post)}
+                  onOpenImage={(imgUrl) => setLightboxImage(imgUrl)}
+                  copied={copiedPostId === post.id}
+                />
+              ))
             )}
-          </div>
-        ) : (
-          posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              language={language}
-              isAdmin={isAdmin}
-              isLiked={Boolean(likedPostIds[post.id])}
-              commentsOpen={Boolean(openComments[post.id])}
-              onToggleComments={() =>
-                setOpenComments((prev) => ({ ...prev, [post.id]: !prev[post.id] }))
-              }
-              onLike={() => handleLikePost(post.id)}
-              onShare={() => handleSharePost(post)}
-              onDelete={() => handleDeletePost(post.id)}
-              onOpenImage={(imgUrl) => setLightboxImage(imgUrl)}
-              visitorId={visitorId}
-              currentUser={currentUser}
-              onShowToast={onShowToast}
-            />
-          ))
+          </>
         )}
       </main>
 
-      {/* Lightbox Fullscreen Modal */}
+      {/* Lightbox Modal */}
       <AnimatePresence>
         {lightboxImage && (
           <motion.div
@@ -626,7 +893,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
             </button>
             <img
               src={lightboxImage}
-              alt="Enlarged view"
+              alt="Enlarged photo"
               className="max-h-[90vh] max-w-[95vw] object-contain rounded-xl shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
@@ -661,14 +928,13 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                   <Shield className="w-6 h-6" />
                 </div>
                 <h3 className="text-base font-bold text-[#f6f3f2]">
-                  {language === 'NE' ? 'राजाबाबु मेहता एडमिन प्रमाणिकरण' : 'Rajababu Mehta Admin Verification'}
+                  {language === 'NE' ? 'एडमिन प्रमाणिकरण' : 'Publisher Verification'}
                 </h3>
                 <p className="text-xs text-[#f6f3f2]/60">
-                  {language === 'NE' ? 'पोस्ट सिर्जना गर्न वा व्यवस्थापन गर्न लगइन गर्नुहोस्' : 'Sign in to create, edit or delete posts'}
+                  {language === 'NE' ? 'समाचार प्रकाशित गर्न लगइन गर्नुहोस्' : 'Sign in to publish or delete news articles'}
                 </p>
               </div>
 
-              {/* 1-Click Google Sign-In */}
               <button
                 onClick={handleGoogleSignIn}
                 className="w-full py-3 px-4 rounded-xl bg-white hover:bg-stone-100 text-stone-900 font-bold text-xs flex items-center justify-center gap-2.5 shadow-md transition-all cursor-pointer"
@@ -691,30 +957,29 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                   />
                 </svg>
-                <span>Sign in with Google (rajababum426@gmail.com)</span>
+                <span>Google Sign-In (rajababum426@gmail.com)</span>
               </button>
 
               <div className="relative flex items-center justify-center">
                 <div className="border-t border-[rgba(255,240,238,0.1)] w-full"></div>
                 <span className="bg-[#171514] px-2 text-[10px] uppercase tracking-wider text-[#f6f3f2]/40 absolute">
-                  {language === 'NE' ? 'वा गोप्य पिन' : 'or secret pin'}
+                  or pin
                 </span>
               </div>
 
-              {/* Passcode alternative */}
               <form onSubmit={handleAdminPinSubmit} className="space-y-3">
                 <input
                   type="password"
                   value={adminPinInput}
                   onChange={(e) => setAdminPinInput(e.target.value)}
-                  placeholder={language === 'NE' ? 'एडमिन पिन हाल्नुहोस् (426)' : 'Enter admin pin (426)'}
+                  placeholder="Enter pin (426)"
                   className="w-full bg-[#12100f] border border-[rgba(255,240,238,0.12)] focus:border-[#e4342f] rounded-xl px-3 py-2.5 text-xs text-center text-[#f6f3f2] tracking-widest outline-none"
                 />
                 <button
                   type="submit"
                   className="w-full py-2.5 rounded-xl bg-[rgba(255,255,255,0.08)] hover:bg-[#e4342f] text-white text-xs font-bold transition-all cursor-pointer"
                 >
-                  {language === 'NE' ? 'प्रवेश गर्नुहोस्' : 'Unlock Admin Post'}
+                  Unlock
                 </button>
               </form>
             </motion.div>
@@ -726,99 +991,49 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
 };
 
 // ==========================================
-// INDIVIDUAL POST CARD (Facebook-style)
+// NEWS ARTICLE CARD (Feed list item - NO Like, NO Comment, ONLY Direct Share)
 // ==========================================
 
-interface PostCardProps {
+interface NewsPostCardProps {
   post: FeedPost;
   language: Language;
   isAdmin: boolean;
-  isLiked: boolean;
-  commentsOpen: boolean;
-  onToggleComments: () => void;
-  onLike: () => void;
-  onShare: () => void;
+  onOpenPost: () => void;
   onDelete: () => void;
+  onCopyLink: () => void;
+  onWhatsAppShare: () => void;
+  onFacebookShare: () => void;
+  onTwitterShare: () => void;
   onOpenImage: (imgUrl: string) => void;
-  visitorId: string;
-  currentUser: AdminUser | null;
-  onShowToast: (message: string, type: 'success' | 'info' | 'warning' | 'error') => void;
+  copied: boolean;
 }
 
-const PostCard: React.FC<PostCardProps> = ({
+const NewsPostCard: React.FC<NewsPostCardProps> = ({
   post,
   language,
   isAdmin,
-  isLiked,
-  commentsOpen,
-  onToggleComments,
-  onLike,
-  onShare,
+  onOpenPost,
   onDelete,
+  onCopyLink,
+  onWhatsAppShare,
+  onFacebookShare,
+  onTwitterShare,
   onOpenImage,
-  visitorId,
-  currentUser,
-  onShowToast,
+  copied,
 }) => {
-  const [comments, setComments] = useState<PostComment[]>([]);
-  const [commentText, setCommentText] = useState('');
-  const [commenterName, setCommenterName] = useState(() => {
-    return localStorage.getItem('rajababu_commenter_name') || '';
-  });
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
 
-  // Subscribe to comments when comment drawer is toggled open
-  useEffect(() => {
-    if (!commentsOpen) return;
-    const unsub = subscribeToPostComments(post.id, (loaded) => {
-      setComments(loaded);
-    });
-    return () => unsub();
-  }, [commentsOpen, post.id]);
+  // Extract first line as headline
+  const lines = post.content.split('\n').filter((l) => l.trim().length > 0);
+  const headline = lines[0] || 'Rajababu Mehta Announcement';
+  const remainingContent = lines.slice(1).join('\n').trim();
 
-  const handleAddComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!commentText.trim()) return;
-
-    const nameToUse = currentUser?.displayName || commenterName.trim() || 'Visitor';
-    localStorage.setItem('rajababu_commenter_name', nameToUse);
-
-    setIsSubmittingComment(true);
-    try {
-      await addPostComment(post.id, {
-        authorId: currentUser?.uid || visitorId,
-        authorName: nameToUse,
-        authorPhoto: currentUser?.photoURL || undefined,
-        content: commentText.trim(),
-      });
-      setCommentText('');
-    } catch (err) {
-      onShowToast(
-        language === 'NE' ? 'टिप्पणी थप्न सकिएन।' : 'Failed to post comment.',
-        'error'
-      );
-    } finally {
-      setIsSubmittingComment(false);
-    }
-  };
-
-  // Format date relative or concise
-  const formattedTime = (() => {
+  // Format date
+  const formattedDate = (() => {
     try {
       const d = new Date(post.createdAt);
       if (isNaN(d.getTime())) return 'Recently';
-      const now = new Date();
-      const diffMs = now.getTime() - d.getTime();
-      const diffMins = Math.floor(diffMs / 60000);
-      const diffHours = Math.floor(diffMins / 60);
-      const diffDays = Math.floor(diffHours / 24);
-
-      if (diffMins < 1) return language === 'NE' ? 'भर्खरै' : 'Just now';
-      if (diffMins < 60) return `${diffMins}m`;
-      if (diffHours < 24) return `${diffHours}h`;
-      if (diffDays < 7) return `${diffDays}d`;
-      return d.toLocaleDateString(language === 'NE' ? 'ne-NP' : 'en-US', {
+      return d.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -828,14 +1043,10 @@ const PostCard: React.FC<PostCardProps> = ({
     }
   })();
 
-  const isLongContent = post.content.length > 280;
-  const displayContent =
-    isLongContent && !isExpanded ? `${post.content.slice(0, 280)}...` : post.content;
-
   return (
-    <article className="bg-[#171514] border border-[rgba(255,240,238,0.1)] rounded-2xl shadow-xl overflow-hidden transition-all hover:border-[rgba(255,240,238,0.16)]">
-      {/* Header: Author + Meta + Delete button */}
-      <div className="p-4 sm:p-5 flex items-start justify-between gap-3">
+    <article className="bg-[#171514] border border-[rgba(255,240,238,0.1)] rounded-3xl overflow-hidden shadow-xl hover:border-[rgba(255,240,238,0.18)] transition-all">
+      {/* Top Header: Author + Category + Date */}
+      <div className="p-5 sm:p-6 pb-4 flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <img
             src={post.authorPhoto || '/assets/aistudio/hero_photo.jpg'}
@@ -857,10 +1068,8 @@ const PostCard: React.FC<PostCardProps> = ({
               <span>·</span>
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {formattedTime}
+                {formattedDate}
               </span>
-              <span>·</span>
-              <Globe className="w-3 h-3 text-[#f6f3f2]/40" />
             </div>
           </div>
         </div>
@@ -868,7 +1077,7 @@ const PostCard: React.FC<PostCardProps> = ({
         {isAdmin && (
           <button
             onClick={onDelete}
-            title="Delete post"
+            title="Delete article"
             className="p-1.5 rounded-lg text-stone-500 hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer"
           >
             <Trash2 className="w-4 h-4" />
@@ -876,78 +1085,48 @@ const PostCard: React.FC<PostCardProps> = ({
         )}
       </div>
 
-      {/* Body: Post text */}
-      <div className="px-4 sm:px-5 pb-3">
-        <p className="text-sm text-[#f6f3f2]/90 leading-relaxed whitespace-pre-line">
-          {displayContent}
-        </p>
-        {isLongContent && (
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-1 text-xs font-bold text-[#ff8175] hover:underline cursor-pointer"
-          >
-            {isExpanded
-              ? language === 'NE'
-                ? 'कम देखाउनुहोस्'
-                : 'See less'
-              : language === 'NE'
-              ? 'थप पढ्नुहोस्'
-              : 'See more'}
-          </button>
+      {/* Main Headline */}
+      <div className="px-5 sm:px-6 pb-2 cursor-pointer" onClick={onOpenPost}>
+        <h3 className="text-lg sm:text-xl font-bold text-[#f6f3f2] hover:text-[#ff8175] transition-colors leading-snug">
+          {headline}
+        </h3>
+        {remainingContent && (
+          <p className="text-sm text-[#f6f3f2]/75 line-clamp-3 mt-2 leading-relaxed">
+            {remainingContent}
+          </p>
         )}
       </div>
 
-      {/* Body: Facebook-style Image Grid */}
+      {/* Images Preview */}
       {post.images && post.images.length > 0 && (
-        <div className="border-t border-b border-[rgba(255,240,238,0.06)] bg-black/40">
+        <div className="border-t border-b border-[rgba(255,240,238,0.06)] bg-black/40 mt-3">
           {post.images.length === 1 ? (
             <div
               onClick={() => onOpenImage(post.images[0])}
-              className="relative cursor-pointer group max-h-[520px] overflow-hidden flex items-center justify-center bg-black"
+              className="relative cursor-pointer group max-h-[460px] overflow-hidden flex items-center justify-center bg-black"
             >
               <img
                 src={post.images[0]}
-                alt="Post attachment"
-                className="w-full max-h-[520px] object-cover group-hover:scale-[1.01] transition-transform duration-300"
+                alt="Post photo"
+                className="w-full max-h-[460px] object-cover group-hover:scale-[1.01] transition-transform duration-300"
               />
-              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <span className="px-3 py-1.5 rounded-full bg-black/70 text-white text-xs font-medium flex items-center gap-1.5">
-                  <Maximize2 className="w-3.5 h-3.5" /> Full View
-                </span>
-              </div>
-            </div>
-          ) : post.images.length === 2 ? (
-            <div className="grid grid-cols-2 gap-1 bg-black">
-              {post.images.map((img, i) => (
-                <div
-                  key={i}
-                  onClick={() => onOpenImage(img)}
-                  className="aspect-square cursor-pointer group relative overflow-hidden bg-black"
-                >
-                  <img
-                    src={img}
-                    alt={`Attachment ${i + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                  />
-                </div>
-              ))}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-1 bg-black">
-              {post.images.slice(0, 4).map((img, i) => (
+              {post.images.slice(0, 2).map((img, i) => (
                 <div
                   key={i}
                   onClick={() => onOpenImage(img)}
-                  className="aspect-square cursor-pointer group relative overflow-hidden bg-black"
+                  className="aspect-video cursor-pointer relative overflow-hidden bg-black"
                 >
                   <img
                     src={img}
                     alt={`Attachment ${i + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                    className="w-full h-full object-cover hover:scale-105 transition-transform"
                   />
-                  {i === 3 && post.images.length > 4 && (
-                    <div className="absolute inset-0 bg-black/75 flex items-center justify-center text-white text-xl font-bold">
-                      +{post.images.length - 4}
+                  {i === 1 && post.images.length > 2 && (
+                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-white text-base font-bold">
+                      +{post.images.length - 2} more
                     </div>
                   )}
                 </div>
@@ -957,135 +1136,67 @@ const PostCard: React.FC<PostCardProps> = ({
         </div>
       )}
 
-      {/* Engagement Counter Strip */}
-      <div className="px-4 sm:px-5 py-2.5 flex items-center justify-between text-xs text-[#f6f3f2]/50 border-b border-[rgba(255,240,238,0.06)]">
+      {/* Direct News Share Bar (STRICTLY NO LIKE, NO COMMENT - ONLY SHARE & READ) */}
+      <div className="px-5 sm:px-6 py-3.5 bg-[#141211]/60 border-t border-[rgba(255,240,238,0.08)] flex items-center justify-between gap-2 flex-wrap">
+        <button
+          onClick={onOpenPost}
+          className="flex items-center gap-1.5 text-xs font-bold text-[#ff8175] hover:text-white transition-colors cursor-pointer"
+        >
+          <span>{language === 'NE' ? 'पूरा लेख पढ्नुहोस्' : 'Read Full Article'}</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+
+        {/* Share Buttons Strip */}
         <div className="flex items-center gap-1.5">
-          <span className="w-5 h-5 rounded-full bg-[#e4342f] flex items-center justify-center text-white text-[10px]">
-            👍
-          </span>
-          <span className="font-medium text-[#f6f3f2]/70">
-            {post.likesCount || 0} {language === 'NE' ? 'लाइक' : 'Likes'}
-          </span>
-        </div>
-
-        <button
-          onClick={onToggleComments}
-          className="hover:underline cursor-pointer"
-        >
-          {post.commentsCount || comments.length || 0} {language === 'NE' ? 'टिप्पणीहरू' : 'Comments'}
-        </button>
-      </div>
-
-      {/* Facebook-style Action Bar */}
-      <div className="px-2 py-1.5 grid grid-cols-3 gap-1">
-        <button
-          onClick={onLike}
-          className={`py-2 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer ${
-            isLiked
-              ? 'text-[#e4342f] bg-[#e4342f]/10'
-              : 'text-[#f6f3f2]/70 hover:bg-[rgba(255,255,255,0.05)] hover:text-[#f6f3f2]'
-          }`}
-        >
-          <Heart className={`w-4 h-4 ${isLiked ? 'fill-[#e4342f] text-[#e4342f]' : ''}`} />
-          <span>{language === 'NE' ? 'लाइक' : 'Like'}</span>
-        </button>
-
-        <button
-          onClick={onToggleComments}
-          className={`py-2 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all cursor-pointer ${
-            commentsOpen
-              ? 'text-[#ff8175] bg-[rgba(255,255,255,0.05)]'
-              : 'text-[#f6f3f2]/70 hover:bg-[rgba(255,255,255,0.05)] hover:text-[#f6f3f2]'
-          }`}
-        >
-          <MessageCircle className="w-4 h-4" />
-          <span>{language === 'NE' ? 'टिप्पणी' : 'Comment'}</span>
-        </button>
-
-        <button
-          onClick={onShare}
-          className="py-2 rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-[#f6f3f2]/70 hover:bg-[rgba(255,255,255,0.05)] hover:text-[#f6f3f2] transition-all cursor-pointer"
-        >
-          <Share2 className="w-4 h-4" />
-          <span>{language === 'NE' ? 'सेयर' : 'Share'}</span>
-        </button>
-      </div>
-
-      {/* Comments Section Drawer */}
-      <AnimatePresence>
-        {commentsOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="border-t border-[rgba(255,240,238,0.08)] bg-[#12100f] p-4 sm:p-5 space-y-4"
+          {/* Quick WhatsApp Share */}
+          <button
+            onClick={onWhatsAppShare}
+            title="Share on WhatsApp"
+            className="p-2 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366] text-[#25D366] hover:text-white transition-all text-xs font-bold flex items-center gap-1 cursor-pointer"
           >
-            {/* New Comment Input */}
-            <form onSubmit={handleAddComment} className="space-y-2">
-              {!currentUser && (
-                <input
-                  type="text"
-                  value={commenterName}
-                  onChange={(e) => setCommenterName(e.target.value)}
-                  placeholder={language === 'NE' ? 'तपाईंको नाम (वैकल्पिक)...' : 'Your name (optional)...'}
-                  className="w-full bg-[#171514] border border-[rgba(255,240,238,0.08)] rounded-lg px-3 py-1.5 text-xs text-[#f6f3f2] placeholder-[#f6f3f2]/40 outline-none focus:border-[#e4342f]"
-                />
-              )}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  placeholder={
-                    language === 'NE'
-                      ? 'आफ्नो विचार वा प्रतिक्रिया लेख्नुहोस्...'
-                      : 'Write a public comment...'
-                  }
-                  className="flex-1 bg-[#171514] border border-[rgba(255,240,238,0.08)] focus:border-[#e4342f] rounded-xl px-3.5 py-2 text-xs text-[#f6f3f2] placeholder-[#f6f3f2]/40 outline-none transition-colors"
-                />
-                <button
-                  type="submit"
-                  disabled={isSubmittingComment || !commentText.trim()}
-                  className="px-3.5 py-2 rounded-xl bg-[#e4342f] hover:bg-[#c92823] disabled:opacity-40 text-white text-xs font-bold transition-all flex items-center justify-center cursor-pointer"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </form>
+            <span className="text-sm leading-none">💬</span>
+            <span className="hidden sm:inline">WhatsApp</span>
+          </button>
 
-            {/* Comments List */}
-            {comments.length === 0 ? (
-              <p className="text-center text-xs text-[#f6f3f2]/40 py-2">
-                {language === 'NE' ? 'पहिलो टिप्पणी तपाईंको होस्!' : 'No comments yet. Be the first to comment!'}
-              </p>
+          {/* Quick Facebook Share */}
+          <button
+            onClick={onFacebookShare}
+            title="Share on Facebook"
+            className="p-2 rounded-xl bg-[#1877F2]/10 hover:bg-[#1877F2] text-[#1877F2] hover:text-white transition-all text-xs font-bold flex items-center gap-1 cursor-pointer"
+          >
+            <span className="text-sm leading-none">📘</span>
+            <span className="hidden sm:inline">Facebook</span>
+          </button>
+
+          {/* Quick X Share */}
+          <button
+            onClick={onTwitterShare}
+            title="Share on X"
+            className="p-2 rounded-xl bg-white/5 hover:bg-white text-white hover:text-black transition-all text-xs font-bold flex items-center gap-1 cursor-pointer"
+          >
+            <span className="text-xs font-black">𝕏</span>
+          </button>
+
+          {/* Copy Direct Link */}
+          <button
+            onClick={onCopyLink}
+            title="Copy Direct Article Link"
+            className="py-2 px-3 rounded-xl bg-[rgba(255,255,255,0.05)] hover:bg-[#e4342f] text-[#f6f3f2] hover:text-white transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-[rgba(255,240,238,0.08)]"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-emerald-400">Copied!</span>
+              </>
             ) : (
-              <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
-                {comments.map((comm) => (
-                  <div key={comm.id} className="flex items-start gap-2.5 text-xs">
-                    <div className="w-7 h-7 rounded-full bg-[#e4342f]/20 border border-[#e4342f]/40 flex items-center justify-center text-[11px] font-bold text-[#ff8175] shrink-0">
-                      {comm.authorName.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 bg-[#171514] rounded-xl p-2.5 border border-[rgba(255,240,238,0.06)]">
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <span className="font-bold text-[#f6f3f2]">{comm.authorName}</span>
-                        <span className="text-[10px] text-[#f6f3f2]/40">
-                          {new Date(comm.createdAt).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-[#f6f3f2]/80 leading-relaxed whitespace-pre-wrap">
-                        {comm.content}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <>
+                <Share2 className="w-3.5 h-3.5 text-[#e4342f]" />
+                <span>Share Link</span>
+              </>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </button>
+        </div>
+      </div>
     </article>
   );
 };

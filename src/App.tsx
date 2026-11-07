@@ -203,33 +203,54 @@ export default function App() {
   const handleOpenAdmin = () => setIsAdminOpen(true);
   const handleCloseAdmin = () => setIsAdminOpen(false);
 
-  // 8. Posts Feed View State (accessible strictly from Menu)
+  // 8. Posts Feed View State (accessible strictly from Menu or direct article share URLs)
   const [isPostsViewOpen, setIsPostsViewOpen] = useState(false);
+  const [initialPostId, setInitialPostId] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleHash = () => {
-      if (window.location.hash === '#posts') {
+    const handleUrlRouting = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const postParam = urlParams.get('post');
+      const hash = window.location.hash;
+
+      if (postParam) {
+        setInitialPostId(postParam);
         setIsPostsViewOpen(true);
-      } else if (window.location.hash === '' && isPostsViewOpen) {
+      } else if (hash.startsWith('#post-')) {
+        setInitialPostId(hash.replace('#post-', ''));
+        setIsPostsViewOpen(true);
+      } else if (hash.startsWith('#post/')) {
+        setInitialPostId(hash.replace('#post/', ''));
+        setIsPostsViewOpen(true);
+      } else if (hash === '#posts') {
+        setInitialPostId(null);
+        setIsPostsViewOpen(true);
+      } else if (hash === '' && !postParam && isPostsViewOpen) {
         setIsPostsViewOpen(false);
+        setInitialPostId(null);
       }
     };
-    handleHash();
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+
+    handleUrlRouting();
+    window.addEventListener('hashchange', handleUrlRouting);
+    window.addEventListener('popstate', handleUrlRouting);
+    return () => {
+      window.removeEventListener('hashchange', handleUrlRouting);
+      window.removeEventListener('popstate', handleUrlRouting);
+    };
   }, [isPostsViewOpen]);
 
   const handleOpenPosts = () => {
     window.location.hash = 'posts';
+    setInitialPostId(null);
     setIsPostsViewOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleClosePosts = () => {
-    if (window.location.hash === '#posts') {
-      window.history.pushState(null, '', window.location.pathname);
-    }
+    window.history.pushState(null, '', window.location.pathname);
     setIsPostsViewOpen(false);
+    setInitialPostId(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -439,11 +460,12 @@ export default function App() {
       )}
 
       {isPostsViewOpen ? (
-        /* Dedicated Facebook-style Post Feed View (Exclusively entered via Menu) */
+        /* Dedicated News & Article Feed View (Direct Share & NewsArticle SEO) */
         <PostsFeedView
           language={language}
           onBackToHome={handleClosePosts}
           onShowToast={(msg, type) => showToast(msg, type === 'error' ? 'error' : 'success')}
+          initialPostId={initialPostId}
         />
       ) : (
         <>
