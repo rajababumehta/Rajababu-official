@@ -433,7 +433,6 @@ export default function App() {
       {!isPostsViewOpen && (
         <Navbar
           language={language}
-          onToggleLanguage={handleToggleLanguage}
           profile={systemSettings.profile}
           onOpenPosts={handleOpenPosts}
         />

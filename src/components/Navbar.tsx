@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import {
   Menu,
   X,
-  Languages,
   ExternalLink,
   Sparkles,
   ArrowRight,
@@ -15,14 +14,13 @@ import { Language, ProfileSettings } from '../types';
 
 interface NavbarProps {
   language: Language;
-  onToggleLanguage: () => void;
+  onToggleLanguage?: () => void;
   profile: ProfileSettings;
   onOpenPosts?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   language,
-  onToggleLanguage,
   profile,
   onOpenPosts,
 }) => {
@@ -138,24 +136,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Action Controls */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            
-            {/* Language Switcher Pill */}
-            <button
-              id="btn-language-toggle-desktop"
-              onClick={onToggleLanguage}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.08)] border border-[rgba(255,240,238,0.09)] text-xs font-semibold text-[#f6f3f2]/80 hover:text-white transition-all cursor-pointer"
-              title={language === 'EN' ? 'नेपालीमा हेर्नुहोस्' : 'Switch to English'}
-              aria-label="Switch Language"
-            >
-              <Languages className="w-3.5 h-3.5 text-[#e4342f]" />
-              <span className={language === 'EN' ? 'text-[#e4342f] font-bold' : 'text-[#f6f3f2]/50'}>
-                EN
-              </span>
-              <span className="text-[#f6f3f2]/30">/</span>
-              <span className={language === 'NE' ? 'text-[#e4342f] font-bold' : 'text-[#f6f3f2]/50'}>
-                नेपाली
-              </span>
-            </button>
 
             {/* Direct AI Clipzone CTA Button with uploaded logo */}
             <a
@@ -362,18 +342,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <ExternalLink className="w-4 h-4 text-[#ff8175] group-hover:translate-x-0.5 transition-transform" />
                 </a>
 
-                {/* Quick Controls: Language Toggle */}
-                <div>
-                  <button
-                    onClick={() => {
-                      onToggleLanguage();
-                    }}
-                    className="w-full py-2.5 px-3 rounded-xl bg-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.08)] border border-[rgba(255,240,238,0.1)] text-xs font-bold text-[#f6f3f2] flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-                  >
-                    <Languages className="w-3.5 h-3.5 text-[#e4342f]" />
-                    <span>{language === 'EN' ? 'नेपालीमा हेर्नुहोस्' : 'English Mode'}</span>
-                  </button>
-                </div>
+
 
                 {/* Footer Location & Credential Tag */}
                 <div className="pt-2 text-[11px] text-[#f6f3f2]/40 text-center flex items-center justify-center gap-1.5">
