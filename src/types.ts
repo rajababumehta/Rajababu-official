@@ -193,3 +193,31 @@ export interface InquiryMessage {
   status?: 'unread' | 'read';
 }
 
+export interface FeedPost {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorEmail?: string;
+  authorPhoto?: string;
+  content: string;
+  contentNe?: string;
+  images: string[];
+  category?: string;
+  likesCount: number;
+  commentsCount: number;
+  createdAt: string;
+  updatedAt?: string;
+  isPublished?: boolean;
+}
+
+export interface PostComment {
+  id: string;
+  postId: string;
+  authorId: string;
+  authorName: string;
+  authorPhoto?: string;
+  content: string;
+  createdAt: string;
+}
+
+

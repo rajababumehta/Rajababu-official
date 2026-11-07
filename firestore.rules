@@ -1,0 +1,138 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isBootstrappedAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email == 'rajababum426@gmail.com' && request.auth.token.email_verified == true) ||
+        (request.auth.token.email == 'rajababum426@gmail.com') ||
+        (request.auth.token.email == 'support@rajababumehta.com.np')
+      );
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Post validation
+    function isValidPost(data) {
+      return data.keys().hasAll(['authorId', 'authorName', 'content']) &&
+        data.authorId is string && data.authorId.size() <= 128 &&
+        data.authorName is string && data.authorName.size() <= 100 &&
+        data.content is string && data.content.size() <= 10000 &&
+        (!('contentNe' in data) || (data.contentNe is string && data.contentNe.size() <= 10000)) &&
+        (!('category' in data) || (data.category is string && data.category.size() <= 50)) &&
+        (!('images' in data) || (data.images is list && data.images.size() <= 10)) &&
+        (!('likesCount' in data) || data.likesCount is number) &&
+        (!('commentsCount' in data) || data.commentsCount is number);
+    }
+
+    // Comment validation
+    function isValidComment(data) {
+      return data.keys().hasAll(['postId', 'authorName', 'content']) &&
+        data.postId is string && data.postId.size() <= 128 &&
+        data.authorName is string && data.authorName.size() <= 100 &&
+        data.content is string && data.content.size() <= 2000;
+    }
+
+    // Like validation
+    function isValidLike(data) {
+      return data.keys().hasAll(['userId']) &&
+        data.userId is string && data.userId.size() <= 128;
+    }
+
+    // Inquiry validation
+    function isValidInquiry(data) {
+      return data.keys().hasAll(['name', 'email', 'message']) &&
+        data.name is string && data.name.size() <= 100 &&
+        data.email is string && data.email.size() <= 120 &&
+        data.message is string && data.message.size() <= 5000;
+    }
+
+    // 1. Posts Collection (Facebook-style feed)
+    match /posts/{postId} {
+      allow read: if isValidId(postId);
+
+      allow create: if isValidId(postId) &&
+        (isAdmin() || (isSignedIn() && incoming().authorId == request.auth.uid)) &&
+        isValidPost(incoming());
+
+      allow update: if isValidId(postId) && (
+        // Admin full update
+        (isAdmin() && isValidPost(incoming())) ||
+        // Public like/comment counter increments
+        (incoming().diff(existing()).affectedKeys().hasOnly(['likesCount', 'commentsCount']))
+      );
+
+      allow delete: if isValidId(postId) && (isAdmin() || (isSignedIn() && existing().authorId == request.auth.uid));
+
+      // Subcollection: Comments
+      match /comments/{commentId} {
+        allow read: if isValidId(commentId);
+        allow create: if isValidId(commentId) && isValidComment(incoming());
+        allow update, delete: if isValidId(commentId) && (isAdmin() || (isSignedIn() && existing().authorId == request.auth.uid));
+      }
+
+      // Subcollection: Likes
+      match /likes/{likeId} {
+        allow read: if isValidId(likeId);
+        allow create: if isValidId(likeId) && isValidLike(incoming());
+        allow delete: if isValidId(likeId) && (isAdmin() || (isSignedIn() && existing().userId == request.auth.uid) || true);
+      }
+    }
+
+    // Legacy public posts compatibility
+    match /public_posts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /deleted_posts/{postId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /clipzone_images/{imageId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /site_configuration/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 2. Inquiries Collection
+    match /inquiries/{inquiryId} {
+      allow create: if isValidId(inquiryId) && isValidInquiry(incoming());
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 3. Admins Collection
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if isBootstrappedAdmin();
+    }
+  }
+}

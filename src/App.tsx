@@ -16,6 +16,7 @@ import { ToastContainer, ToastMessage } from './components/Toast';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
 import { AdminModal } from './components/AdminModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import { PostsFeedView } from './components/PostsFeedView';
 
 import { Language, Moment, Comment, SystemSettings, ClipzoneImage } from './types';
 import {
@@ -201,6 +202,36 @@ export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const handleOpenAdmin = () => setIsAdminOpen(true);
   const handleCloseAdmin = () => setIsAdminOpen(false);
+
+  // 8. Posts Feed View State (accessible strictly from Menu)
+  const [isPostsViewOpen, setIsPostsViewOpen] = useState(false);
+
+  useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === '#posts') {
+        setIsPostsViewOpen(true);
+      } else if (window.location.hash === '' && isPostsViewOpen) {
+        setIsPostsViewOpen(false);
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, [isPostsViewOpen]);
+
+  const handleOpenPosts = () => {
+    window.location.hash = 'posts';
+    setIsPostsViewOpen(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleClosePosts = () => {
+    if (window.location.hash === '#posts') {
+      window.history.pushState(null, '', window.location.pathname);
+    }
+    setIsPostsViewOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Global keyboard shortcut to open Admin panel: Ctrl+Shift+A or Cmd+Shift+A
   useEffect(() => {
@@ -399,58 +430,72 @@ export default function App() {
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* Sticky Navigation Bar */}
-      <Navbar
-        language={language}
-        onToggleLanguage={handleToggleLanguage}
-        profile={systemSettings.profile}
-      />
-
-      {/* Main Page Content */}
-      <main className="flex-1">
-        {/* Hero Section */}
-        <Header
+      {!isPostsViewOpen && (
+        <Navbar
           language={language}
+          onToggleLanguage={handleToggleLanguage}
           profile={systemSettings.profile}
+          onOpenPosts={handleOpenPosts}
         />
+      )}
 
-        {/* About Section */}
-        <AboutSection
+      {isPostsViewOpen ? (
+        /* Dedicated Facebook-style Post Feed View (Exclusively entered via Menu) */
+        <PostsFeedView
           language={language}
-          about={systemSettings.about}
+          onBackToHome={handleClosePosts}
+          onShowToast={(msg, type) => showToast(msg, type === 'error' ? 'error' : 'success')}
         />
+      ) : (
+        <>
+          {/* Main Page Content */}
+          <main className="flex-1">
+            {/* Hero Section */}
+            <Header
+              language={language}
+              profile={systemSettings.profile}
+            />
 
-        {/* Experience & Competencies Section */}
-        <ExperienceSection
-          language={language}
-          experience={systemSettings.experience}
-        />
+            {/* About Section */}
+            <AboutSection
+              language={language}
+              about={systemSettings.about}
+            />
 
-        {/* Web Deliverables & Technical Standards Section */}
-        <DeliverablesSection
-          language={language}
-          contact={systemSettings.contact}
-        />
+            {/* Experience & Competencies Section */}
+            <ExperienceSection
+              language={language}
+              experience={systemSettings.experience}
+            />
 
-        {/* FAQ & Process Section */}
-        <FaqSection
-          language={language}
-          contact={systemSettings.contact}
-        />
+            {/* Web Deliverables & Technical Standards Section */}
+            <DeliverablesSection
+              language={language}
+              contact={systemSettings.contact}
+            />
 
-        {/* Contact & Inquiry Section */}
-        <ContactSection
-          language={language}
-          contact={systemSettings.contact}
-          onShowToast={showToast}
-          onAdminSecretLogin={handleOpenAdmin}
-        />
-      </main>
+            {/* FAQ & Process Section */}
+            <FaqSection
+              language={language}
+              contact={systemSettings.contact}
+            />
 
-      {/* Footer */}
-      <Footer
-        language={language}
-        profile={systemSettings.profile}
-      />
+            {/* Contact & Inquiry Section */}
+            <ContactSection
+              language={language}
+              contact={systemSettings.contact}
+              onShowToast={showToast}
+              onAdminSecretLogin={handleOpenAdmin}
+            />
+          </main>
+
+          {/* Footer */}
+          <Footer
+            language={language}
+            profile={systemSettings.profile}
+          />
+        </>
+      )}
 
       {/* Firebase Admin & Media Upload Portal */}
       <AdminModal

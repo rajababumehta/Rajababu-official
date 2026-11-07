@@ -17,12 +17,14 @@ interface NavbarProps {
   language: Language;
   onToggleLanguage: () => void;
   profile: ProfileSettings;
+  onOpenPosts?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   language,
   onToggleLanguage,
   profile,
+  onOpenPosts,
 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -64,16 +66,23 @@ export const Navbar: React.FC<NavbarProps> = ({
     { num: '02', href: '#who', labelEn: 'Who am I', labelNe: 'मेरो परिचय' },
     {
       num: '03',
+      labelEn: 'Posts',
+      labelNe: 'पोस्टहरू',
+      isPosts: true,
+      badge: 'Feed',
+    },
+    {
+      num: '04',
       href: 'https://aiclipzone.vercel.app/',
       labelEn: 'AI Clipzone',
       labelNe: 'एआई क्लिपजोन',
       isExternal: true,
       badge: 'Platform',
     },
-    { num: '04', href: '#services', labelEn: 'Deliverables', labelNe: 'वेब सेवाहरू' },
-    { num: '05', href: '#skills', labelEn: 'Skills & Journey', labelNe: 'सीप तथा यात्रा' },
-    { num: '06', href: '#faq', labelEn: 'FAQ', labelNe: 'प्रश्नोत्तर' },
-    { num: '07', href: '#contact', labelEn: 'Work With Me', labelNe: 'सम्पर्क' },
+    { num: '05', href: '#services', labelEn: 'Deliverables', labelNe: 'वेब सेवाहरू' },
+    { num: '06', href: '#skills', labelEn: 'Skills & Journey', labelNe: 'सीप तथा यात्रा' },
+    { num: '07', href: '#faq', labelEn: 'FAQ', labelNe: 'प्रश्नोत्तर' },
+    { num: '08', href: '#contact', labelEn: 'Work With Me', labelNe: 'सम्पर्क' },
   ];
 
   const handleLinkClick = () => {
@@ -113,9 +122,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
           </a>
 
-          {/* Desktop Nav Links (clean, minimal) */}
+          {/* Desktop Nav Links (clean, minimal - only main portfolio sections, no posts) */}
           <nav className="hidden lg:flex items-center gap-7">
-            {navItems.filter((item) => !item.isExternal).map((item) => (
+            {navItems.filter((item) => !item.isExternal && !item.isPosts).map((item) => (
               <a
                 key={item.href}
                 href={item.href}
@@ -241,45 +250,83 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
 
                 <nav className="flex flex-col divide-y divide-[rgba(255,240,238,0.06)]">
-                  {navItems.map((item) => (
-                    <a
-                      key={item.href}
-                      href={item.href}
-                      target={item.isExternal ? '_blank' : undefined}
-                      rel={item.isExternal ? 'noopener noreferrer' : undefined}
-                      onClick={handleLinkClick}
-                      className="py-3.5 sm:py-4 flex items-baseline justify-between group transition-all"
-                    >
-                      <div className="flex items-baseline gap-4 sm:gap-5">
-                        {/* Red Serif Number */}
-                        <span className="font-serif italic text-lg sm:text-xl text-[#e4342f] opacity-80 group-hover:opacity-100 transition-opacity">
-                          {item.num}
-                        </span>
+                  {navItems.map((item) => {
+                    if (item.isPosts) {
+                      return (
+                        <button
+                          key="nav-posts-action"
+                          type="button"
+                          onClick={() => {
+                            handleLinkClick();
+                            onOpenPosts?.();
+                          }}
+                          className="py-3.5 sm:py-4 flex items-baseline justify-between group transition-all text-left w-full cursor-pointer"
+                        >
+                          <div className="flex items-baseline gap-4 sm:gap-5">
+                            {/* Red Serif Number */}
+                            <span className="font-serif italic text-lg sm:text-xl text-[#e4342f] opacity-80 group-hover:opacity-100 transition-opacity">
+                              {item.num}
+                            </span>
 
-                        {/* Title */}
-                        <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#f6f3f2]/85 group-hover:text-white group-hover:translate-x-1 transition-all flex items-center gap-2.5">
-                          {item.isExternal && (
-                            <img
-                              src="/assets/aistudio/logo_3c930995.png"
-                              alt="AI Clipzone Logo"
-                              className="w-5 h-5 rounded-full object-cover border border-[#e4342f]/60 shrink-0"
-                            />
-                          )}
-                          <span>{language === 'NE' ? item.labelNe : item.labelEn}</span>
-                        </span>
-                      </div>
+                            {/* Title */}
+                            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#f6f3f2]/85 group-hover:text-white group-hover:translate-x-1 transition-all flex items-center gap-2.5">
+                              <span>{language === 'NE' ? item.labelNe : item.labelEn}</span>
+                            </span>
+                          </div>
 
-                      {/* Right Indicator / Badge */}
-                      <div className="flex items-center gap-2">
-                        {item.badge && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#e4342f]/20 border border-[#e4342f]/40 text-[#ff8175] uppercase tracking-wider">
-                            {item.badge}
+                          {/* Right Indicator / Badge */}
+                          <div className="flex items-center gap-2">
+                            {item.badge && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#e4342f] text-white uppercase tracking-wider shadow-[0_0_12px_rgba(228,52,47,0.5)]">
+                                {item.badge}
+                              </span>
+                            )}
+                            <ArrowRight className="w-4 h-4 text-[#e4342f] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                          </div>
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        target={item.isExternal ? '_blank' : undefined}
+                        rel={item.isExternal ? 'noopener noreferrer' : undefined}
+                        onClick={handleLinkClick}
+                        className="py-3.5 sm:py-4 flex items-baseline justify-between group transition-all"
+                      >
+                        <div className="flex items-baseline gap-4 sm:gap-5">
+                          {/* Red Serif Number */}
+                          <span className="font-serif italic text-lg sm:text-xl text-[#e4342f] opacity-80 group-hover:opacity-100 transition-opacity">
+                            {item.num}
                           </span>
-                        )}
-                        <ArrowRight className="w-4 h-4 text-[#e4342f] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                      </div>
-                    </a>
-                  ))}
+
+                          {/* Title */}
+                          <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#f6f3f2]/85 group-hover:text-white group-hover:translate-x-1 transition-all flex items-center gap-2.5">
+                            {item.isExternal && (
+                              <img
+                                src="/assets/aistudio/logo_3c930995.png"
+                                alt="AI Clipzone Logo"
+                                className="w-5 h-5 rounded-full object-cover border border-[#e4342f]/60 shrink-0"
+                              />
+                            )}
+                            <span>{language === 'NE' ? item.labelNe : item.labelEn}</span>
+                          </span>
+                        </div>
+
+                        {/* Right Indicator / Badge */}
+                        <div className="flex items-center gap-2">
+                          {item.badge && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#e4342f]/20 border border-[#e4342f]/40 text-[#ff8175] uppercase tracking-wider">
+                              {item.badge}
+                            </span>
+                          )}
+                          <ArrowRight className="w-4 h-4 text-[#e4342f] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                        </div>
+                      </a>
+                    );
+                  })}
                 </nav>
               </div>
 

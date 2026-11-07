@@ -8,6 +8,8 @@ import {
   sendPasswordResetEmail,
   Auth,
   User as FirebaseUser,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
 import {
   initializeFirestore,
@@ -20,6 +22,8 @@ import {
   deleteDoc,
   updateDoc,
   getDocs,
+  getDoc,
+  getDocFromServer,
   onSnapshot,
   query,
   orderBy,
@@ -32,7 +36,17 @@ import {
   isSupported as isAnalyticsSupported,
   Analytics,
 } from 'firebase/analytics';
-import { FirebaseConfig, ClipzoneImage, AdminUser, InquiryMessage, Moment } from '../types';
+import {
+  FirebaseConfig,
+  ClipzoneImage,
+  AdminUser,
+  InquiryMessage,
+  Moment,
+  FeedPost,
+  PostComment,
+} from '../types';
+import { handleFirestoreError, OperationType } from './firestoreError';
+
 
 export const FIREBASE_CONFIG_STORAGE_KEY = 'ai_clipzone_firebase_config';
 export const LOCAL_IMAGES_STORAGE_KEY = 'ai_clipzone_local_images';
@@ -1034,4 +1048,316 @@ export const deleteInquiryFromFirestore = async (id: string): Promise<void> => {
     // ignore
   }
 };
+
+// ==========================================
+// GOOGLE AUTH & ADMIN ROLES
+// ==========================================
+
+export const ADMIN_EMAILS = ['rajababum426@gmail.com', 'support@rajababumehta.com.np'];
+
+export const isUserAdmin = (user: AdminUser | null): boolean => {
+  if (!user) return false;
+  if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) return true;
+  if (user.isLocalFallback) return true;
+  return false;
+};
+
+export const signInWithGoogle = async (): Promise<AdminUser> => {
+  const { auth } = getFirebaseInstances();
+  if (!auth) throw new Error('Firebase Authentication is not ready');
+
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  const result = await signInWithPopup(auth, provider);
+  const user = result.user;
+
+  const adminUser: AdminUser = {
+    uid: user.uid,
+    email: user.email,
+    displayName: user.displayName || user.email?.split('@')[0] || 'User',
+    photoURL: user.photoURL,
+    isLocalFallback: false,
+  };
+
+  localStorage.setItem(LOCAL_ADMIN_STORAGE_KEY, JSON.stringify(adminUser));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('admin-auth-changed', { detail: adminUser }));
+  }
+  return adminUser;
+};
+
+// ==========================================
+// CLIENT-SIDE IMAGE OPTIMIZATION (FOR FIRESTORE STORAGE)
+// ==========================================
+
+export const compressImageFile = async (
+  file: File,
+  maxWidth = 1200,
+  quality = 0.75
+): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(e.target?.result as string);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+// ==========================================
+// FACEBOOK-STYLE POST FEED SERVICES
+// ==========================================
+
+export const testFirestoreConnection = async () => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) return;
+  try {
+    await getDocFromServer(doc(firestore, 'test', 'connection'));
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('the client is offline')) {
+      console.warn('Firestore client is offline, retrying...');
+    }
+  }
+};
+
+export const subscribeToFeedPosts = (
+  onPosts: (posts: FeedPost[]) => void,
+  onError?: (error: Error) => void
+) => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) return () => {};
+
+  const q = query(collection(firestore, 'posts'), orderBy('createdAt', 'desc'));
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const posts: FeedPost[] = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        let createdAtStr = new Date().toISOString();
+        if (data.createdAt?.toDate) {
+          createdAtStr = data.createdAt.toDate().toISOString();
+        } else if (typeof data.createdAt === 'string') {
+          createdAtStr = data.createdAt;
+        }
+
+        return {
+          id: docSnap.id,
+          authorId: data.authorId || '',
+          authorName: data.authorName || 'Rajababu Mehta',
+          authorEmail: data.authorEmail || '',
+          authorPhoto: data.authorPhoto || '/assets/aistudio/hero_photo.jpg',
+          content: data.content || '',
+          contentNe: data.contentNe || '',
+          images: Array.isArray(data.images) ? data.images : [],
+          category: data.category || 'Announcement',
+          likesCount: typeof data.likesCount === 'number' ? data.likesCount : 0,
+          commentsCount: typeof data.commentsCount === 'number' ? data.commentsCount : 0,
+          createdAt: createdAtStr,
+          updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt,
+          isPublished: data.isPublished ?? true,
+        };
+      });
+      onPosts(posts);
+    },
+    (err) => {
+      console.warn('Feed posts snapshot notice:', err);
+      if (onError) onError(err);
+      try {
+        handleFirestoreError(err, OperationType.LIST, 'posts');
+      } catch {
+        // logged
+      }
+    }
+  );
+};
+
+export const createFeedPost = async (postData: {
+  authorId: string;
+  authorName: string;
+  authorEmail?: string;
+  authorPhoto?: string;
+  content: string;
+  contentNe?: string;
+  images: string[];
+  category?: string;
+}): Promise<string> => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) throw new Error('Firestore is not ready');
+
+  const path = 'posts';
+  try {
+    const docRef = await addDoc(collection(firestore, path), {
+      authorId: postData.authorId,
+      authorName: postData.authorName,
+      authorEmail: postData.authorEmail || '',
+      authorPhoto: postData.authorPhoto || '',
+      content: postData.content,
+      contentNe: postData.contentNe || '',
+      images: postData.images || [],
+      category: postData.category || 'Announcement',
+      likesCount: 0,
+      commentsCount: 0,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      isPublished: true,
+    });
+    return docRef.id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+  }
+};
+
+export const deleteFeedPost = async (postId: string): Promise<void> => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) throw new Error('Firestore not ready');
+  const path = `posts/${postId}`;
+  try {
+    await deleteDoc(doc(firestore, 'posts', postId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+  }
+};
+
+export const toggleFeedPostLike = async (
+  postId: string,
+  userId: string,
+  userName: string
+): Promise<boolean> => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) throw new Error('Firestore not ready');
+
+  const sanitizedUserId = userId.replace(/[^a-zA-Z0-9_\-]/g, '_');
+  const likeDocRef = doc(firestore, 'posts', postId, 'likes', sanitizedUserId);
+  const postDocRef = doc(firestore, 'posts', postId);
+
+  try {
+    const existing = await getDoc(likeDocRef);
+    if (existing.exists()) {
+      await deleteDoc(likeDocRef);
+      await updateDoc(postDocRef, {
+        likesCount: increment(-1),
+      });
+      return false;
+    } else {
+      await setDoc(likeDocRef, {
+        userId: sanitizedUserId,
+        userName: userName || 'Visitor',
+        createdAt: serverTimestamp(),
+      });
+      await updateDoc(postDocRef, {
+        likesCount: increment(1),
+      });
+      return true;
+    }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `posts/${postId}/likes/${sanitizedUserId}`);
+  }
+};
+
+export const checkUserLikedPost = async (postId: string, userId: string): Promise<boolean> => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore || !userId) return false;
+  try {
+    const sanitizedUserId = userId.replace(/[^a-zA-Z0-9_\-]/g, '_');
+    const likeDocRef = doc(firestore, 'posts', postId, 'likes', sanitizedUserId);
+    const snap = await getDoc(likeDocRef);
+    return snap.exists();
+  } catch {
+    return false;
+  }
+};
+
+export const subscribeToPostComments = (
+  postId: string,
+  onComments: (comments: PostComment[]) => void
+) => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) return () => {};
+
+  const q = query(collection(firestore, 'posts', postId, 'comments'), orderBy('createdAt', 'asc'));
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const comments: PostComment[] = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        let createdStr = new Date().toISOString();
+        if (data.createdAt?.toDate) {
+          createdStr = data.createdAt.toDate().toISOString();
+        } else if (typeof data.createdAt === 'string') {
+          createdStr = data.createdAt;
+        }
+
+        return {
+          id: docSnap.id,
+          postId,
+          authorId: data.authorId || '',
+          authorName: data.authorName || 'Guest Visitor',
+          authorPhoto: data.authorPhoto || '',
+          content: data.content || '',
+          createdAt: createdStr,
+        };
+      });
+      onComments(comments);
+    },
+    (err) => {
+      console.warn('Comments snapshot warning:', err);
+    }
+  );
+};
+
+export const addPostComment = async (
+  postId: string,
+  comment: {
+    authorId: string;
+    authorName: string;
+    authorPhoto?: string;
+    content: string;
+  }
+): Promise<string> => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore) throw new Error('Firestore not ready');
+
+  const path = `posts/${postId}/comments`;
+  try {
+    const docRef = await addDoc(collection(firestore, 'posts', postId, 'comments'), {
+      postId,
+      authorId: comment.authorId,
+      authorName: comment.authorName,
+      authorPhoto: comment.authorPhoto || '',
+      content: comment.content,
+      createdAt: serverTimestamp(),
+    });
+
+    await updateDoc(doc(firestore, 'posts', postId), {
+      commentsCount: increment(1),
+    }).catch(() => {});
+
+    return docRef.id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+  }
+};
+
 

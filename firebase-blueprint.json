@@ -1,0 +1,196 @@
+{
+  "entities": {
+    "Post": {
+      "title": "Post",
+      "description": "Facebook-style feed post authored by admin",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the post"
+        },
+        "authorId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the post author"
+        },
+        "authorName": {
+          "type": "string",
+          "description": "Display name of the author",
+          "maxLength": 100
+        },
+        "authorEmail": {
+          "type": "string",
+          "description": "Email address of the author",
+          "maxLength": 120
+        },
+        "authorPhoto": {
+          "type": "string",
+          "description": "Avatar photo URL of the author",
+          "maxLength": 1000
+        },
+        "content": {
+          "type": "string",
+          "description": "Text body or article of the post",
+          "maxLength": 10000
+        },
+        "contentNe": {
+          "type": "string",
+          "description": "Optional Nepali version or translation",
+          "maxLength": 10000
+        },
+        "images": {
+          "type": "array",
+          "description": "Array of image URLs or optimized base64 images stored in post"
+        },
+        "category": {
+          "type": "string",
+          "description": "Post category tag",
+          "maxLength": 50
+        },
+        "likesCount": {
+          "type": "number",
+          "description": "Aggregate number of likes"
+        },
+        "commentsCount": {
+          "type": "number",
+          "description": "Aggregate number of comments"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        },
+        "isPublished": {
+          "type": "boolean",
+          "description": "Whether the post is publicly visible"
+        }
+      },
+      "required": ["authorId", "authorName", "content", "createdAt"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "Comment on a post",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique comment ID"
+        },
+        "postId": {
+          "type": "string",
+          "description": "ID of parent post"
+        },
+        "authorId": {
+          "type": "string",
+          "description": "Auth UID or anonymous visitor ID of commenter"
+        },
+        "authorName": {
+          "type": "string",
+          "description": "Name of commenter",
+          "maxLength": 100
+        },
+        "authorPhoto": {
+          "type": "string",
+          "description": "Optional avatar URL",
+          "maxLength": 1000
+        },
+        "content": {
+          "type": "string",
+          "description": "Comment text content",
+          "maxLength": 2000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["postId", "authorName", "content", "createdAt"]
+    },
+    "Like": {
+      "title": "Like",
+      "description": "User like record on a post",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User ID who liked the post"
+        },
+        "userName": {
+          "type": "string",
+          "description": "User display name",
+          "maxLength": 100
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when liked"
+        }
+      },
+      "required": ["userId", "createdAt"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Direct contact inquiry from visitors",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "subject": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 5000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 50
+        }
+      },
+      "required": ["name", "email", "message"]
+    }
+  },
+  "firestore": {
+    "/posts/{postId}": {
+      "schema": {
+        "$ref": "Post"
+      },
+      "description": "Public posts feed authored by admin with Facebook style presentation"
+    },
+    "/posts/{postId}/comments/{commentId}": {
+      "schema": {
+        "$ref": "Comment"
+      },
+      "description": "User comments on Facebook-style posts"
+    },
+    "/posts/{postId}/likes/{likeId}": {
+      "schema": {
+        "$ref": "Like"
+      },
+      "description": "Likes registered on posts"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": {
+        "$ref": "Inquiry"
+      },
+      "description": "Client inquiries sent through contact form"
+    }
+  }
+}
