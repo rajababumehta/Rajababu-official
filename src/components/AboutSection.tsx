@@ -30,7 +30,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       ? about.bioParagraph2Ne
       : 'एआई क्लिपजोनका संस्थापक तथा प्रविधि अन्वेषकको रूपमा, राजाबाबु मेहताले यस आधिकारिक वेबसाइटमार्फत आफ्ना परियोजनाहरू, प्राविधिक सीपहरू र सेवाहरू प्रस्तुत गर्नुभएको छ। व्यक्तिगत पोर्टफोलियो, व्यवसायिक पोर्टल, ल्यान्डिङ पेज वा कुनै पनि आधुनिक वेबसाइट बनाउन परेमा, अथवा एआई प्रविधिको व्यवहारिक प्रयोगबारे बुझ्न चाहेमा राजाबाबु मेहतासँग सिधै सम्पर्क गर्न सक्नुहुन्छ।';
 
-  // 3-photo strip data matching dhruvrathee.com .photo-strip
+  // 2-photo strip under Who am I (Image 3 / 4th overall image removed as requested)
   const photoStrip = [
     {
       src: '/assets/who/dr-photo-1.jpg',
@@ -43,12 +43,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       alt: 'Rajababu Mehta - Nature & outdoor study portrait',
       captionEn: 'Outdoor portrait in natural greenery with arms crossed',
       captionNe: 'प्राकृतिक हरियाली र खुला वातावरणमा खिचिएको तस्बिर',
-    },
-    {
-      src: '/assets/who/dr-photo-3.jpg',
-      alt: 'Rajababu Mehta - Rooftop black polo portrait',
-      captionEn: 'Rooftop black polo portrait looking straight at camera',
-      captionNe: 'वीरगञ्जको छतमा खिचिएको आधिकारिक कालो टिसर्ट तस्बिर',
     },
   ];
 
@@ -151,7 +145,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                   <div className="absolute bottom-2 left-2 right-2 z-10 text-[10px] text-white/90 font-medium truncate pointer-events-none drop-shadow">
                     {idx === 0 && (language === 'NE' ? 'रात्रि मेला' : 'Festival')}
                     {idx === 1 && (language === 'NE' ? 'प्रकृति' : 'Outdoor')}
-                    {idx === 2 && (language === 'NE' ? 'कालो टिसर्ट' : 'Portrait')}
                   </div>
                   <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Maximize2 className="w-3 h-3" />
