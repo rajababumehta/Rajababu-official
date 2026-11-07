@@ -305,10 +305,14 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
            FEATURED PLATFORM SHOWCASE CARD (.ac - DR ACADEMY STYLE)
            Showcasing AI Clipzone (Founder & CEO)
            ======================================================== */}
-        <div className="ac">
-          <div className="relative z-10 max-w-3xl">
-            <div className="ac-tag">
-              <Sparkles className="w-3.5 h-3.5" />
+        <div className="ac flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="relative z-10 max-w-2xl">
+            <div className="ac-tag flex items-center gap-2">
+              <img
+                src="/assets/aistudio/logo_3c930995.png"
+                alt="AI Clipzone Logo"
+                className="w-4 h-4 rounded-full object-cover shrink-0"
+              />
               <span>{language === 'NE' ? 'आधिकारिक प्लेटफर्म • संस्थापक तथा सीईओ' : 'Featured Platform • Founder & CEO'}</span>
             </div>
 
@@ -340,6 +344,20 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               <span>{language === 'NE' ? 'AI Clipzone खोल्नुहोस्' : 'Visit AI Clipzone'}</span>
               <ChevronRight className="w-4 h-4" />
             </a>
+          </div>
+
+          {/* AI Clipzone Emblem Crest (mirroring DR Academy crest on dhruvrathee.com) */}
+          <div className="relative z-10 shrink-0 self-center md:self-auto hidden sm:flex flex-col items-center justify-center p-3">
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-tr from-[#e4342f]/50 via-white/10 to-transparent border border-white/20 shadow-[0_12px_36px_-8px_rgba(228,52,47,0.45)] hover:scale-105 transition-transform">
+              <img
+                src="/assets/aistudio/logo_3c930995.png"
+                alt="AI Clipzone Logo"
+                className="w-full h-full rounded-full object-cover bg-black"
+              />
+            </div>
+            <span className="mt-2 text-[10.5px] font-bold tracking-widest uppercase text-[#f6f3f2]/40">
+              AI Clipzone
+            </span>
           </div>
         </div>
 

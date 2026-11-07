@@ -196,10 +196,11 @@ export const Header: React.FC<HeaderProps> = ({
     {
       name: 'AI Clipzone',
       logo: (
-        <svg className="w-5 h-5 shrink-0 rounded" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect width="24" height="24" rx="5" fill="#e4342f"/>
-          <path d="M7 12.5L10.5 15.5L17 8.5" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
+        <img
+          src="/assets/aistudio/logo_3c930995.png"
+          alt="AI Clipzone"
+          className="w-5 h-5 shrink-0 rounded-full object-cover border border-white/20"
+        />
       ),
     },
     {
