@@ -14,7 +14,6 @@ import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { ToastContainer, ToastMessage } from './components/Toast';
 import { WhatsAppFloatingButton } from './components/WhatsAppFloatingButton';
-import { CvModal } from './components/CvModal';
 import { AdminModal } from './components/AdminModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
 
@@ -198,12 +197,7 @@ export default function App() {
   // 6. Toast Notifications
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  // 7. CV Modal State
-  const [isCvOpen, setIsCvOpen] = useState(false);
-  const handleOpenCv = () => setIsCvOpen(true);
-  const handleCloseCv = () => setIsCvOpen(false);
-
-  // 8. Firebase Admin Modal State
+  // 7. Firebase Admin Modal State
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const handleOpenAdmin = () => setIsAdminOpen(true);
   const handleCloseAdmin = () => setIsAdminOpen(false);
@@ -409,7 +403,6 @@ export default function App() {
         language={language}
         onToggleLanguage={handleToggleLanguage}
         profile={systemSettings.profile}
-        onOpenCv={handleOpenCv}
       />
 
       {/* Main Page Content */}
@@ -457,14 +450,6 @@ export default function App() {
       <Footer
         language={language}
         profile={systemSettings.profile}
-      />
-
-      {/* Official Verified CV Modal & PDF Downloader */}
-      <CvModal
-        isOpen={isCvOpen}
-        onClose={handleCloseCv}
-        language={language}
-        onShowToast={showToast}
       />
 
       {/* Firebase Admin & Media Upload Portal */}
