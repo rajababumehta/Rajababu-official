@@ -270,9 +270,9 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     }
   };
 
-  // Direct Post URL Generator
+  // Direct Post URL Generator (Optimized for Facebook, WhatsApp, and social crawlers)
   const getDirectPostUrl = (postId: string) => {
-    return `${window.location.origin}/?post=${postId}#post-${postId}`;
+    return `${window.location.origin}/?post=${postId}`;
   };
 
   // Share Actions specifically for this post

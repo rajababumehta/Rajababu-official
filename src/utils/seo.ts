@@ -15,10 +15,10 @@ export const updatePostSeo = (post: FeedPost | null) => {
 
   // Extract clean summary (first 160 characters without newlines)
   const summary = post.content.slice(0, 160).replace(/\s+/g, ' ').trim();
-  const postUrl = `${window.location.origin}/?post=${post.id}#post-${post.id}`;
+  const postUrl = `${window.location.origin}/?post=${post.id}`;
 
-  // Ensure absolute image URL for external social crawlers
-  let postImage = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg';
+  // Ensure absolute image URL for external social crawlers (Facebook, WhatsApp, Twitter)
+  let postImage = `${window.location.origin}/brand-avatar.png`;
   if (post.images && post.images.length > 0 && post.images[0]) {
     const firstImg = post.images[0];
     if (firstImg.startsWith('http://') || firstImg.startsWith('https://')) {
@@ -26,8 +26,8 @@ export const updatePostSeo = (post: FeedPost | null) => {
     } else if (firstImg.startsWith('/')) {
       postImage = `${window.location.origin}${firstImg}`;
     } else if (firstImg.startsWith('data:')) {
-      // Data URLs are fine locally; keep fallback for scrapers that reject data URI in og:image
-      postImage = `${window.location.origin}/brand-avatar.png`;
+      // Point to our Express server's dedicated binary image endpoint
+      postImage = `${window.location.origin}/api/post-image/${post.id}`;
     }
   }
 
@@ -74,6 +74,9 @@ export const updatePostSeo = (post: FeedPost | null) => {
   setMetaTag('property', 'og:url', postUrl);
   setMetaTag('property', 'og:image', postImage);
   setMetaTag('property', 'og:image:secure_url', postImage);
+  setMetaTag('property', 'og:image:type', 'image/jpeg');
+  setMetaTag('property', 'og:image:width', '1200');
+  setMetaTag('property', 'og:image:height', '630');
   setMetaTag('property', 'og:image:alt', headline);
   setMetaTag('property', 'article:published_time', post.createdAt || new Date().toISOString());
   if (post.updatedAt) {
