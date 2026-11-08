@@ -15,8 +15,6 @@ import {
   Clock,
   Maximize2,
   Loader2,
-  Copy,
-  Check,
   BookOpen,
   ArrowRight,
   Mail,
@@ -104,9 +102,6 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
 
   // Active Lightbox Image
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
-
-  // Track copied link state for visual feedback
-  const [copiedPostId, setCopiedPostId] = useState<string | null>(null);
 
   // Active Share Modal Post (Universal Share Anywhere)
   const [shareModalPost, setShareModalPost] = useState<FeedPost | null>(null);
@@ -312,46 +307,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     return `${window.location.origin}/?post=${postId}`;
   };
 
-  // Share Actions specifically for this post
-  const handleCopyPostLink = async (post: FeedPost) => {
-    const directUrl = getDirectPostUrl(post.id);
-    try {
-      await navigator.clipboard.writeText(directUrl);
-      setCopiedPostId(post.id);
-      setTimeout(() => setCopiedPostId(null), 2500);
-      onShowToast(
-        language === 'NE'
-          ? 'यस पोस्टको प्रत्यक्ष लिङ्क कपी भयो!'
-          : 'Direct Article Link copied to clipboard!',
-        'success'
-      );
-    } catch {
-      onShowToast(language === 'NE' ? 'लिङ्क कपी हुन सकेन।' : 'Could not copy link.', 'warning');
-    }
-  };
-
-  const handleNativeShare = async (post: FeedPost) => {
-    const directUrl = getDirectPostUrl(post.id);
-    const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
-    const headline = firstLine || 'Rajababu Mehta Post';
-    const summary = post.content.slice(0, 140).replace(/\n/g, ' ');
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: headline,
-          text: `${headline}\n\n${summary}...`,
-          url: directUrl,
-        });
-        return;
-      } catch (err) {
-        // user cancelled or fallback
-      }
-    }
-
-    handleCopyPostLink(post);
-  };
-
+  // Direct Social Share Actions specifically for this post
   const handleWhatsAppShare = (post: FeedPost) => {
     const directUrl = getDirectPostUrl(post.id);
     const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
@@ -659,36 +615,6 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                   <span>{language === 'NE' ? 'सबैतिर पठाउनुहोस्' : 'Share Anywhere'}</span>
                 </button>
               </div>
-
-              {/* Direct URL Preview Box & Multi-Action */}
-              <div className="bg-[#100e0d] p-3 rounded-xl border border-[rgba(255,240,238,0.06)] flex items-center justify-between gap-2 text-xs font-mono text-[#f6f3f2]/60">
-                <span className="truncate">{getDirectPostUrl(currentActivePost.id)}</span>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => handleCopyPostLink(currentActivePost)}
-                    className="px-3 py-1.5 rounded-lg bg-[rgba(255,255,255,0.06)] hover:bg-[#e4342f] hover:text-white text-[#f6f3f2] font-sans text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5"
-                  >
-                    {copiedPostId === currentActivePost.id ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-emerald-400">{language === 'NE' ? 'कपी भयो!' : 'Copied'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>{language === 'NE' ? 'लिङ्क कपी' : 'Copy'}</span>
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setShareModalPost(currentActivePost)}
-                    title="More sharing apps"
-                    className="px-2.5 py-1.5 rounded-lg bg-[rgba(255,255,255,0.06)] hover:bg-white/20 text-[#f6f3f2] font-sans text-xs font-semibold cursor-pointer transition-colors"
-                  >
-                    + More
-                  </button>
-                </div>
-              </div>
             </div>
 
             {/* Back to all posts footer */}
@@ -886,13 +812,11 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                   isAdmin={isAdmin}
                   onOpenPost={() => handleOpenSinglePost(post.id)}
                   onDelete={() => handleDeletePost(post.id)}
-                  onCopyLink={() => handleCopyPostLink(post)}
                   onWhatsAppShare={() => handleWhatsAppShare(post)}
                   onFacebookShare={() => handleFacebookShare(post)}
                   onTwitterShare={() => handleTwitterShare(post)}
                   onUniversalShare={() => handleUniversalShare(post)}
                   onOpenImage={(imgUrl) => setLightboxImage(imgUrl)}
-                  copied={copiedPostId === post.id}
                 />
               ))
             )}
@@ -1080,33 +1004,6 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                   <span>{language === 'NE' ? 'अन्य सबै मोबाइल एपहरूमा पठाउनुहोस्' : 'Open More Apps / System Share Sheet'}</span>
                 </button>
               )}
-
-              {/* Copy Direct Link */}
-              <div className="pt-2 border-t border-[rgba(255,240,238,0.08)] flex items-center gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={getDirectPostUrl(shareModalPost.id)}
-                  className="flex-1 bg-[#0f0d0c] border border-[rgba(255,240,238,0.1)] rounded-xl px-3 py-2 text-xs font-mono text-[#f6f3f2]/80 outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleCopyPostLink(shareModalPost)}
-                  className="px-4 py-2 rounded-xl bg-[#e4342f] hover:bg-[#c92823] text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
-                >
-                  {copiedPostId === shareModalPost.id ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span>Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy Link</span>
-                    </>
-                  )}
-                </button>
-              </div>
             </motion.div>
           </motion.div>
         )}
@@ -1127,13 +1024,11 @@ interface NewsPostCardProps {
   isAdmin: boolean;
   onOpenPost: () => void;
   onDelete: () => void;
-  onCopyLink: () => void;
   onWhatsAppShare: () => void;
   onFacebookShare: () => void;
   onTwitterShare: () => void;
   onUniversalShare: () => void;
   onOpenImage: (imgUrl: string) => void;
-  copied: boolean;
 }
 
 const NewsPostCard: React.FC<NewsPostCardProps> = ({
@@ -1142,13 +1037,11 @@ const NewsPostCard: React.FC<NewsPostCardProps> = ({
   isAdmin,
   onOpenPost,
   onDelete,
-  onCopyLink,
   onWhatsAppShare,
   onFacebookShare,
   onTwitterShare,
   onUniversalShare,
   onOpenImage,
-  copied,
 }) => {
   const [showShareMenu, setShowShareMenu] = useState(false);
 
@@ -1314,25 +1207,6 @@ const NewsPostCard: React.FC<NewsPostCardProps> = ({
           >
             <Share2 className="w-3.5 h-3.5 shrink-0" />
             <span className="hidden sm:inline">{language === 'NE' ? 'सेयर' : 'Share'}</span>
-          </button>
-
-          {/* Copy Direct Link Button */}
-          <button
-            onClick={onCopyLink}
-            title="Copy Direct Article Link"
-            className="py-2 px-2.5 sm:px-3 rounded-xl bg-[rgba(255,255,255,0.05)] hover:bg-[#e4342f] text-[#f6f3f2] hover:text-white transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-[rgba(255,240,238,0.08)]"
-          >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-emerald-400 hidden sm:inline">Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5 text-stone-400" />
-                <span className="hidden sm:inline">Link</span>
-              </>
-            )}
           </button>
         </div>
       </div>
