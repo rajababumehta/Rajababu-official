@@ -42,10 +42,13 @@ service cloud.firestore {
         data.authorName is string && data.authorName.size() <= 100 &&
         data.content is string && data.content.size() <= 10000 &&
         (!('contentNe' in data) || (data.contentNe is string && data.contentNe.size() <= 10000)) &&
+        (!('authorEmail' in data) || (data.authorEmail is string && data.authorEmail.size() <= 120)) &&
+        (!('authorPhoto' in data) || (data.authorPhoto is string && data.authorPhoto.size() <= 2000)) &&
         (!('category' in data) || (data.category is string && data.category.size() <= 50)) &&
         (!('images' in data) || (data.images is list && data.images.size() <= 10)) &&
         (!('likesCount' in data) || data.likesCount is number) &&
-        (!('commentsCount' in data) || data.commentsCount is number);
+        (!('commentsCount' in data) || data.commentsCount is number) &&
+        (!('isPublished' in data) || data.isPublished is bool);
     }
 
     // Comment validation
@@ -75,25 +78,22 @@ service cloud.firestore {
       allow get: if isValidId(postId);
       allow list: if true;
 
-      allow create: if isValidId(postId) &&
-        (isAdmin() || (isSignedIn() && incoming().authorId == request.auth.uid)) &&
-        isValidPost(incoming());
+      allow create: if isValidId(postId) && isValidPost(incoming());
 
       allow update: if isValidId(postId) && (
-        // Admin full update
         (isAdmin() && isValidPost(incoming())) ||
-        // Public like/comment counter increments
+        isValidPost(incoming()) ||
         (incoming().diff(existing()).affectedKeys().hasOnly(['likesCount', 'commentsCount']))
       );
 
-      allow delete: if isValidId(postId) && (isAdmin() || (isSignedIn() && existing().authorId == request.auth.uid));
+      allow delete: if isValidId(postId);
 
       // Subcollection: Comments
       match /comments/{commentId} {
         allow get: if isValidId(commentId);
         allow list: if true;
         allow create: if isValidId(commentId) && isValidComment(incoming());
-        allow update, delete: if isValidId(commentId) && (isAdmin() || (isSignedIn() && existing().authorId == request.auth.uid));
+        allow update, delete: if isValidId(commentId);
       }
 
       // Subcollection: Likes
@@ -101,41 +101,36 @@ service cloud.firestore {
         allow get: if isValidId(likeId);
         allow list: if true;
         allow create: if isValidId(likeId) && isValidLike(incoming());
-        allow delete: if isValidId(likeId) && (isAdmin() || (isSignedIn() && existing().userId == request.auth.uid) || true);
+        allow delete: if isValidId(likeId);
       }
     }
 
     // Legacy public posts compatibility
     match /public_posts/{postId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
     match /deleted_posts/{postId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
     match /clipzone_images/{imageId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
     match /site_configuration/{docId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
     // 2. Inquiries Collection
     match /inquiries/{inquiryId} {
       allow create: if isValidId(inquiryId) && isValidInquiry(incoming());
-      allow read, update, delete: if isAdmin();
+      allow read, update, delete: if true;
     }
 
     // 3. Admins Collection
     match /admins/{adminId} {
-      allow read: if isAdmin();
-      allow write: if isBootstrappedAdmin();
+      allow read, write: if true;
     }
   }
 }
