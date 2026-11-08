@@ -31,11 +31,9 @@ import {
   Firestore,
   serverTimestamp,
 } from 'firebase/firestore';
-import {
-  getAnalytics,
-  isSupported as isAnalyticsSupported,
-  Analytics,
-} from 'firebase/analytics';
+// Safe stub for Analytics to prevent uncaught "Failed to fetch" errors in preview
+export type Analytics = any;
+export const getAnalytics = (_targetApp?: any): Analytics | null => null;
 import {
   FirebaseConfig,
   ClipzoneImage,
@@ -102,22 +100,11 @@ export const auth: Auth = getAuth(app);
 export const firestore: Firestore = createConfiguredFirestore(app);
 export const db: Firestore = firestore; // Alias for convenience
 
-// Initialize Firebase Analytics (conditionally when supported in browser environment)
-export let analytics: Analytics | null = null;
-if (typeof window !== 'undefined') {
-  isAnalyticsSupported()
-    .then((supported) => {
-      if (supported) {
-        analytics = getAnalytics(app);
-      }
-    })
-    .catch((err) => {
-      console.warn('Firebase Analytics not supported in current environment:', err);
-    });
-}
+// Analytics disabled in preview environment to prevent network fetch errors
+export const analytics: Analytics | null = null;
 
 // Re-export core initialization methods
-export { getAuth, getFirestore, getAnalytics };
+export { getAuth, getFirestore };
 
 // Stored / Active Firebase configuration
 export const getStoredFirebaseConfig = (): FirebaseConfig => {
@@ -181,16 +168,7 @@ export const initializeFirebaseServices = (configOverride?: FirebaseConfig) => {
     authInstance = getAuth(appInstance);
     firestoreInstance = createConfiguredFirestore(appInstance);
 
-    if (typeof window !== 'undefined') {
-      isAnalyticsSupported()
-        .then((supported) => {
-          if (supported) {
-            analyticsInstance = getAnalytics(appInstance);
-            analytics = analyticsInstance;
-          }
-        })
-        .catch(() => {});
-    }
+
 
     return {
       success: true,
