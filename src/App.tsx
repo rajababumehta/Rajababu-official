@@ -525,6 +525,7 @@ export default function App() {
         language={language}
         systemSettings={systemSettings}
         onShowToast={showToast}
+        onOpenPosts={handleOpenPosts}
       />
 
       {/* Floating Circle WhatsApp Button in Bottom Right */}

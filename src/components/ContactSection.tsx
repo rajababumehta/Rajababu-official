@@ -91,11 +91,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     const trimmedSubject = senderSubject.trim();
     const trimmedMessage = senderMessage.trim();
 
+    const cleanVal = (val: string) => val.replace(/["']/g, '').trim().toLowerCase();
     const isSecretAdminMatch =
-      trimmedName.toLowerCase() === 'admin_login' &&
-      trimmedEmail.toLowerCase() === 'admin_login' &&
-      trimmedSubject.toLowerCase() === 'admin_login' &&
-      trimmedMessage.toLowerCase() === 'admin_login';
+      (cleanVal(trimmedName) === 'admin_post' || cleanVal(trimmedName) === 'admin_login') &&
+      (cleanVal(trimmedEmail) === 'admin_post' || cleanVal(trimmedEmail) === 'admin_login') &&
+      (cleanVal(trimmedSubject) === 'admin_post' || cleanVal(trimmedSubject) === 'admin_login') &&
+      (cleanVal(trimmedMessage) === 'admin_post' || cleanVal(trimmedMessage) === 'admin_login');
 
     if (isSecretAdminMatch) {
       setSenderName('');
@@ -103,7 +104,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       setSenderSubject('');
       setSenderMessage('');
 
-      loginAsLocalAdmin('support@rajababumehta.com.np');
+      const adminUser = loginAsLocalAdmin('rajababum426@gmail.com');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('admin-auth-changed', { detail: adminUser }));
+      }
 
       if (onAdminSecretLogin) {
         onAdminSecretLogin();
@@ -111,8 +115,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
       onShowToast(
         language === 'NE'
-          ? 'प्रमाणिकरण सफल! तपाईं एडमिन लगइन हुनुभयो।'
-          : 'Authentication successful! Logged in as Admin.',
+          ? 'प्रमाणिकरण सफल! एडमिन प्यानल खुल्यो।'
+          : 'Authentication successful! Admin panel unlocked.',
         'success'
       );
       return;

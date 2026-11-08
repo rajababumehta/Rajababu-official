@@ -53,6 +53,7 @@ interface AdminModalProps {
   systemSettings: SystemSettings;
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
   onAddMoment?: (moment: Moment) => void;
+  onOpenPosts?: () => void;
 }
 
 export const AdminModal: React.FC<AdminModalProps> = ({
@@ -62,6 +63,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   systemSettings,
   onShowToast,
   onAddMoment,
+  onOpenPosts,
 }) => {
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [activeTab, setActiveTab] = useState<'upload' | 'gallery' | 'inquiries' | 'settings'>('upload');
@@ -389,13 +391,28 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
-              aria-label="Close Admin Modal"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {onOpenPosts && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenPosts();
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-[#e4342f] hover:bg-[#c92823] text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-[#e4342f]/20 cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>{language === 'NE' ? 'समाचार/लेख सेक्सन खोल्नुहोस्' : 'Open News & Post Feed'}</span>
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
+                aria-label="Close Admin Modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Firebase Services Status Banner */}

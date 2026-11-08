@@ -9,11 +9,9 @@ import {
   Globe,
   Sparkles,
   CheckCircle2,
-  LogIn,
   LogOut,
   X,
   ExternalLink,
-  Shield,
   Clock,
   Maximize2,
   Loader2,
@@ -27,7 +25,6 @@ import {
   subscribeToFeedPosts,
   createFeedPost,
   deleteFeedPost,
-  signInWithGoogle,
   logoutAdmin,
   subscribeToAuth,
   isUserAdmin,
@@ -70,8 +67,6 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   const [selectedCategory, setSelectedCategory] = useState('Article');
   const [imageFiles, setImageFiles] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showAdminLoginModal, setShowAdminLoginModal] = useState(false);
-  const [adminPinInput, setAdminPinInput] = useState('');
 
   // Active Lightbox Image
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
@@ -156,63 +151,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     };
   }, [currentActivePost, posts, activePostId]);
 
-  // Google Login for Admin
-  const handleGoogleSignIn = async () => {
-    try {
-      const user = await signInWithGoogle();
-      if (isUserAdmin(user)) {
-        onShowToast(
-          language === 'NE'
-            ? 'स्वागत छ राजाबाबु! एडमिन लगइन सफल भयो।'
-            : 'Welcome Rajababu! Admin authenticated successfully.',
-          'success'
-        );
-      } else {
-        onShowToast(
-          language === 'NE'
-            ? `लगइन सफल भयो (${user.displayName || user.email})`
-            : `Signed in as ${user.displayName || user.email}`,
-          'info'
-        );
-      }
-      setShowAdminLoginModal(false);
-    } catch (e: any) {
-      console.warn('Google sign in error:', e);
-      onShowToast(
-        e?.message?.includes('popup-closed')
-          ? (language === 'NE' ? 'साइन-इन पपअप बन्द गरियो।' : 'Sign-in popup closed.')
-          : (language === 'NE' ? 'लगइन हुन सकेन, पुन: प्रयास गर्नुहोस्।' : 'Sign in failed, please try again.'),
-        'warning'
-      );
-    }
-  };
 
-  // Quick PIN Fallback
-  const handleAdminPinSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (adminPinInput.trim() === 'rajababu2026' || adminPinInput.trim() === '426') {
-      const admin: AdminUser = {
-        uid: 'admin-rajababu-mehta',
-        email: 'rajababum426@gmail.com',
-        displayName: 'Rajababu Mehta',
-        photoURL: '/assets/aistudio/hero_photo.jpg',
-        isLocalFallback: true,
-      };
-      localStorage.setItem('ai_clipzone_local_admin', JSON.stringify(admin));
-      window.dispatchEvent(new CustomEvent('admin-auth-changed', { detail: admin }));
-      setCurrentUser(admin);
-      setShowAdminLoginModal(false);
-      setAdminPinInput('');
-      onShowToast(
-        language === 'NE'
-          ? 'राजाबाबु मेहता एडमिन मोड अनलक भयो!'
-          : 'Rajababu Mehta Admin mode unlocked!',
-        'success'
-      );
-    } else {
-      onShowToast(language === 'NE' ? 'गलत पासकोड!' : 'Invalid admin passcode!', 'error');
-    }
-  };
 
   // Image Upload Selection
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -448,31 +387,17 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
           </div>
 
           <div>
-            {isAdmin ? (
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 font-medium">
-                  <Shield className="w-3 h-3 text-emerald-400" />
-                  Admin
-                </span>
-                <button
-                  onClick={() => {
-                    logoutAdmin();
-                    setCurrentUser(null);
-                    onShowToast(language === 'NE' ? 'लगआउट भयो।' : 'Logged out.', 'info');
-                  }}
-                  title="Sign out"
-                  className="p-1.5 rounded-lg bg-[rgba(255,255,255,0.05)] hover:bg-rose-900/40 text-stone-300 hover:text-white transition-colors cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
+            {isAdmin && (
               <button
-                onClick={() => setShowAdminLoginModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgba(228,52,47,0.12)] border border-[rgba(228,52,47,0.3)] hover:bg-[#e4342f] hover:text-white text-xs font-semibold text-[#ff8175] transition-all cursor-pointer"
+                onClick={() => {
+                  logoutAdmin();
+                  setCurrentUser(null);
+                  onShowToast(language === 'NE' ? 'लगआउट भयो।' : 'Logged out.', 'info');
+                }}
+                title="Sign out"
+                className="p-1.5 rounded-lg bg-[rgba(255,255,255,0.05)] hover:bg-rose-900/40 text-stone-300 hover:text-white transition-colors cursor-pointer"
               >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>{language === 'NE' ? 'एडमिन' : 'Admin'}</span>
+                <LogOut className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -901,91 +826,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Admin Login Modal */}
-      <AnimatePresence>
-        {showAdminLoginModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-sm bg-[#171514] border border-[rgba(255,240,238,0.15)] rounded-2xl p-6 shadow-2xl relative space-y-5"
-            >
-              <button
-                onClick={() => setShowAdminLoginModal(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-[rgba(255,255,255,0.08)] text-stone-400 hover:text-white cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
 
-              <div className="text-center space-y-1">
-                <div className="w-12 h-12 rounded-full bg-[#e4342f]/10 border border-[#e4342f]/30 flex items-center justify-center mx-auto text-[#ff8175]">
-                  <Shield className="w-6 h-6" />
-                </div>
-                <h3 className="text-base font-bold text-[#f6f3f2]">
-                  {language === 'NE' ? 'एडमिन प्रमाणिकरण' : 'Publisher Verification'}
-                </h3>
-                <p className="text-xs text-[#f6f3f2]/60">
-                  {language === 'NE' ? 'समाचार प्रकाशित गर्न लगइन गर्नुहोस्' : 'Sign in to publish or delete news articles'}
-                </p>
-              </div>
-
-              <button
-                onClick={handleGoogleSignIn}
-                className="w-full py-3 px-4 rounded-xl bg-white hover:bg-stone-100 text-stone-900 font-bold text-xs flex items-center justify-center gap-2.5 shadow-md transition-all cursor-pointer"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  />
-                </svg>
-                <span>Google Sign-In (rajababum426@gmail.com)</span>
-              </button>
-
-              <div className="relative flex items-center justify-center">
-                <div className="border-t border-[rgba(255,240,238,0.1)] w-full"></div>
-                <span className="bg-[#171514] px-2 text-[10px] uppercase tracking-wider text-[#f6f3f2]/40 absolute">
-                  or pin
-                </span>
-              </div>
-
-              <form onSubmit={handleAdminPinSubmit} className="space-y-3">
-                <input
-                  type="password"
-                  value={adminPinInput}
-                  onChange={(e) => setAdminPinInput(e.target.value)}
-                  placeholder="Enter pin (426)"
-                  className="w-full bg-[#12100f] border border-[rgba(255,240,238,0.12)] focus:border-[#e4342f] rounded-xl px-3 py-2.5 text-xs text-center text-[#f6f3f2] tracking-widest outline-none"
-                />
-                <button
-                  type="submit"
-                  className="w-full py-2.5 rounded-xl bg-[rgba(255,255,255,0.08)] hover:bg-[#e4342f] text-white text-xs font-bold transition-all cursor-pointer"
-                >
-                  Unlock
-                </button>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
