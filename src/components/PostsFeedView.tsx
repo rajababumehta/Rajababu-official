@@ -67,7 +67,7 @@ export const LinkedInLogo: React.FC<{ className?: string }> = ({ className = 'w-
 
 interface PostsFeedViewProps {
   language: Language;
-  onBackToHome: () => void;
+  onBackToHome?: () => void;
   onShowToast: (message: string, type: 'success' | 'info' | 'warning' | 'error') => void;
   initialPostId?: string | null;
 }
@@ -451,21 +451,22 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
               <span>{language === 'NE' ? 'सबै पोस्टहरू' : 'All Articles'}</span>
             </button>
           ) : (
-            <button
-              onClick={onBackToHome}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.05)] hover:bg-[#e4342f] hover:text-white transition-all text-sm font-semibold cursor-pointer border border-[rgba(255,240,238,0.1)]"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>{language === 'NE' ? 'गृहपृष्ठमा फर्कनुहोस्' : 'Back to Portfolio'}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#e4342f] animate-pulse"></span>
+              <span className="text-xs uppercase tracking-wider font-bold text-[#ff8175]">
+                {language === 'NE' ? 'समाचार तथा विचार' : 'News & Articles'}
+              </span>
+            </div>
           )}
 
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#e4342f] animate-pulse"></span>
-            <span className="text-xs uppercase tracking-wider font-bold text-[#ff8175]">
-              {language === 'NE' ? 'समाचार तथा विचार' : 'News & Articles'}
-            </span>
-          </div>
+          {currentActivePost && (
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#e4342f] animate-pulse"></span>
+              <span className="text-xs uppercase tracking-wider font-bold text-[#ff8175]">
+                {language === 'NE' ? 'समाचार तथा विचार' : 'News & Articles'}
+              </span>
+            </div>
+          )}
 
           <div>
             {isAdmin && (
