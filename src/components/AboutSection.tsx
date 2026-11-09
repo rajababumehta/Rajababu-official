@@ -78,8 +78,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 
           <p className="mt-4 text-base sm:text-lg text-[#f6f3f2]/70 max-w-2xl leading-relaxed">
             {language === 'NE'
-              ? 'एआई क्लिपजोनका संस्थापक तथा प्रमुख कार्यकारी अधिकृत (Founder & CEO)। एआई वेबसाइट डेभलपर, प्रविधि व्याख्याकर्ता तथा डेसिमल कलेज, वीरगञ्जका विद्यार्थी।'
-              : 'Founder & CEO of AI Clipzone. AI Website Developer. Tech Explainer. Student at Decimal College, Birgunj.'}
+              ? 'एआई क्लिपजोनका संस्थापक (Founder)। एआई वेबसाइट डेभलपर, प्रविधि व्याख्याकर्ता तथा डेसिमल कलेज, वीरगञ्जका विद्यार्थी।'
+              : 'Founder of AI Clipzone. AI Website Developer. Tech Explainer. Student at Decimal College, Birgunj.'}
           </p>
         </div>
 
@@ -122,8 +122,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 </div>
                 <div className="text-[#f6f3f2]/75 text-xs sm:text-[13px] leading-relaxed">
                   {language === 'NE'
-                    ? 'एआई क्लिपजोन (AI Clipzone) का संस्थापक तथा सीईओ। +२ व्यवस्थापन अध्ययनरत, डेसिमल कलेज, वीरगञ्ज।'
-                    : '+2 Management at Decimal College, Birgunj. Founder & CEO of AI Clipzone. Based in Birgunj, Nepal.'}
+                    ? 'एआई क्लिपजोन (AI Clipzone) का संस्थापक। +२ व्यवस्थापन अध्ययनरत, डेसिमल कलेज, वीरगञ्ज।'
+                    : '+2 Management at Decimal College, Birgunj. Founder of AI Clipzone. Based in Birgunj, Nepal.'}
                 </div>
               </div>
             </div>
@@ -174,7 +174,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 <span>
                   {language === 'NE'
                     ? 'एआई क्लिपजोनका संस्थापक तथा प्राविधिक अन्वेषक'
-                    : 'Founder & CEO of AI Clipzone, Web Developer & Tech Explorer'}
+                    : 'Founder of AI Clipzone, Web Developer & Tech Explorer'}
                 </span>
               </h3>
               
@@ -191,7 +191,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             <div className="stat-row">
               <div className="stat">
                 <span className="stat-num text-[#ff8175]">Founder</span>
-                <span className="stat-label">AI Clipzone CEO</span>
+                <span className="stat-label">AI Clipzone Founder</span>
               </div>
               <div className="stat">
                 <span className="stat-num text-[#ff8175]">25+</span>
@@ -233,7 +233,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 <div className="award-year">2024</div>
                 <div>
                   <b className="group-hover:text-[#ff8175] transition-colors flex items-center gap-2">
-                    <span>Founder & CEO — AI Clipzone</span>
+                    <span>Founder — AI Clipzone</span>
                     <ExternalLink className="w-3.5 h-3.5 text-[#e4342f] opacity-80" />
                   </b>
                   <span>
@@ -286,7 +286,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 "{language === 'NE' ? about.mottoNe : about.mottoEn}"
               </p>
               <div className="mt-2 text-xs text-[#ff8175] font-semibold">
-                — Rajababu Mehta (Founder & CEO, AI Clipzone)
+                — Rajababu Mehta (Founder, AI Clipzone)
               </div>
             </div>
 
@@ -303,7 +303,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 
         {/* ========================================================
            FEATURED PLATFORM SHOWCASE CARD (.ac - DR ACADEMY STYLE)
-           Showcasing AI Clipzone (Founder & CEO)
+           Showcasing AI Clipzone (Founder)
            ======================================================== */}
         <div className="ac flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="relative z-10 max-w-2xl">
@@ -313,7 +313,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 alt="AI Clipzone Logo"
                 className="w-4 h-4 rounded-full object-cover shrink-0"
               />
-              <span>{language === 'NE' ? 'आधिकारिक प्लेटफर्म • संस्थापक तथा सीईओ' : 'Featured Platform • Founder & CEO'}</span>
+              <span>{language === 'NE' ? 'आधिकारिक प्लेटफर्म • संस्थापक' : 'Featured Platform • Founder'}</span>
             </div>
 
             <h3 className="ac-h">

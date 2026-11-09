@@ -331,8 +331,8 @@ export default function App() {
     localStorage.setItem(STORAGE_KEYS.LANGUAGE, language);
     document.title =
       language === 'NE'
-        ? 'राजाबाबु मेहता | एआई क्लिपजोनका संस्थापक तथा सीईओ, एआई वेबसाइट डेभलपर'
-        : 'Rajababu Mehta | Founder & CEO of AI Clipzone & AI Website Developer';
+        ? 'राजाबाबु मेहता | एआई क्लिपजोनका संस्थापक, एआई वेबसाइट डेभलपर'
+        : 'Rajababu Mehta | Founder of AI Clipzone & AI Website Developer';
   }, [language]);
 
   useEffect(() => {
@@ -576,11 +576,13 @@ export default function App() {
         onOpenPosts={handleOpenPosts}
       />
 
-      {/* Floating Circle WhatsApp Button in Bottom Right */}
-      <WhatsAppFloatingButton
-        language={language}
-        whatsappNumber={systemSettings.contact.whatsappNumber}
-      />
+      {/* Floating Circle WhatsApp Button in Bottom Right (Hidden in Post section) */}
+      {!isPostsViewOpen && (
+        <WhatsAppFloatingButton
+          language={language}
+          whatsappNumber={systemSettings.contact.whatsappNumber}
+        />
+      )}
 
       {/* PWA Offline Connectivity Indicator */}
       <OfflineIndicator />

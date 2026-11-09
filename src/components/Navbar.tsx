@@ -347,7 +347,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {/* Footer Location & Credential Tag */}
                 <div className="pt-2 text-[11px] text-[#f6f3f2]/40 text-center flex items-center justify-center gap-1.5">
                   <MapPin className="w-3 h-3 text-[#e4342f]" />
-                  <span>Birgunj, Nepal · Founder & CEO, AI Clipzone</span>
+                  <span>Birgunj, Nepal · Founder, AI Clipzone</span>
                 </div>
 
               </div>

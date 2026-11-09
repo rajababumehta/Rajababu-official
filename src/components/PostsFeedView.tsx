@@ -598,7 +598,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                   <CheckCircle2 className="w-4 h-4 text-[#e4342f] fill-[#e4342f] text-black" />
                 </div>
                 <div className="text-xs text-[#f6f3f2]/60 flex items-center gap-2 mt-0.5">
-                  <span>Founder & CEO, AI Clipzone</span>
+                  <span>Founder, AI Clipzone</span>
                   <span>·</span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5" />
@@ -1197,7 +1197,7 @@ const NewsPostCard: React.FC<NewsPostCardProps> = ({
               )}
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-[#f6f3f2]/50 mt-0.5">
-              <span>Founder & CEO, AI Clipzone</span>
+              <span>Founder, AI Clipzone</span>
               <span>·</span>
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />

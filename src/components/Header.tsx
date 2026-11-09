@@ -25,14 +25,14 @@ export const Header: React.FC<HeaderProps> = ({
   const heroImageSrc = profile.heroImage || '/hero-portrait.png';
 
   const rolesEn = [
-    'Founder & CEO of AI Clipzone',
+    'Founder of AI Clipzone',
     'AI Website Developer',
     'AI Explainer & Creator',
     'Student in Birgunj, Nepal',
   ];
 
   const rolesNe = [
-    'एआई क्लिपजोनका संस्थापक तथा सीईओ',
+    'एआई क्लिपजोनका संस्थापक',
     'एआई वेबसाइट डेभलपर',
     'एआई व्याख्याकर्ता तथा सर्जक',
     'वीरगञ्ज, नेपालका विद्यार्थी',
