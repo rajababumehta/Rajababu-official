@@ -1171,6 +1171,45 @@ export const subscribeToFeedPosts = (
   );
 };
 
+export const getSingleFeedPost = async (postId: string): Promise<FeedPost | null> => {
+  const { firestore } = getFirebaseInstances();
+  if (!firestore || !postId) return null;
+
+  try {
+    const docRef = doc(firestore, 'posts', postId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) return null;
+
+    const data = docSnap.data();
+    let createdAtStr = new Date().toISOString();
+    if (data.createdAt?.toDate) {
+      createdAtStr = data.createdAt.toDate().toISOString();
+    } else if (typeof data.createdAt === 'string') {
+      createdAtStr = data.createdAt;
+    }
+
+    return {
+      id: docSnap.id,
+      authorId: data.authorId || '',
+      authorName: data.authorName || 'Rajababu Mehta',
+      authorEmail: data.authorEmail || '',
+      authorPhoto: data.authorPhoto || '/assets/aistudio/hero_photo.jpg',
+      content: data.content || '',
+      contentNe: data.contentNe || '',
+      images: Array.isArray(data.images) ? data.images : [],
+      category: data.category || 'Announcement',
+      likesCount: typeof data.likesCount === 'number' ? data.likesCount : 0,
+      commentsCount: typeof data.commentsCount === 'number' ? data.commentsCount : 0,
+      createdAt: createdAtStr,
+      updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt,
+      isPublished: data.isPublished ?? true,
+    };
+  } catch (e) {
+    console.warn('Failed to fetch single post:', e);
+    return null;
+  }
+};
+
 export const createFeedPost = async (postData: {
   authorId: string;
   authorName: string;

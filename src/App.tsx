@@ -203,29 +203,77 @@ export default function App() {
   const handleOpenAdmin = () => setIsAdminOpen(true);
   const handleCloseAdmin = () => setIsAdminOpen(false);
 
-  // 8. Posts Feed View State (accessible strictly from Menu or direct article share URLs)
-  const [isPostsViewOpen, setIsPostsViewOpen] = useState(false);
-  const [initialPostId, setInitialPostId] = useState<string | null>(null);
+  // 8. Posts Feed View State (Directly open post section & details on shared links)
+  const [isPostsViewOpen, setIsPostsViewOpen] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const urlParams = new URLSearchParams(window.location.search);
+    const postParam = urlParams.get('post');
+    const pathname = window.location.pathname;
+    const pathMatch = pathname.match(/^\/(?:posts|post|news)\/([a-zA-Z0-9_\-]+)/);
+    const hash = window.location.hash;
+    let savedSession: string | null = null;
+    try {
+      savedSession = sessionStorage.getItem('open_post_id');
+    } catch {}
+    return Boolean(
+      postParam ||
+      pathMatch ||
+      pathname === '/posts' ||
+      pathname === '/news' ||
+      hash.startsWith('#post-') ||
+      hash.startsWith('#post/') ||
+      hash === '#posts' ||
+      savedSession
+    );
+  });
+
+  const [initialPostId, setInitialPostId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const postParam = urlParams.get('post');
+    if (postParam) return postParam;
+    const pathname = window.location.pathname;
+    const pathMatch = pathname.match(/^\/(?:posts|post|news)\/([a-zA-Z0-9_\-]+)/);
+    if (pathMatch) return pathMatch[1];
+    const hash = window.location.hash;
+    if (hash.startsWith('#post-')) return hash.replace('#post-', '');
+    if (hash.startsWith('#post/')) return hash.replace('#post/', '');
+    try {
+      const saved = sessionStorage.getItem('open_post_id');
+      if (saved) {
+        sessionStorage.removeItem('open_post_id');
+        return saved;
+      }
+    } catch {}
+    return null;
+  });
 
   useEffect(() => {
     const handleUrlRouting = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const postParam = urlParams.get('post');
       const hash = window.location.hash;
+      const pathname = window.location.pathname;
+      const pathMatch = pathname.match(/^\/(?:posts|post|news)\/([a-zA-Z0-9_\-]+)/);
 
+      let targetPost: string | null = null;
       if (postParam) {
-        setInitialPostId(postParam);
-        setIsPostsViewOpen(true);
+        targetPost = postParam;
+      } else if (pathMatch) {
+        targetPost = pathMatch[1];
       } else if (hash.startsWith('#post-')) {
-        setInitialPostId(hash.replace('#post-', ''));
-        setIsPostsViewOpen(true);
+        targetPost = hash.replace('#post-', '');
       } else if (hash.startsWith('#post/')) {
-        setInitialPostId(hash.replace('#post/', ''));
+        targetPost = hash.replace('#post/', '');
+      }
+
+      if (targetPost) {
+        setInitialPostId(targetPost);
         setIsPostsViewOpen(true);
-      } else if (hash === '#posts') {
+      } else if (hash === '#posts' || pathname === '/posts' || pathname === '/news') {
+        setIsPostsViewOpen(true);
         setInitialPostId(null);
-        setIsPostsViewOpen(true);
-      } else if (hash === '' && !postParam && isPostsViewOpen) {
+      } else if (hash === '' && !postParam && !pathMatch && (pathname === '/' || pathname === '') && isPostsViewOpen) {
         setIsPostsViewOpen(false);
         setInitialPostId(null);
       }

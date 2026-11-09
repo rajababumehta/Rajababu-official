@@ -24,6 +24,7 @@ import {
 import { FeedPost, Language, AdminUser } from '../types';
 import {
   subscribeToFeedPosts,
+  getSingleFeedPost,
   createFeedPost,
   deleteFeedPost,
   logoutAdmin,
@@ -114,6 +115,12 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   // Active Selected Post for Dedicated News View
   const [activePostId, setActivePostId] = useState<string | null>(initialPostId || null);
 
+  useEffect(() => {
+    if (initialPostId) {
+      setActivePostId(initialPostId);
+    }
+  }, [initialPostId]);
+
   // Composer State (for Admin)
   const [postTitle, setPostTitle] = useState('');
   const [postContent, setPostContent] = useState('');
@@ -203,8 +210,29 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     return () => unsub();
   }, []);
 
+  const [directLoadedPost, setDirectLoadedPost] = useState<FeedPost | null>(null);
+
+  // If activePostId is set but not in posts array, fetch directly from Firestore
+  useEffect(() => {
+    if (activePostId && !posts.some((p) => p.id === activePostId)) {
+      let isMounted = true;
+      getSingleFeedPost(activePostId).then((fetched) => {
+        if (isMounted && fetched) {
+          setDirectLoadedPost(fetched);
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    } else if (activePostId && posts.some((p) => p.id === activePostId)) {
+      setDirectLoadedPost(null);
+    }
+  }, [activePostId, posts]);
+
   // Active Post Object
-  const currentActivePost = activePostId ? posts.find((p) => p.id === activePostId) || null : null;
+  const currentActivePost = activePostId
+    ? posts.find((p) => p.id === activePostId) || directLoadedPost
+    : null;
 
   // Dynamically update SEO structured data and title for Google search
   useEffect(() => {
@@ -492,7 +520,40 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
         {/* ------------------------------------------------------------- */}
         {/* SINGLE ARTICLE VIEW (News Portal Reader Mode with Direct Link) */}
         {/* ------------------------------------------------------------- */}
-        {currentActivePost ? (
+        {activePostId && !currentActivePost && loadingPosts ? (
+          <article className="bg-[#171514] border border-[rgba(255,240,238,0.12)] rounded-3xl p-6 sm:p-8 space-y-6 animate-pulse">
+            <div className="flex items-center justify-between pb-4 border-b border-[rgba(255,240,238,0.08)]">
+              <div className="h-4 w-28 bg-white/10 rounded" />
+              <div className="h-4 w-24 bg-white/5 rounded" />
+            </div>
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-full bg-white/10" />
+              <div className="space-y-1.5 flex-1">
+                <div className="h-4 w-36 bg-white/10 rounded" />
+                <div className="h-3 w-28 bg-white/5 rounded" />
+              </div>
+            </div>
+            <div className="h-8 w-4/5 bg-white/10 rounded" />
+            <div className="h-64 sm:h-80 w-full bg-white/5 rounded-2xl" />
+            <div className="space-y-3 pt-2">
+              <div className="h-4 w-full bg-white/5 rounded" />
+              <div className="h-4 w-5/6 bg-white/5 rounded" />
+              <div className="h-4 w-3/4 bg-white/5 rounded" />
+            </div>
+          </article>
+        ) : activePostId && !currentActivePost && !loadingPosts ? (
+          <div className="bg-[#171514] border border-[rgba(255,240,238,0.12)] rounded-3xl p-8 text-center space-y-4">
+            <p className="text-stone-300 text-sm">
+              {language === 'NE' ? 'यो पोस्ट वा समाचार फेला परेन।' : 'This post or article could not be found.'}
+            </p>
+            <button
+              onClick={handleBackToFeed}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#e4342f] text-white text-xs font-bold hover:bg-[#c92823] transition-colors cursor-pointer"
+            >
+              <span>← {language === 'NE' ? 'सबै समाचार र पोस्टहरू हेर्नुहोस्' : 'Browse All News & Posts'}</span>
+            </button>
+          </div>
+        ) : currentActivePost ? (
           <article className="bg-[#171514] border border-[rgba(255,240,238,0.12)] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
             {/* Breadcrumb & Category */}
             <div className="flex items-center justify-between gap-3 text-xs flex-wrap border-b border-[rgba(255,240,238,0.08)] pb-4">
