@@ -15,7 +15,7 @@ export const updatePostSeo = (post: FeedPost | null) => {
 
   // Extract clean summary (first 160 characters without newlines)
   const summary = post.content.slice(0, 160).replace(/\s+/g, ' ').trim();
-  const postUrl = `${window.location.origin}/?post=${post.id}`;
+  const postUrl = `${window.location.origin}/posts/${post.id}`;
 
   // Ensure absolute image URL for external social crawlers (Facebook, WhatsApp, Twitter)
   let postImage = `${window.location.origin}/brand-avatar.png`;
@@ -32,7 +32,7 @@ export const updatePostSeo = (post: FeedPost | null) => {
   }
 
   // 1. Dynamic Page Title
-  document.title = `${headline} | Rajababu Mehta - AI Clipzone`;
+  document.title = `${headline} | Rajababu Mehta News`;
 
   // Helper function to safely update or append meta elements
   const setMetaTag = (
@@ -67,7 +67,7 @@ export const updatePostSeo = (post: FeedPost | null) => {
   setLinkTag('canonical', postUrl);
 
   // 3. OpenGraph Tags (WhatsApp, Facebook, LinkedIn, iMessage)
-  setMetaTag('property', 'og:site_name', 'Rajababu Mehta - AI Clipzone');
+  setMetaTag('property', 'og:site_name', 'Rajababu Mehta News');
   setMetaTag('property', 'og:type', 'article');
   setMetaTag('property', 'og:title', headline);
   setMetaTag('property', 'og:description', summary);

@@ -114,14 +114,20 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
       const urlParams = new URLSearchParams(window.location.search);
       const postParam = urlParams.get('post');
       const hash = window.location.hash;
+      const pathname = window.location.pathname;
       let targetId: string | null = null;
 
       if (postParam) {
         targetId = postParam;
-      } else if (hash.startsWith('#post-')) {
-        targetId = hash.replace('#post-', '');
-      } else if (hash.startsWith('#post/')) {
-        targetId = hash.replace('#post/', '');
+      } else {
+        const pathMatch = pathname.match(/^\/(?:posts|post|news)\/([a-zA-Z0-9_\-]+)/);
+        if (pathMatch) {
+          targetId = pathMatch[1];
+        } else if (hash.startsWith('#post-')) {
+          targetId = hash.replace('#post-', '');
+        } else if (hash.startsWith('#post/')) {
+          targetId = hash.replace('#post/', '');
+        }
       }
 
       if (targetId) {
@@ -302,18 +308,16 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     }
   };
 
-  // Direct Post URL Generator (Optimized for Facebook, WhatsApp, and social crawlers)
+  // Direct News Post URL Generator (Optimized for Facebook, WhatsApp, and social crawlers)
   const getDirectPostUrl = (postId: string) => {
-    return `${window.location.origin}/?post=${postId}`;
+    return `${window.location.origin}/posts/${postId}`;
   };
 
-  // Direct Social Share Actions specifically for this post
+  // Direct Social Share Actions specifically for this post (NO website promotional bio, pure news)
   const handleWhatsAppShare = (post: FeedPost) => {
     const directUrl = getDirectPostUrl(post.id);
     const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
-    const text = encodeURIComponent(
-      `*${firstLine}*\n\nRead the full update by Rajababu Mehta (Founder & CEO, AI Clipzone):\n${directUrl}`
-    );
+    const text = encodeURIComponent(`*${firstLine}*\n\n${directUrl}`);
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };
 
@@ -328,7 +332,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   const handleTwitterShare = (post: FeedPost) => {
     const directUrl = getDirectPostUrl(post.id);
     const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
-    const text = encodeURIComponent(`${firstLine}\n\nBy @mrrajababumehta`);
+    const text = encodeURIComponent(firstLine);
     window.open(
       `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(directUrl)}`,
       '_blank'
@@ -339,9 +343,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     const directUrl = getDirectPostUrl(post.id);
     const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
     window.open(
-      `https://t.me/share/url?url=${encodeURIComponent(directUrl)}&text=${encodeURIComponent(
-        `*${firstLine}*\nBy Rajababu Mehta (Founder & CEO, AI Clipzone)`
-      )}`,
+      `https://t.me/share/url?url=${encodeURIComponent(directUrl)}&text=${encodeURIComponent(firstLine)}`,
       '_blank'
     );
   };
@@ -359,7 +361,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
     window.open(
       `mailto:?subject=${encodeURIComponent(firstLine)}&body=${encodeURIComponent(
-        `${firstLine}\n\nRead the full update by Rajababu Mehta:\n${directUrl}`
+        `${firstLine}\n\n${directUrl}`
       )}`,
       '_blank'
     );
@@ -368,7 +370,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   const handleUniversalShare = async (post: FeedPost) => {
     const directUrl = getDirectPostUrl(post.id);
     const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
-    const headline = firstLine || 'Rajababu Mehta Post';
+    const headline = firstLine || 'Rajababu Mehta News';
     const summary = post.content.slice(0, 140).replace(/\n/g, ' ');
 
     if (navigator.share) {
@@ -389,13 +391,13 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
 
   const handleOpenSinglePost = (postId: string) => {
     setActivePostId(postId);
-    window.history.pushState(null, '', `?post=${postId}#post-${postId}`);
+    window.history.pushState(null, '', `/posts/${postId}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToFeed = () => {
     setActivePostId(null);
-    window.history.pushState(null, '', window.location.pathname);
+    window.history.pushState(null, '', '/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

@@ -101,23 +101,35 @@ function injectPostOpenGraph(
   postUrl: string,
   imageUrl: string
 ): string {
-  const safeTitle = escapeHtml(`${post.title} | Rajababu Mehta`);
+  // Use clean news headline without website promotional bio
+  const safeTitle = escapeHtml(post.title);
   const safeDesc = escapeHtml(post.summary);
   const safeImg = escapeHtml(imageUrl);
   const safeUrl = escapeHtml(postUrl);
+  const siteName = escapeHtml('Rajababu Mehta News');
 
   let output = html;
 
   // 1. Update <title>
   output = output.replace(/<title>.*?<\/title>/i, `<title>${safeTitle}</title>`);
 
-  // 2. Update description
+  // 2. CRITICAL: Update Canonical URL so Facebook scraper does NOT redirect to homepage!
+  output = output.replace(
+    /<link\s+rel="canonical"\s+href=".*?"\s*\/?>/i,
+    `<link rel="canonical" href="${safeUrl}" />`
+  );
+
+  // 3. Update description
   output = output.replace(
     /<meta\s+name="description"\s+content=".*?"\s*\/?>/i,
     `<meta name="description" content="${safeDesc}" />`
   );
 
-  // 3. Update Open Graph tags for Facebook / WhatsApp / LinkedIn
+  // 4. Update Open Graph tags for Facebook / WhatsApp / LinkedIn
+  output = output.replace(
+    /<meta\s+property="og:site_name"\s+content=".*?"\s*\/?>/i,
+    `<meta property="og:site_name" content="${siteName}" />`
+  );
   output = output.replace(
     /<meta\s+property="og:title"\s+content=".*?"\s*\/?>/i,
     `<meta property="og:title" content="${safeTitle}" />`
@@ -128,7 +140,9 @@ function injectPostOpenGraph(
   );
   output = output.replace(
     /<meta\s+property="og:type"\s+content=".*?"\s*\/?>/i,
-    `<meta property="og:type" content="article" />`
+    `<meta property="og:type" content="article" />
+    <meta property="article:author" content="Rajababu Mehta" />
+    <meta property="article:section" content="${escapeHtml(post.category || 'News')}" />`
   );
   output = output.replace(
     /<meta\s+property="og:url"\s+content=".*?"\s*\/?>/i,
@@ -142,8 +156,16 @@ function injectPostOpenGraph(
     /<meta\s+property="og:image:secure_url"\s+content=".*?"\s*\/?>/i,
     `<meta property="og:image:secure_url" content="${safeImg}" />`
   );
+  output = output.replace(
+    /<meta\s+property="og:image:alt"\s+content=".*?"\s*\/?>/i,
+    `<meta property="og:image:alt" content="${safeTitle}" />`
+  );
+  output = output.replace(
+    /<meta\s+property="og:image:type"\s+content=".*?"\s*\/?>/i,
+    `<meta property="og:image:type" content="${post.imageMime || 'image/jpeg'}" />`
+  );
 
-  // 4. Update Twitter Card tags
+  // 5. Update Twitter Card tags
   output = output.replace(
     /<meta\s+name="twitter:title"\s+content=".*?"\s*\/?>/i,
     `<meta name="twitter:title" content="${safeTitle}" />`
@@ -155,6 +177,10 @@ function injectPostOpenGraph(
   output = output.replace(
     /<meta\s+name="twitter:image"\s+content=".*?"\s*\/?>/i,
     `<meta name="twitter:image" content="${safeImg}" />`
+  );
+  output = output.replace(
+    /<meta\s+name="twitter:image:alt"\s+content=".*?"\s*\/?>/i,
+    `<meta name="twitter:image:alt" content="${safeTitle}" />`
   );
 
   return output;
@@ -234,7 +260,7 @@ async function startServer() {
       const protocol = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'https';
       const host = req.headers['x-forwarded-host'] || req.headers.host;
       const baseUrl = `${protocol}://${host}`;
-      const postUrl = `${baseUrl}/?post=${targetPostId}`;
+      const postUrl = `${baseUrl}/posts/${targetPostId}`;
       const imageUrl = `${baseUrl}/api/post-image/${targetPostId}`;
 
       if (!isProduction && vite) {

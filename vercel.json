@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/post-image/:postId",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/posts/:id",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/news/:id",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "query",
+          "key": "post"
+        }
+      ],
+      "destination": "/api/index"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
