@@ -80,14 +80,35 @@ const CATEGORIES = [
   { id: 'Personal', en: '📸 Behind The Scenes', ne: '📸 व्यक्तिगत पलहरू' },
 ];
 
+const LOCAL_POSTS_CACHE_KEY = 'rajababu_news_posts_cache_v4';
+
 export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   language,
   onBackToHome,
   onShowToast,
   initialPostId,
 }) => {
-  const [posts, setPosts] = useState<FeedPost[]>([]);
-  const [loadingPosts, setLoadingPosts] = useState(true);
+  // Instant Cache Initialization for 0ms loading lag
+  const [posts, setPosts] = useState<FeedPost[]>(() => {
+    try {
+      const raw = localStorage.getItem(LOCAL_POSTS_CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [loadingPosts, setLoadingPosts] = useState(() => {
+    try {
+      const raw = localStorage.getItem(LOCAL_POSTS_CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return false;
+      }
+    } catch {}
+    return true;
+  });
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
 
   // Active Selected Post for Dedicated News View
@@ -130,6 +151,16 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
         }
       }
 
+      if (!targetId) {
+        try {
+          const sessionSaved = sessionStorage.getItem('open_post_id');
+          if (sessionSaved) {
+            targetId = sessionSaved;
+            sessionStorage.removeItem('open_post_id');
+          }
+        } catch {}
+      }
+
       if (targetId) {
         setActivePostId(targetId);
       }
@@ -154,16 +185,18 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     return () => unsub();
   }, []);
 
-  // Subscribe to real-time posts
+  // Subscribe to real-time posts (updates cache seamlessly in background)
   useEffect(() => {
-    setLoadingPosts(true);
     const unsub = subscribeToFeedPosts(
       (loadedPosts) => {
         setPosts(loadedPosts);
         setLoadingPosts(false);
+        try {
+          localStorage.setItem(LOCAL_POSTS_CACHE_KEY, JSON.stringify(loadedPosts));
+        } catch {}
       },
       (err) => {
-        console.warn('Posts listener error:', err);
+        console.warn('Posts listener note:', err);
         setLoadingPosts(false);
       }
     );
@@ -317,7 +350,8 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   const handleWhatsAppShare = (post: FeedPost) => {
     const directUrl = getDirectPostUrl(post.id);
     const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
-    const text = encodeURIComponent(`*${firstLine}*\n\n${directUrl}`);
+    // Exactly like RONB post: Headline followed by space and direct article URL
+    const text = encodeURIComponent(`${firstLine} ${directUrl}`);
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };
 
@@ -781,13 +815,26 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
               </div>
             </div>
 
-            {/* Posts List */}
-            {loadingPosts ? (
-              <div className="py-20 text-center space-y-3">
-                <Loader2 className="w-8 h-8 text-[#e4342f] animate-spin mx-auto" />
-                <p className="text-xs text-[#f6f3f2]/60">
-                  {language === 'NE' ? 'समाचार तथा लेखहरू लोड हुँदैछ...' : 'Loading articles from database...'}
-                </p>
+            {/* Posts List: Fast Instant Skeleton Preview or Articles */}
+            {loadingPosts && posts.length === 0 ? (
+              <div className="space-y-4">
+                {[1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="bg-[#171514] border border-[rgba(255,240,238,0.06)] rounded-3xl p-5 sm:p-6 space-y-4 animate-pulse"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-white/10 shrink-0" />
+                      <div className="space-y-1.5 flex-1">
+                        <div className="h-4 w-32 bg-white/10 rounded" />
+                        <div className="h-3 w-24 bg-white/5 rounded" />
+                      </div>
+                    </div>
+                    <div className="h-6 w-3/4 bg-white/10 rounded" />
+                    <div className="h-4 w-5/6 bg-white/5 rounded" />
+                    <div className="h-44 sm:h-56 w-full bg-white/5 rounded-2xl" />
+                  </div>
+                ))}
               </div>
             ) : posts.length === 0 ? (
               <div className="bg-[#171514] border border-[rgba(255,240,238,0.08)] rounded-3xl p-10 text-center space-y-4">

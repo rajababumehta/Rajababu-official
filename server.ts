@@ -164,8 +164,20 @@ function injectPostOpenGraph(
     /<meta\s+property="og:image:type"\s+content=".*?"\s*\/?>/i,
     `<meta property="og:image:type" content="${post.imageMime || 'image/jpeg'}" />`
   );
+  output = output.replace(
+    /<meta\s+property="og:image:width"\s+content=".*?"\s*\/?>/i,
+    `<meta property="og:image:width" content="1200" />`
+  );
+  output = output.replace(
+    /<meta\s+property="og:image:height"\s+content=".*?"\s*\/?>/i,
+    `<meta property="og:image:height" content="630" />`
+  );
 
-  // 5. Update Twitter Card tags
+  // 5. Update Twitter Card tags (summary_large_image like ronbpost.com)
+  output = output.replace(
+    /<meta\s+name="twitter:card"\s+content=".*?"\s*\/?>/i,
+    `<meta name="twitter:card" content="summary_large_image" />`
+  );
   output = output.replace(
     /<meta\s+name="twitter:title"\s+content=".*?"\s*\/?>/i,
     `<meta name="twitter:title" content="${safeTitle}" />`
@@ -183,6 +195,38 @@ function injectPostOpenGraph(
     `<meta name="twitter:image:alt" content="${safeTitle}" />`
   );
 
+  // 6. Strip profile:* tags so Facebook never classifies the page as a user profile
+  output = output.replace(/<meta\s+property="profile:[^"]+"\s+content="[^"]*"\s*\/?>\s*/gi, '');
+
+  // 7. Replace Person Schema with NewsArticle Schema (like ronbpost.com)
+  const origin = postUrl.replace(/\/(posts|post)\/.*$/, '');
+  const newsArticleJsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": post.title,
+    "image": [imageUrl],
+    "datePublished": new Date(post.fetchedAt).toISOString(),
+    "dateModified": new Date(post.fetchedAt).toISOString(),
+    "author": {
+      "@type": "Person",
+      "name": "Rajababu Mehta"
+    },
+    "publisher": {
+      "@type": "NewsMediaOrganization",
+      "name": "Rajababu Mehta News",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${origin}/brand-avatar.png`
+      }
+    },
+    "description": post.summary
+  });
+
+  output = output.replace(
+    /<script\s+type="application\/ld\+json">[\s\S]*?<\/script>/i,
+    `<script type="application/ld+json">${newsArticleJsonLd}</script>`
+  );
+
   return output;
 }
 
@@ -192,10 +236,12 @@ async function startServer() {
   const isProduction = process.env.NODE_ENV === 'production';
 
   // -------------------------------------------------------------
-  // 1. Direct Image Endpoint for Facebook & Social Crawlers
+  // 1. Direct Image Endpoint for Facebook & WhatsApp Crawlers (.jpg)
   // -------------------------------------------------------------
-  app.get('/api/post-image/:postId', async (req, res) => {
-    const { postId } = req.params;
+  const handleImageRequest = async (req: express.Request, res: express.Response) => {
+    const rawParam = req.params.postId;
+    const rawId = Array.isArray(rawParam) ? rawParam[0] : (rawParam || '');
+    const postId = String(rawId).replace(/\.(?:jpg|jpeg|png|webp)$/i, '');
     const post = await getPostData(postId);
 
     if (post?.imageBuffer && post.imageMime) {
@@ -218,7 +264,10 @@ async function startServer() {
     }
 
     res.status(404).send('Image not found');
-  });
+  };
+
+  app.get('/api/post-image/:postId', handleImageRequest);
+  app.get('/posts/:postId/image.jpg', handleImageRequest);
 
   // -------------------------------------------------------------
   // 2. Open Graph & Social Preview HTML Middleware
@@ -261,7 +310,7 @@ async function startServer() {
       const host = req.headers['x-forwarded-host'] || req.headers.host;
       const baseUrl = `${protocol}://${host}`;
       const postUrl = `${baseUrl}/posts/${targetPostId}`;
-      const imageUrl = `${baseUrl}/api/post-image/${targetPostId}`;
+      const imageUrl = `${baseUrl}/api/post-image/${targetPostId}.jpg`;
 
       if (!isProduction && vite) {
         const rawTemplate = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');

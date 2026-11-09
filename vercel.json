@@ -2,15 +2,19 @@
   "version": 2,
   "rewrites": [
     {
-      "source": "/api/post-image/:postId",
+      "source": "/api/post-image/(.*)",
       "destination": "/api/index"
     },
     {
-      "source": "/posts/:id",
+      "source": "/posts/(.*)/image.jpg",
       "destination": "/api/index"
     },
     {
-      "source": "/news/:id",
+      "source": "/posts/(.*)",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/news/(.*)",
       "destination": "/api/index"
     },
     {
