@@ -8,7 +8,6 @@ import {
   Trash2,
   Globe,
   Sparkles,
-  CheckCircle2,
   LogOut,
   X,
   ExternalLink,
@@ -63,6 +62,28 @@ export const TelegramLogo: React.FC<{ className?: string }> = ({ className = 'w-
 export const LinkedInLogo: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
     <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75c.97 0 1.76.78 1.76 1.75s-.79 1.76-1.76 1.76m1.4 9.74v-8.37H5.06v8.37h2.8z" />
+  </svg>
+);
+
+// Official Red Facebook/Meta Scalloped Verification Badge with Crisp White Checkmark
+export const FacebookVerifiedBadge: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    className={className}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-label="Verified Badge"
+  >
+    {/* Real Facebook/Meta Scalloped Rosette Seal */}
+    <path
+      d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.79-4-4-4-.495 0-.965.084-1.4.238C14.55 2.475 13.18 1.6 11.6 1.6c-1.58 0-2.95.875-3.6 2.148-.435-.154-.905-.238-1.4-.238-2.21 0-4 1.79-4 4 0 .495.084.965.238 1.4C1.575 9.55.7 10.92.7 12.5c0 1.58.875 2.95 2.148 3.6-.154.435-.238.905-.238 1.4 0 2.21 1.79 4 4 4 .495 0 .965-.084 1.4-.238.65 1.273 2.02 2.148 3.6 2.148 1.58 0 2.95-.875 3.6-2.148.435.154.905.238 1.4.238 2.21 0 4-1.79 4-4 0-.495-.084-.965-.238-1.4 1.273-.65 2.148-2.02 2.148-3.6z"
+      fill="#e4342f"
+    />
+    {/* Crisp White Checkmark */}
+    <path
+      d="M9.8 16.7L6 12.9l1.4-1.4 2.4 2.4 5.8-5.8 1.4 1.4-7.2 7.2z"
+      fill="#ffffff"
+    />
   </svg>
 );
 
@@ -314,7 +335,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
         authorId: currentUser?.uid || 'admin-rajababu',
         authorName: 'Rajababu Mehta',
         authorEmail: currentUser?.email || 'rajababum426@gmail.com',
-        authorPhoto: '/assets/aistudio/hero_photo.jpg',
+        authorPhoto: '/brand-avatar.png',
         content: fullContent,
         images: imageFiles,
         category: selectedCategory,
@@ -483,13 +504,13 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
               <img
                 src="/brand-avatar.png"
                 alt="Rajababu Mehta"
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-[#e4342f]/80"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-[#e4342f] shadow-sm"
               />
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#e4342f] animate-pulse shrink-0" />
+              <div className="flex items-center gap-1.5">
                 <span className="text-xs sm:text-sm font-bold text-[#f6f3f2] tracking-tight">
-                  Rajababu Mehta <span className="text-[#ff8175] font-semibold">{language === 'NE' ? 'समाचार' : 'News'}</span>
+                  Rajababu Mehta
                 </span>
+                <FacebookVerifiedBadge className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               </div>
             </div>
           )}
@@ -558,14 +579,12 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
           </div>
         ) : currentActivePost ? (
           <article className="bg-[#161413] border border-[rgba(255,240,238,0.1)] rounded-2xl sm:rounded-3xl p-4 sm:p-7 md:p-8 shadow-2xl space-y-5 sm:space-y-6">
-            {/* Breadcrumb & Category */}
+            {/* Breadcrumb & Status */}
             <div className="flex items-center justify-between gap-2 text-xs flex-wrap border-b border-[rgba(255,240,238,0.08)] pb-3">
               <div className="flex items-center gap-2 text-[#f6f3f2]/60">
                 <span className="text-[#ff8175] font-bold uppercase tracking-wider text-[11px]">
-                  {currentActivePost.category || 'News'}
+                  Official Update
                 </span>
-                <span>·</span>
-                <span className="text-[11px] text-[#f6f3f2]/50">Official Article</span>
               </div>
 
               {/* Direct Post URL Indicator */}
@@ -593,17 +612,22 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
 
             {/* Author Header Bar */}
             <div className="flex items-center gap-3">
-              <img
-                src={currentActivePost.authorPhoto || '/assets/aistudio/hero_photo.jpg'}
-                alt={currentActivePost.authorName}
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover ring-2 ring-[#e4342f] shrink-0"
-              />
+              <div className="relative shrink-0">
+                <img
+                  src="/brand-avatar.png"
+                  alt={currentActivePost.authorName || 'Rajababu Mehta'}
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover object-center ring-2 ring-[#e4342f] shadow-md bg-stone-900"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/brand-avatar.png';
+                  }}
+                />
+              </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-sm sm:text-base text-[#f6f3f2] truncate">
-                    {currentActivePost.authorName}
+                    {currentActivePost.authorName || 'Rajababu Mehta'}
                   </span>
-                  <CheckCircle2 className="w-4 h-4 text-[#e4342f] fill-[#e4342f] text-black shrink-0" />
+                  <FacebookVerifiedBadge className="w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0" />
                 </div>
                 <div className="text-[11px] sm:text-xs text-[#f6f3f2]/60 flex items-center gap-1.5 mt-0.5 flex-wrap">
                   <span>Founder, AI Clipzone</span>
@@ -739,15 +763,17 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
             {isAdmin ? (
               <div className="bg-[#171514] border border-[rgba(255,240,238,0.12)] rounded-3xl p-5 sm:p-6 shadow-xl">
                 <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src="/assets/aistudio/hero_photo.jpg"
-                    alt="Rajababu Mehta"
-                    className="w-11 h-11 rounded-full object-cover border-2 border-[#e4342f]"
-                  />
+                  <div className="relative shrink-0">
+                    <img
+                      src="/brand-avatar.png"
+                      alt="Rajababu Mehta"
+                      className="w-11 h-11 rounded-full object-cover object-center ring-2 ring-[#e4342f] shadow-md bg-stone-900"
+                    />
+                  </div>
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="font-bold text-sm text-[#f6f3f2]">Rajababu Mehta</span>
-                      <CheckCircle2 className="w-4 h-4 text-[#e4342f] fill-[#e4342f] text-black" />
+                      <FacebookVerifiedBadge className="w-4 h-4 shrink-0" />
                     </div>
                     <div className="flex items-center gap-1 text-[11px] text-[#f6f3f2]/60">
                       <span>Publisher & Founder, AI Clipzone</span>
@@ -873,16 +899,16 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#e4342f] animate-pulse" />
                 <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#ff8175]">
-                  {language === 'NE' ? 'आधिकारिक समाचार तथा अपडेट' : 'Official News & Releases'}
+                  {language === 'NE' ? 'आधिकारिक अपडेटहरू' : 'Official Updates'}
                 </span>
               </div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#f6f3f2] tracking-tight">
-                {language === 'NE' ? 'समाचार तथा आधिकारिक लेखहरू' : 'News, Articles & Official Updates'}
+                {language === 'NE' ? 'आधिकारिक सामग्री तथा अपडेटहरू' : 'Official Updates & Articles'}
               </h2>
               <p className="text-xs sm:text-sm text-[#f6f3f2]/65 leading-relaxed">
                 {language === 'NE'
-                  ? 'राजाबाबु मेहताद्वारा प्रकाशित आधिकारिक समाचार, लेख तथा सामग्रीहरू'
-                  : 'Directly shareable news articles & official updates by Rajababu Mehta'}
+                  ? 'राजाबाबु मेहताद्वारा प्रकाशित आधिकारिक सामग्रीहरू'
+                  : 'Official posts and announcements by Rajababu Mehta'}
               </p>
             </div>
 
@@ -1187,23 +1213,25 @@ const NewsPostCard: React.FC<NewsPostCardProps> = ({
 
   return (
     <article className="bg-[#151312] border border-[rgba(255,240,238,0.08)] hover:border-[rgba(255,240,238,0.18)] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg transition-all">
-      {/* Top Header: Author + Category + Date */}
+      {/* Top Header: Author + Date */}
       <div className="p-4 sm:p-5 pb-3 flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-          <img
-            src={post.authorPhoto || '/assets/aistudio/hero_photo.jpg'}
-            alt={post.authorName}
-            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover ring-2 ring-[#e4342f]/80 shrink-0"
-          />
+          <div className="relative shrink-0">
+            <img
+              src="/brand-avatar.png"
+              alt={post.authorName || 'Rajababu Mehta'}
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover object-center ring-2 ring-[#e4342f] shadow-md bg-stone-900"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/brand-avatar.png';
+              }}
+            />
+          </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-bold text-sm text-[#f6f3f2] truncate">{post.authorName}</span>
-              <CheckCircle2 className="w-4 h-4 text-[#e4342f] fill-[#e4342f] text-black shrink-0" />
-              {post.category && (
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#e4342f]/10 text-[#ff8175] border border-[#e4342f]/25">
-                  {post.category}
-                </span>
-              )}
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-sm text-[#f6f3f2] truncate">
+                {post.authorName || 'Rajababu Mehta'}
+              </span>
+              <FacebookVerifiedBadge className="w-4 h-4 shrink-0" />
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-[#f6f3f2]/60 mt-0.5">
               <span className="truncate">Founder, AI Clipzone</span>

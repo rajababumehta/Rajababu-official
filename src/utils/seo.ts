@@ -32,7 +32,7 @@ export const updatePostSeo = (post: FeedPost | null) => {
   }
 
   // 1. Dynamic Page Title
-  document.title = `${headline} | Rajababu Mehta News`;
+  document.title = `${headline} | Rajababu Mehta`;
 
   // Helper function to safely update or append meta elements
   const setMetaTag = (
@@ -67,7 +67,7 @@ export const updatePostSeo = (post: FeedPost | null) => {
   setLinkTag('canonical', postUrl);
 
   // 3. OpenGraph Tags (WhatsApp, Facebook, LinkedIn, iMessage)
-  setMetaTag('property', 'og:site_name', 'Rajababu Mehta News');
+  setMetaTag('property', 'og:site_name', 'Rajababu Mehta');
   setMetaTag('property', 'og:type', 'article');
   setMetaTag('property', 'og:title', headline);
   setMetaTag('property', 'og:description', summary);

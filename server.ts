@@ -106,7 +106,7 @@ function injectPostOpenGraph(
   const safeDesc = escapeHtml(post.summary);
   const safeImg = escapeHtml(imageUrl);
   const safeUrl = escapeHtml(postUrl);
-  const siteName = escapeHtml('Rajababu Mehta News');
+  const siteName = escapeHtml('Rajababu Mehta');
 
   let output = html;
 
@@ -216,8 +216,8 @@ function injectPostOpenGraph(
       ]
     },
     "publisher": {
-      "@type": "NewsMediaOrganization",
-      "name": "Rajababu Mehta News",
+      "@type": "Person",
+      "name": "Rajababu Mehta",
       "logo": {
         "@type": "ImageObject",
         "url": `${origin}/brand-avatar.png`
