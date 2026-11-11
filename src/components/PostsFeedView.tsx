@@ -468,35 +468,38 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   return (
     <div className="min-h-screen bg-[#0d0b0a] text-[#f6f3f2] font-sans selection:bg-[#e4342f] selection:text-white pb-24">
       {/* Top Sticky Header */}
-      <header className="sticky top-0 z-40 bg-[#141211]/90 backdrop-blur-md border-b border-[rgba(255,240,238,0.08)]">
-        <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-[#12100f]/95 backdrop-blur-md border-b border-[rgba(255,240,238,0.08)]">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-3">
           {currentActivePost ? (
             <button
               onClick={handleBackToFeed}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.05)] hover:bg-[#e4342f] hover:text-white transition-all text-sm font-semibold cursor-pointer border border-[rgba(255,240,238,0.1)]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.06)] hover:bg-[#e4342f] text-[#f6f3f2] hover:text-white transition-all text-xs sm:text-sm font-bold cursor-pointer border border-[rgba(255,240,238,0.12)] active:scale-95"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>{language === 'NE' ? 'सबै पोस्टहरू' : 'All Articles'}</span>
+              <ArrowLeft className="w-4 h-4 text-[#ff8175] group-hover:text-white" />
+              <span>{language === 'NE' ? 'सबै समाचार' : 'All Articles'}</span>
             </button>
           ) : (
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#e4342f] animate-pulse"></span>
-              <span className="text-xs uppercase tracking-wider font-bold text-[#ff8175]">
-                {language === 'NE' ? 'समाचार तथा विचार' : 'News & Articles'}
-              </span>
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/brand-avatar.png"
+                alt="Rajababu Mehta"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-[#e4342f]/80"
+              />
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#e4342f] animate-pulse shrink-0" />
+                <span className="text-xs sm:text-sm font-bold text-[#f6f3f2] tracking-tight">
+                  Rajababu Mehta <span className="text-[#ff8175] font-semibold">{language === 'NE' ? 'समाचार' : 'News'}</span>
+                </span>
+              </div>
             </div>
           )}
 
-          {currentActivePost && (
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#e4342f] animate-pulse"></span>
-              <span className="text-xs uppercase tracking-wider font-bold text-[#ff8175]">
-                {language === 'NE' ? 'समाचार तथा विचार' : 'News & Articles'}
-              </span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <span className="hidden xs:inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+              <Globe className="w-3 h-3" />
+              Live Portal
+            </span>
 
-          <div>
             {isAdmin && (
               <button
                 onClick={() => {
@@ -515,67 +518,67 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
       </header>
 
       {/* Main Container */}
-      <main className="max-w-3xl mx-auto px-4 pt-6 space-y-6">
+      <main className="max-w-3xl mx-auto px-3 sm:px-4 pt-4 sm:pt-6 space-y-4 sm:space-y-6">
 
         {/* ------------------------------------------------------------- */}
         {/* SINGLE ARTICLE VIEW (News Portal Reader Mode with Direct Link) */}
         {/* ------------------------------------------------------------- */}
         {activePostId && !currentActivePost && loadingPosts ? (
-          <article className="bg-[#171514] border border-[rgba(255,240,238,0.12)] rounded-3xl p-6 sm:p-8 space-y-6 animate-pulse">
-            <div className="flex items-center justify-between pb-4 border-b border-[rgba(255,240,238,0.08)]">
+          <article className="bg-[#161413] border border-[rgba(255,240,238,0.1)] rounded-2xl sm:rounded-3xl p-4 sm:p-7 md:p-8 space-y-5 sm:space-y-6 animate-pulse">
+            <div className="flex items-center justify-between pb-3 border-b border-[rgba(255,240,238,0.06)]">
               <div className="h-4 w-28 bg-white/10 rounded" />
-              <div className="h-4 w-24 bg-white/5 rounded" />
+              <div className="h-4 w-20 bg-white/5 rounded" />
             </div>
-            <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-full bg-white/10" />
+            <div className="h-7 sm:h-9 w-4/5 bg-white/10 rounded" />
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full bg-white/10" />
               <div className="space-y-1.5 flex-1">
-                <div className="h-4 w-36 bg-white/10 rounded" />
-                <div className="h-3 w-28 bg-white/5 rounded" />
+                <div className="h-4 w-32 bg-white/10 rounded" />
+                <div className="h-3 w-24 bg-white/5 rounded" />
               </div>
             </div>
-            <div className="h-8 w-4/5 bg-white/10 rounded" />
-            <div className="h-64 sm:h-80 w-full bg-white/5 rounded-2xl" />
-            <div className="space-y-3 pt-2">
+            <div className="aspect-[16/10] sm:aspect-video w-full bg-white/5 rounded-xl sm:rounded-2xl" />
+            <div className="space-y-2.5 pt-2">
               <div className="h-4 w-full bg-white/5 rounded" />
               <div className="h-4 w-5/6 bg-white/5 rounded" />
               <div className="h-4 w-3/4 bg-white/5 rounded" />
             </div>
           </article>
         ) : activePostId && !currentActivePost && !loadingPosts ? (
-          <div className="bg-[#171514] border border-[rgba(255,240,238,0.12)] rounded-3xl p-8 text-center space-y-4">
+          <div className="bg-[#161413] border border-[rgba(255,240,238,0.1)] rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center space-y-4">
             <p className="text-stone-300 text-sm">
               {language === 'NE' ? 'यो पोस्ट वा समाचार फेला परेन।' : 'This post or article could not be found.'}
             </p>
             <button
               onClick={handleBackToFeed}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#e4342f] text-white text-xs font-bold hover:bg-[#c92823] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#e4342f] text-white text-xs font-bold hover:bg-[#c92823] transition-colors cursor-pointer active:scale-95"
             >
               <span>← {language === 'NE' ? 'सबै समाचार र पोस्टहरू हेर्नुहोस्' : 'Browse All News & Posts'}</span>
             </button>
           </div>
         ) : currentActivePost ? (
-          <article className="bg-[#171514] border border-[rgba(255,240,238,0.12)] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+          <article className="bg-[#161413] border border-[rgba(255,240,238,0.1)] rounded-2xl sm:rounded-3xl p-4 sm:p-7 md:p-8 shadow-2xl space-y-5 sm:space-y-6">
             {/* Breadcrumb & Category */}
-            <div className="flex items-center justify-between gap-3 text-xs flex-wrap border-b border-[rgba(255,240,238,0.08)] pb-4">
+            <div className="flex items-center justify-between gap-2 text-xs flex-wrap border-b border-[rgba(255,240,238,0.08)] pb-3">
               <div className="flex items-center gap-2 text-[#f6f3f2]/60">
-                <span className="text-[#ff8175] font-semibold">
+                <span className="text-[#ff8175] font-bold uppercase tracking-wider text-[11px]">
                   {currentActivePost.category || 'News'}
                 </span>
-                <span>/</span>
-                <span>Direct Link</span>
+                <span>·</span>
+                <span className="text-[11px] text-[#f6f3f2]/50">Official Article</span>
               </div>
 
               {/* Direct Post URL Indicator */}
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <span className="text-[10px] sm:text-[11px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                   <Globe className="w-3 h-3" />
-                  Indexed on Google
+                  Google Indexed
                 </span>
                 {isAdmin && (
                   <button
                     onClick={() => handleDeletePost(currentActivePost.id)}
                     title="Delete article"
-                    className="p-1 rounded text-stone-500 hover:text-rose-400 hover:bg-rose-950/40 cursor-pointer"
+                    className="p-1 rounded text-stone-500 hover:text-rose-400 hover:bg-rose-950/40 cursor-pointer transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -583,27 +586,32 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
               </div>
             </div>
 
+            {/* Prominent Editorial Headline */}
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[#f6f3f2] tracking-tight leading-snug">
+              {currentActivePost.content.split('\n').filter((l) => l.trim().length > 0)[0] || 'Official Announcement'}
+            </h1>
+
             {/* Author Header Bar */}
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-center gap-3">
               <img
                 src={currentActivePost.authorPhoto || '/assets/aistudio/hero_photo.jpg'}
                 alt={currentActivePost.authorName}
-                className="w-12 h-12 rounded-full object-cover border-2 border-[#e4342f]"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover ring-2 ring-[#e4342f] shrink-0"
               />
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-base text-[#f6f3f2]">
+                  <span className="font-bold text-sm sm:text-base text-[#f6f3f2] truncate">
                     {currentActivePost.authorName}
                   </span>
-                  <CheckCircle2 className="w-4 h-4 text-[#e4342f] fill-[#e4342f] text-black" />
+                  <CheckCircle2 className="w-4 h-4 text-[#e4342f] fill-[#e4342f] text-black shrink-0" />
                 </div>
-                <div className="text-xs text-[#f6f3f2]/60 flex items-center gap-2 mt-0.5">
+                <div className="text-[11px] sm:text-xs text-[#f6f3f2]/60 flex items-center gap-1.5 mt-0.5 flex-wrap">
                   <span>Founder, AI Clipzone</span>
                   <span>·</span>
                   <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5" />
+                    <Clock className="w-3 h-3 text-[#ff8175]/80" />
                     {new Date(currentActivePost.createdAt).toLocaleDateString('en-US', {
-                      month: 'long',
+                      month: 'short',
                       day: 'numeric',
                       year: 'numeric',
                     })}
@@ -614,19 +622,19 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
 
             {/* Post Images Gallery (News Style) */}
             {currentActivePost.images && currentActivePost.images.length > 0 && (
-              <div className="space-y-3 pt-2">
+              <div className="space-y-3 pt-1">
                 <div
                   onClick={() => setLightboxImage(currentActivePost.images[0])}
-                  className="rounded-2xl overflow-hidden cursor-pointer group relative bg-black border border-[rgba(255,240,238,0.1)]"
+                  className="rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer group relative bg-black border border-[rgba(255,240,238,0.1)] shadow-inner"
                 >
                   <img
                     src={currentActivePost.images[0]}
                     alt="Article Featured Attachment"
-                    className="w-full max-h-[500px] object-cover group-hover:scale-[1.01] transition-transform duration-300"
+                    className="w-full max-h-[480px] object-cover group-hover:scale-[1.01] transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="px-3.5 py-1.5 rounded-full bg-black/75 text-white text-xs font-semibold flex items-center gap-1.5">
-                      <Maximize2 className="w-3.5 h-3.5" /> Full View
+                  <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="px-3 py-1.5 rounded-full bg-black/80 text-white text-xs font-semibold flex items-center gap-1.5 backdrop-blur-sm">
+                      <Maximize2 className="w-3.5 h-3.5" /> Full Photo
                     </span>
                   </div>
                 </div>
@@ -654,30 +662,27 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
 
             {/* Article Content / Lekh */}
             <div className="pt-2">
-              <div className="text-base text-[#f6f3f2]/95 leading-relaxed font-sans whitespace-pre-line space-y-4">
-                {currentActivePost.content}
+              <div className="text-sm sm:text-base text-[#f6f3f2]/90 leading-relaxed font-sans whitespace-pre-line space-y-4">
+                {currentActivePost.content.split('\n').filter((l) => l.trim().length > 0).slice(1).join('\n\n') || currentActivePost.content}
               </div>
             </div>
 
-            {/* DIRECT NEWS PORTAL SHARE BAR (ONLY SHARE, NO LIKE, NO COMMENT) */}
-            <div className="pt-6 border-t border-[rgba(255,240,238,0.12)] space-y-3">
+            {/* DIRECT NEWS PORTAL SHARE BAR */}
+            <div className="pt-5 border-t border-[rgba(255,240,238,0.1)] space-y-3">
               <div className="flex items-center justify-between text-xs text-[#f6f3f2]/60">
-                <span className="font-semibold uppercase tracking-wider text-[#ff8175] flex items-center gap-1.5">
+                <span className="font-bold uppercase tracking-wider text-[#ff8175] flex items-center gap-1.5 text-[11px] sm:text-xs">
                   <Share2 className="w-3.5 h-3.5" />
                   {language === 'NE' ? 'यो समाचार / लेख सेयर गर्नुहोस्:' : 'Share this news article:'}
-                </span>
-                <span className="text-[11px] font-mono opacity-60">
-                  ID: {currentActivePost.id.slice(0, 10)}
                 </span>
               </div>
 
               {/* Direct Social Share Buttons with Real Official Logos */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
                 {/* Real WhatsApp Direct Share */}
                 <button
                   type="button"
                   onClick={() => handleWhatsAppShare(currentActivePost)}
-                  className="py-2.5 px-3 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/35 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                  className="py-2.5 px-3 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/35 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95"
                 >
                   <WhatsAppLogo className="w-4 h-4 shrink-0" />
                   <span>WhatsApp</span>
@@ -687,7 +692,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                 <button
                   type="button"
                   onClick={() => handleFacebookShare(currentActivePost)}
-                  className="py-2.5 px-3 rounded-xl bg-[#1877F2]/15 hover:bg-[#1877F2] text-[#1877F2] hover:text-white border border-[#1877F2]/35 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                  className="py-2.5 px-3 rounded-xl bg-[#1877F2]/15 hover:bg-[#1877F2] text-[#1877F2] hover:text-white border border-[#1877F2]/35 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95"
                 >
                   <FacebookLogo className="w-4 h-4 shrink-0" />
                   <span>Facebook</span>
@@ -697,9 +702,9 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                 <button
                   type="button"
                   onClick={() => handleTwitterShare(currentActivePost)}
-                  className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+                  className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-95"
                 >
-                  <XTwitterLogo className="w-4 h-4 shrink-0" />
+                  <XTwitterLogo className="w-3.5 h-3.5 shrink-0" />
                   <span>X / Twitter</span>
                 </button>
 
@@ -707,7 +712,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                 <button
                   type="button"
                   onClick={() => handleUniversalShare(currentActivePost)}
-                  className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#e4342f] to-[#ff4742] hover:from-[#c92823] hover:to-[#e4342f] text-white border border-[#e4342f]/50 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#e4342f]/25 hover:scale-[1.02] active:scale-[0.98]"
+                  className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#e4342f] to-[#ff4742] hover:from-[#c92823] hover:to-[#e4342f] text-white border border-[#e4342f]/50 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#e4342f]/25 active:scale-95"
                 >
                   <Share2 className="w-4 h-4 shrink-0" />
                   <span>{language === 'NE' ? 'सबैतिर पठाउनुहोस्' : 'Share Anywhere'}</span>
@@ -719,7 +724,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
             <div className="pt-2 text-center">
               <button
                 onClick={handleBackToFeed}
-                className="inline-flex items-center gap-2 text-xs font-bold text-[#ff8175] hover:text-white transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 text-xs font-bold text-[#ff8175] hover:text-white transition-colors cursor-pointer py-1.5 px-3 rounded-full hover:bg-white/5 active:scale-95"
               >
                 <span>← {language === 'NE' ? 'सबै समाचार र पोस्टहरू हेर्नुहोस्' : 'Browse All News & Posts'}</span>
               </button>
@@ -864,17 +869,21 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
             ) : null}
 
             {/* Posts Feed Header */}
-            <div className="flex items-center justify-between pb-1">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-[#f6f3f2] tracking-tight">
-                  {language === 'NE' ? 'समाचार तथा आधिकारिक लेखहरू' : 'News, Articles & Official Updates'}
-                </h2>
-                <p className="text-xs text-[#f6f3f2]/60 mt-0.5">
-                  {language === 'NE'
-                    ? 'राजाबाबु मेहताद्वारा प्रकाशित सामग्रीहरू (प्रत्यक्ष सेयर गर्न मिल्ने)'
-                    : 'Directly shareable news articles & insights by Rajababu Mehta'}
-                </p>
+            <div className="space-y-1.5 pb-2 border-b border-[rgba(255,240,238,0.06)]">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#e4342f] animate-pulse" />
+                <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#ff8175]">
+                  {language === 'NE' ? 'आधिकारिक समाचार तथा अपडेट' : 'Official News & Releases'}
+                </span>
               </div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-[#f6f3f2] tracking-tight">
+                {language === 'NE' ? 'समाचार तथा आधिकारिक लेखहरू' : 'News, Articles & Official Updates'}
+              </h2>
+              <p className="text-xs sm:text-sm text-[#f6f3f2]/65 leading-relaxed">
+                {language === 'NE'
+                  ? 'राजाबाबु मेहताद्वारा प्रकाशित आधिकारिक समाचार, लेख तथा सामग्रीहरू'
+                  : 'Directly shareable news articles & official updates by Rajababu Mehta'}
+              </p>
             </div>
 
             {/* Posts List: Fast Instant Skeleton Preview or Articles */}
@@ -1177,30 +1186,30 @@ const NewsPostCard: React.FC<NewsPostCardProps> = ({
   })();
 
   return (
-    <article className="bg-[#171514] border border-[rgba(255,240,238,0.1)] rounded-3xl overflow-hidden shadow-xl hover:border-[rgba(255,240,238,0.18)] transition-all">
+    <article className="bg-[#151312] border border-[rgba(255,240,238,0.08)] hover:border-[rgba(255,240,238,0.18)] rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg transition-all">
       {/* Top Header: Author + Category + Date */}
-      <div className="p-5 sm:p-6 pb-4 flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
+      <div className="p-4 sm:p-5 pb-3 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <img
             src={post.authorPhoto || '/assets/aistudio/hero_photo.jpg'}
             alt={post.authorName}
-            className="w-11 h-11 rounded-full object-cover border-2 border-[#e4342f]"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover ring-2 ring-[#e4342f]/80 shrink-0"
           />
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-bold text-sm text-[#f6f3f2]">{post.authorName}</span>
-              <CheckCircle2 className="w-4 h-4 text-[#e4342f] fill-[#e4342f] text-black" />
+              <span className="font-bold text-sm text-[#f6f3f2] truncate">{post.authorName}</span>
+              <CheckCircle2 className="w-4 h-4 text-[#e4342f] fill-[#e4342f] text-black shrink-0" />
               {post.category && (
-                <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[rgba(228,52,47,0.12)] text-[#ff8175] border border-[rgba(228,52,47,0.25)]">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#e4342f]/10 text-[#ff8175] border border-[#e4342f]/25">
                   {post.category}
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-[#f6f3f2]/50 mt-0.5">
-              <span>Founder, AI Clipzone</span>
+            <div className="flex items-center gap-1.5 text-[11px] text-[#f6f3f2]/60 mt-0.5">
+              <span className="truncate">Founder, AI Clipzone</span>
               <span>·</span>
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
+              <span className="flex items-center gap-1 shrink-0">
+                <Clock className="w-3 h-3 text-[#ff8175]/80" />
                 {formattedDate}
               </span>
             </div>
@@ -1211,20 +1220,20 @@ const NewsPostCard: React.FC<NewsPostCardProps> = ({
           <button
             onClick={onDelete}
             title="Delete article"
-            className="p-1.5 rounded-lg text-stone-500 hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-stone-500 hover:text-rose-400 hover:bg-rose-950/30 transition-colors cursor-pointer shrink-0"
           >
             <Trash2 className="w-4 h-4" />
           </button>
         )}
       </div>
 
-      {/* Main Headline */}
-      <div className="px-5 sm:px-6 pb-2 cursor-pointer" onClick={onOpenPost}>
-        <h3 className="text-lg sm:text-xl font-bold text-[#f6f3f2] hover:text-[#ff8175] transition-colors leading-snug">
+      {/* Main Headline & Excerpt */}
+      <div className="px-4 sm:px-5 pb-3 cursor-pointer group" onClick={onOpenPost}>
+        <h3 className="text-base sm:text-lg md:text-xl font-bold text-[#f6f3f2] group-hover:text-[#ff8175] transition-colors leading-snug line-clamp-2">
           {headline}
         </h3>
         {remainingContent && (
-          <p className="text-sm text-[#f6f3f2]/75 line-clamp-3 mt-2 leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#f6f3f2]/75 line-clamp-2 sm:line-clamp-3 mt-1.5 leading-relaxed">
             {remainingContent}
           </p>
         )}
@@ -1232,33 +1241,38 @@ const NewsPostCard: React.FC<NewsPostCardProps> = ({
 
       {/* Images Preview */}
       {post.images && post.images.length > 0 && (
-        <div className="border-t border-b border-[rgba(255,240,238,0.06)] bg-black/40 mt-3">
+        <div className="mx-3.5 sm:mx-5 mb-3 rounded-xl sm:rounded-2xl overflow-hidden bg-black/60 border border-[rgba(255,240,238,0.06)] shadow-inner">
           {post.images.length === 1 ? (
             <div
               onClick={() => onOpenImage(post.images[0])}
-              className="relative cursor-pointer group max-h-[460px] overflow-hidden flex items-center justify-center bg-black"
+              className="relative cursor-pointer group max-h-[360px] sm:max-h-[460px] overflow-hidden flex items-center justify-center bg-black"
             >
               <img
                 src={post.images[0]}
                 alt="Post photo"
-                className="w-full max-h-[460px] object-cover group-hover:scale-[1.01] transition-transform duration-300"
+                className="w-full max-h-[360px] sm:max-h-[460px] object-cover group-hover:scale-[1.01] transition-transform duration-300"
               />
+              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="px-3 py-1.5 rounded-full bg-black/80 text-white text-xs font-semibold flex items-center gap-1.5 backdrop-blur-sm">
+                  <Maximize2 className="w-3.5 h-3.5" /> Full Photo
+                </span>
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-1 bg-black">
+            <div className="grid grid-cols-2 gap-1.5 bg-black">
               {post.images.slice(0, 2).map((img, i) => (
                 <div
                   key={i}
                   onClick={() => onOpenImage(img)}
-                  className="aspect-video cursor-pointer relative overflow-hidden bg-black"
+                  className="aspect-[4/3] sm:aspect-video cursor-pointer relative overflow-hidden bg-black group"
                 >
                   <img
                     src={img}
                     alt={`Attachment ${i + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   {i === 1 && post.images.length > 2 && (
-                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-white text-base font-bold">
+                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-white text-sm sm:text-base font-bold">
                       +{post.images.length - 2} more
                     </div>
                   )}
@@ -1269,55 +1283,59 @@ const NewsPostCard: React.FC<NewsPostCardProps> = ({
         </div>
       )}
 
-      {/* Direct News Share Bar (STRICTLY NO LIKE, NO COMMENT - ONLY SHARE & READ) */}
-      <div className="px-5 sm:px-6 py-3.5 bg-[#141211]/60 border-t border-[rgba(255,240,238,0.08)] flex items-center justify-between gap-2 flex-wrap">
+      {/* Direct News Share Bar (Mobile optimized single-row actions) */}
+      <div className="px-3.5 sm:px-5 py-2.5 sm:py-3 bg-[#110f0e] border-t border-[rgba(255,240,238,0.06)] flex items-center justify-between gap-2">
         <button
           onClick={onOpenPost}
-          className="flex items-center gap-1.5 text-xs font-bold text-[#ff8175] hover:text-white transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[rgba(255,255,255,0.04)] hover:bg-[#e4342f]/20 text-xs font-bold text-[#ff8175] hover:text-white transition-all cursor-pointer shrink-0 active:scale-95"
         >
-          <span>{language === 'NE' ? 'पूरा लेख पढ्नुहोस्' : 'Read Full Article'}</span>
+          <span>{language === 'NE' ? 'पूरा पढ्नुहोस्' : 'Read Article'}</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
 
         {/* Share Buttons Strip with Real Official Brand Logos */}
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           {/* Real WhatsApp Share Button */}
           <button
             onClick={onWhatsAppShare}
             title="Share on WhatsApp"
-            className="p-2 sm:px-3 sm:py-2 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/30 transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+            aria-label="Share on WhatsApp"
+            className="w-8 h-8 sm:w-auto sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl bg-[#25D366]/15 hover:bg-[#25D366] text-[#25D366] hover:text-white border border-[#25D366]/30 transition-all text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
           >
-            <WhatsAppLogo className="w-4 h-4 shrink-0" />
-            <span className="hidden sm:inline">WhatsApp</span>
+            <WhatsAppLogo className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="hidden md:inline">WhatsApp</span>
           </button>
 
           {/* Real Facebook Share Button */}
           <button
             onClick={onFacebookShare}
-            title="Share on Facebook with Photo"
-            className="p-2 sm:px-3 sm:py-2 rounded-xl bg-[#1877F2]/15 hover:bg-[#1877F2] text-[#1877F2] hover:text-white border border-[#1877F2]/30 transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+            title="Share on Facebook"
+            aria-label="Share on Facebook"
+            className="w-8 h-8 sm:w-auto sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl bg-[#1877F2]/15 hover:bg-[#1877F2] text-[#1877F2] hover:text-white border border-[#1877F2]/30 transition-all text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
           >
-            <FacebookLogo className="w-4 h-4 shrink-0" />
-            <span className="hidden sm:inline">Facebook</span>
+            <FacebookLogo className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="hidden md:inline">Facebook</span>
           </button>
 
           {/* Real X / Twitter Share Button */}
           <button
             onClick={onTwitterShare}
             title="Share on X"
-            className="p-2 sm:px-2.5 sm:py-2 rounded-xl bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 transition-all text-xs font-bold flex items-center gap-1 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+            aria-label="Share on X"
+            className="w-8 h-8 sm:w-auto sm:px-2 sm:py-1.5 rounded-lg sm:rounded-xl bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 transition-all text-xs font-bold flex items-center justify-center gap-1 cursor-pointer shadow-sm active:scale-95"
           >
             <XTwitterLogo className="w-3.5 h-3.5 shrink-0" />
           </button>
 
-          {/* Universal Share Anywhere Button (Jata Sukai Send Garnu) */}
+          {/* Universal Share Anywhere Button */}
           <button
             onClick={onUniversalShare}
-            title="Share anywhere (Telegram, Messenger, Email, etc.)"
-            className="p-2 sm:px-3 sm:py-2 rounded-xl bg-[#e4342f]/20 hover:bg-[#e4342f] text-[#ff8175] hover:text-white border border-[#e4342f]/40 transition-all text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+            title="Share Anywhere"
+            aria-label="Share Anywhere"
+            className="w-8 h-8 sm:w-auto sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl bg-[#e4342f]/20 hover:bg-[#e4342f] text-[#ff8175] hover:text-white border border-[#e4342f]/40 transition-all text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
           >
             <Share2 className="w-3.5 h-3.5 shrink-0" />
-            <span className="hidden sm:inline">{language === 'NE' ? 'सेयर' : 'Share'}</span>
+            <span className="hidden md:inline">{language === 'NE' ? 'सेयर' : 'Share'}</span>
           </button>
         </div>
       </div>

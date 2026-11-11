@@ -1,5 +1,5 @@
 // Rajababu Mehta Website Service Worker
-const CACHE_NAME = 'rajababu-mehta-cache-v2';
+const CACHE_NAME = 'rajababu-mehta-cache-v4';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -21,7 +21,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(PRECACHE_ASSETS).catch((err) => {
-        console.warn('Ai Clipzone precache warning:', err);
+        console.warn('Precache note:', err);
       });
     }).then(() => {
       return self.skipWaiting();
@@ -49,6 +49,18 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   const url = new URL(event.request.url);
+
+  // CRITICAL: NEVER cache or intercept Vite dev server, node_modules, src, or API routes
+  if (
+    url.pathname.startsWith('/node_modules') ||
+    url.pathname.startsWith('/@') ||
+    url.pathname.startsWith('/src') ||
+    url.pathname.startsWith('/api') ||
+    url.searchParams.has('v') ||
+    url.searchParams.has('t')
+  ) {
+    return;
+  }
 
   // Handle same-origin requests
   if (url.origin === self.location.origin) {

@@ -195,6 +195,17 @@
   </head>
   <body class="bg-[#0a0b0e] text-[#f6f3f2] antialiased selection:bg-[#e4342f] selection:text-white font-sans overflow-x-hidden">
     <div id="root"></div>
+    <script>
+      if (location.hostname.includes('run.app') || location.hostname === 'localhost') {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            for (var i = 0; i < regs.length; i++) {
+              regs[i].unregister();
+            }
+          });
+        }
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
