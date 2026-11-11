@@ -485,11 +485,11 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
           {currentActivePost ? (
             <button
               onClick={handleBackToFeed}
-              title={language === 'NE' ? 'पछाडि' : 'Back'}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.06)] hover:bg-[#e4342f] text-[#f6f3f2] hover:text-white transition-all text-xs sm:text-sm font-bold cursor-pointer border border-[rgba(255,240,238,0.12)] active:scale-95 group"
+              aria-label="Back"
+              title="Back"
+              className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[rgba(255,255,255,0.06)] hover:bg-[#e4342f] text-[#f6f3f2] hover:text-white transition-all cursor-pointer border border-[rgba(255,240,238,0.12)] active:scale-95 group shadow-sm"
             >
-              <ArrowLeft className="w-4 h-4 text-[#ff8175] group-hover:text-white transition-colors" />
-              <span>{language === 'NE' ? 'पछाडि' : 'Back'}</span>
+              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
             </button>
           ) : (
             <div className="flex items-center gap-2.5">
@@ -543,10 +543,11 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
             </p>
             <button
               onClick={handleBackToFeed}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#e4342f] text-white text-xs font-bold hover:bg-[#c92823] transition-colors cursor-pointer active:scale-95"
+              aria-label="Back"
+              title="Back"
+              className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-[#e4342f] hover:bg-[#c92823] text-white transition-colors cursor-pointer active:scale-95 shadow-md mx-auto"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>{language === 'NE' ? 'पछाडि फर्कनुहोस्' : 'Go Back'}</span>
+              <ArrowLeft className="w-5 h-5" />
             </button>
           </div>
         ) : currentActivePost ? (
@@ -713,10 +714,11 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
             <div className="pt-2 text-center">
               <button
                 onClick={handleBackToFeed}
-                className="inline-flex items-center gap-2 text-xs font-bold text-[#ff8175] hover:text-white transition-colors cursor-pointer py-1.5 px-3 rounded-full hover:bg-white/5 active:scale-95 group"
+                aria-label="Back"
+                title="Back"
+                className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-[rgba(255,255,255,0.06)] hover:bg-[#e4342f] text-[#ff8175] hover:text-white border border-[rgba(255,240,238,0.12)] transition-all cursor-pointer active:scale-95 group shadow-sm mx-auto"
               >
-                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-                <span>{language === 'NE' ? 'पछाडि फर्कनुहोस्' : 'Back'}</span>
+                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
               </button>
             </div>
           </article>
@@ -745,7 +747,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                       <span>Publisher & Founder, AI Clipzone</span>
                       <span>·</span>
                       <span className="text-emerald-400 flex items-center gap-0.5">
-                        <Globe className="w-3 h-3" /> Public & Google Searchable
+                        <Globe className="w-3 h-3" /> Public
                       </span>
                     </div>
                   </div>
@@ -759,8 +761,8 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                     onChange={(e) => setPostTitle(e.target.value)}
                     placeholder={
                       language === 'NE'
-                        ? 'शीर्षक वा मुख्य समाचार (वैकल्पिक)...'
-                        : 'Article Headline / News Title (Optional)...'
+                        ? 'शीर्षक वा मुख्य विषय (वैकल्पिक)...'
+                        : 'Article Headline / Post Title (Optional)...'
                     }
                     className="w-full bg-[#12100f] border border-[rgba(255,240,238,0.1)] focus:border-[#e4342f] rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[#f6f3f2] placeholder-[#f6f3f2]/40 outline-none transition-colors"
                   />
@@ -771,8 +773,8 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                     onChange={(e) => setPostContent(e.target.value)}
                     placeholder={
                       language === 'NE'
-                        ? 'समाचार, लेख वा विस्तृत जानकारी लेख्नुहोस् (यो गुगल सर्चमा पनि देखिनेछ)...'
-                        : 'Write the complete article, announcement, or news information (Google search indexed)...'
+                        ? 'समाचार, लेख वा विस्तृत जानकारी लेख्नुहोस्...'
+                        : 'Write the complete article, announcement, or update information...'
                     }
                     rows={4}
                     className="w-full bg-[#12100f] border border-[rgba(255,240,238,0.1)] focus:border-[#e4342f] rounded-xl p-3.5 text-sm text-[#f6f3f2] placeholder-[#f6f3f2]/40 resize-none outline-none transition-colors"
@@ -890,8 +892,8 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                   </h3>
                   <p className="text-xs text-[#f6f3f2]/60 max-w-sm mx-auto mt-1">
                     {language === 'NE'
-                      ? 'राजाबाबु मेहताले यहाँ पहिलो समाचार वा लेख प्रकाशित गरेपछि प्रत्यक्ष रूपमा सेयर गर्न सकिनेछ।'
-                      : 'Articles published here will generate direct shareable links and Google search metadata.'}
+                      ? 'राजाबाबु मेहताले यहाँ पहिलो सामग्री वा अपडेट प्रकाशित गरेपछि प्रत्यक्ष रूपमा सेयर गर्न सकिनेछ।'
+                      : 'Posts published here can be directly shared across WhatsApp, Facebook, and social platforms.'}
                   </p>
                 </div>
               </div>

@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +27,7 @@ try {
 interface CachedPost {
   title: string;
   summary: string;
+  fullContent?: string;
   imageBuffer?: Buffer;
   imageMime?: string;
   imageUrl?: string;
@@ -73,6 +74,7 @@ async function getPostData(postId: string): Promise<CachedPost | null> {
     const item: CachedPost = {
       title: headline,
       summary,
+      fullContent: data.content || '',
       imageBuffer,
       imageMime,
       imageUrl,
@@ -231,6 +233,11 @@ function injectPostOpenGraph(
     `<script type="application/ld+json">${newsArticleJsonLd}</script>`
   );
 
+  // 8. Pre-render article body inside <noscript> inside <div id="root"> for 100% genuine Google search indexing
+  const rawBodyText = escapeHtml(post.fullContent || post.summary);
+  const ssrCrawlerSnippet = `<noscript><article style="padding:24px;max-width:800px;margin:auto;"><h1>${safeTitle}</h1><p><strong>Published by Rajababu Mehta</strong></p><div>${rawBodyText.replace(/\n/g, '<br/>')}</div></article></noscript>`;
+  output = output.replace('<div id="root"></div>', `<div id="root">${ssrCrawlerSnippet}</div>`);
+
   return output;
 }
 
@@ -238,6 +245,64 @@ async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
   const isProduction = process.env.NODE_ENV === 'production';
+
+  // -------------------------------------------------------------
+  // Dynamic XML Sitemap for Real Google Search Engine Indexing
+  // -------------------------------------------------------------
+  app.get('/sitemap.xml', async (req, res) => {
+    try {
+      const protocol = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'https';
+      const host = req.headers['x-forwarded-host'] || req.headers.host || 'rajababumehta.com.np';
+      const baseUrl = `${protocol}://${host}`;
+
+      let postEntries = '';
+      if (firestoreDb) {
+        try {
+          const postsCollection = collection(firestoreDb, 'posts');
+          const snap = await getDocs(postsCollection);
+          snap.forEach((docSnap) => {
+            const data = docSnap.data();
+            const dateStr = data.createdAt
+              ? new Date(data.createdAt).toISOString()
+              : new Date().toISOString();
+            postEntries += `
+  <url>
+    <loc>${baseUrl}/posts/${docSnap.id}</loc>
+    <lastmod>${dateStr}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+          });
+        } catch (dbErr) {
+          console.warn('Sitemap firestore query note:', dbErr);
+        }
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/posts</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>${postEntries}
+</urlset>`;
+
+      res.setHeader('Content-Type', 'application/xml');
+      res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+      return res.status(200).send(sitemapXml);
+    } catch (err) {
+      console.warn('Sitemap generation note:', err);
+      res.status(500).send('Error generating sitemap');
+    }
+  });
 
   // -------------------------------------------------------------
   // 1. Direct Image Endpoint for Facebook & WhatsApp Crawlers (.jpg)
