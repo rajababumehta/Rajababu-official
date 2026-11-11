@@ -146,7 +146,12 @@ export default async function handler(req: any, res: any) {
       "dateModified": post.createdAt,
       "author": {
         "@type": "Person",
-        "name": "Rajababu Mehta"
+        "name": "Rajababu Mehta",
+        "url": "https://www.facebook.com/share/1JMEFsQwNA/",
+        "sameAs": [
+          "https://www.facebook.com/share/1JMEFsQwNA/",
+          "https://aiclipzone.vercel.app/"
+        ]
       },
       "publisher": {
         "@type": "NewsMediaOrganization",
@@ -185,7 +190,8 @@ export default async function handler(req: any, res: any) {
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="${safeTitle}" />
     <meta property="article:published_time" content="${post.createdAt}" />
-    <meta property="article:author" content="Rajababu Mehta" />
+    <meta property="article:author" content="https://www.facebook.com/share/1JMEFsQwNA/" />
+    <meta property="article:publisher" content="https://www.facebook.com/share/1JMEFsQwNA/" />
     <meta property="article:section" content="${escapeHtml(post.category || 'News')}" />
 
     <!-- Twitter Card (summary_large_image) -->

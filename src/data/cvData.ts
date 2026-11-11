@@ -87,7 +87,7 @@ export const RAJABABU_CV_DATA: CvData = {
     {
       platform: 'Facebook',
       handle: 'Rajababu Mehta',
-      url: 'https://www.facebook.com/share/19PZ6HWQdk/',
+      url: 'https://www.facebook.com/share/1JMEFsQwNA/',
     },
     {
       platform: 'Instagram',

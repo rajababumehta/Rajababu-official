@@ -109,7 +109,7 @@ export default function App() {
         phone: '9816689232',
         locationEn: 'Birgunj, Nepal',
         locationNe: 'वीरगञ्ज, नेपाल',
-        facebookUrl: 'https://www.facebook.com/share/19PZ6HWQdk/',
+        facebookUrl: 'https://www.facebook.com/share/1JMEFsQwNA/',
         instagramUrl: 'https://www.instagram.com/mr.rajababumehta',
         whatsappNumber: '9816689232',
       },

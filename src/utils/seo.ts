@@ -82,7 +82,8 @@ export const updatePostSeo = (post: FeedPost | null) => {
   if (post.updatedAt) {
     setMetaTag('property', 'article:modified_time', post.updatedAt);
   }
-  setMetaTag('property', 'article:author', 'Rajababu Mehta');
+  setMetaTag('property', 'article:author', 'https://www.facebook.com/share/1JMEFsQwNA/');
+  setMetaTag('property', 'article:publisher', 'https://www.facebook.com/share/1JMEFsQwNA/');
   setMetaTag('property', 'article:section', post.category || 'Technology');
 
   // 4. Twitter / X Card Metadata
@@ -123,7 +124,7 @@ export const updatePostSeo = (post: FeedPost | null) => {
       'sameAs': [
         'https://aiclipzone.vercel.app/',
         'https://www.linkedin.com/in/rajababumehta',
-        'https://www.facebook.com/share/19PZ6HWQdk/',
+        'https://www.facebook.com/share/1JMEFsQwNA/',
       ],
     },
     'publisher': {

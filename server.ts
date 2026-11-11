@@ -141,7 +141,6 @@ function injectPostOpenGraph(
   output = output.replace(
     /<meta\s+property="og:type"\s+content=".*?"\s*\/?>/i,
     `<meta property="og:type" content="article" />
-    <meta property="article:author" content="Rajababu Mehta" />
     <meta property="article:section" content="${escapeHtml(post.category || 'News')}" />`
   );
   output = output.replace(
@@ -209,7 +208,12 @@ function injectPostOpenGraph(
     "dateModified": new Date(post.fetchedAt).toISOString(),
     "author": {
       "@type": "Person",
-      "name": "Rajababu Mehta"
+      "name": "Rajababu Mehta",
+      "url": "https://www.facebook.com/share/1JMEFsQwNA/",
+      "sameAs": [
+        "https://www.facebook.com/share/1JMEFsQwNA/",
+        "https://aiclipzone.vercel.app/"
+      ]
     },
     "publisher": {
       "@type": "NewsMediaOrganization",
