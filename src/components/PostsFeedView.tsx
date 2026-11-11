@@ -121,16 +121,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     } catch {}
     return [];
   });
-  const [loadingPosts, setLoadingPosts] = useState(() => {
-    try {
-      const raw = localStorage.getItem(LOCAL_POSTS_CACHE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return false;
-      }
-    } catch {}
-    return true;
-  });
+  const [loadingPosts, setLoadingPosts] = useState(false);
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
 
   // Active Selected Post for Dedicated News View
@@ -494,10 +485,11 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
           {currentActivePost ? (
             <button
               onClick={handleBackToFeed}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.06)] hover:bg-[#e4342f] text-[#f6f3f2] hover:text-white transition-all text-xs sm:text-sm font-bold cursor-pointer border border-[rgba(255,240,238,0.12)] active:scale-95"
+              title={language === 'NE' ? 'पछाडि' : 'Back'}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgba(255,255,255,0.06)] hover:bg-[#e4342f] text-[#f6f3f2] hover:text-white transition-all text-xs sm:text-sm font-bold cursor-pointer border border-[rgba(255,240,238,0.12)] active:scale-95 group"
             >
-              <ArrowLeft className="w-4 h-4 text-[#ff8175] group-hover:text-white" />
-              <span>{language === 'NE' ? 'सबै समाचार' : 'All Articles'}</span>
+              <ArrowLeft className="w-4 h-4 text-[#ff8175] group-hover:text-white transition-colors" />
+              <span>{language === 'NE' ? 'पछाडि' : 'Back'}</span>
             </button>
           ) : (
             <div className="flex items-center gap-2.5">
@@ -544,37 +536,17 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
         {/* ------------------------------------------------------------- */}
         {/* SINGLE ARTICLE VIEW (News Portal Reader Mode with Direct Link) */}
         {/* ------------------------------------------------------------- */}
-        {activePostId && !currentActivePost && loadingPosts ? (
-          <article className="bg-[#161413] border border-[rgba(255,240,238,0.1)] rounded-2xl sm:rounded-3xl p-4 sm:p-7 md:p-8 space-y-5 sm:space-y-6 animate-pulse">
-            <div className="flex items-center justify-between pb-3 border-b border-[rgba(255,240,238,0.06)]">
-              <div className="h-4 w-28 bg-white/10 rounded" />
-              <div className="h-4 w-20 bg-white/5 rounded" />
-            </div>
-            <div className="h-7 sm:h-9 w-4/5 bg-white/10 rounded" />
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full bg-white/10" />
-              <div className="space-y-1.5 flex-1">
-                <div className="h-4 w-32 bg-white/10 rounded" />
-                <div className="h-3 w-24 bg-white/5 rounded" />
-              </div>
-            </div>
-            <div className="aspect-[16/10] sm:aspect-video w-full bg-white/5 rounded-xl sm:rounded-2xl" />
-            <div className="space-y-2.5 pt-2">
-              <div className="h-4 w-full bg-white/5 rounded" />
-              <div className="h-4 w-5/6 bg-white/5 rounded" />
-              <div className="h-4 w-3/4 bg-white/5 rounded" />
-            </div>
-          </article>
-        ) : activePostId && !currentActivePost && !loadingPosts ? (
+        {activePostId && !currentActivePost ? (
           <div className="bg-[#161413] border border-[rgba(255,240,238,0.1)] rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center space-y-4">
             <p className="text-stone-300 text-sm">
-              {language === 'NE' ? 'यो पोस्ट वा समाचार फेला परेन।' : 'This post or article could not be found.'}
+              {language === 'NE' ? 'यो पोस्ट वा सामग्री फेला परेन।' : 'This post or article could not be found.'}
             </p>
             <button
               onClick={handleBackToFeed}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#e4342f] text-white text-xs font-bold hover:bg-[#c92823] transition-colors cursor-pointer active:scale-95"
             >
-              <span>← {language === 'NE' ? 'सबै समाचार र पोस्टहरू हेर्नुहोस्' : 'Browse All News & Posts'}</span>
+              <ArrowLeft className="w-4 h-4" />
+              <span>{language === 'NE' ? 'पछाडि फर्कनुहोस्' : 'Go Back'}</span>
             </button>
           </div>
         ) : currentActivePost ? (
@@ -587,22 +559,15 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                 </span>
               </div>
 
-              {/* Direct Post URL Indicator */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] sm:text-[11px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                  <Globe className="w-3 h-3" />
-                  Google Indexed
-                </span>
-                {isAdmin && (
-                  <button
-                    onClick={() => handleDeletePost(currentActivePost.id)}
-                    title="Delete article"
-                    className="p-1 rounded text-stone-500 hover:text-rose-400 hover:bg-rose-950/40 cursor-pointer transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+              {isAdmin && (
+                <button
+                  onClick={() => handleDeletePost(currentActivePost.id)}
+                  title="Delete article"
+                  className="p-1 rounded text-stone-500 hover:text-rose-400 hover:bg-rose-950/40 cursor-pointer transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
             </div>
 
             {/* Prominent Editorial Headline */}
@@ -744,13 +709,14 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
               </div>
             </div>
 
-            {/* Back to all posts footer */}
+            {/* Back to feed footer */}
             <div className="pt-2 text-center">
               <button
                 onClick={handleBackToFeed}
-                className="inline-flex items-center gap-2 text-xs font-bold text-[#ff8175] hover:text-white transition-colors cursor-pointer py-1.5 px-3 rounded-full hover:bg-white/5 active:scale-95"
+                className="inline-flex items-center gap-2 text-xs font-bold text-[#ff8175] hover:text-white transition-colors cursor-pointer py-1.5 px-3 rounded-full hover:bg-white/5 active:scale-95 group"
               >
-                <span>← {language === 'NE' ? 'सबै समाचार र पोस्टहरू हेर्नुहोस्' : 'Browse All News & Posts'}</span>
+                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                <span>{language === 'NE' ? 'पछाडि फर्कनुहोस्' : 'Back'}</span>
               </button>
             </div>
           </article>
@@ -912,28 +878,8 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
               </p>
             </div>
 
-            {/* Posts List: Fast Instant Skeleton Preview or Articles */}
-            {loadingPosts && posts.length === 0 ? (
-              <div className="space-y-4">
-                {[1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="bg-[#171514] border border-[rgba(255,240,238,0.06)] rounded-3xl p-5 sm:p-6 space-y-4 animate-pulse"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-full bg-white/10 shrink-0" />
-                      <div className="space-y-1.5 flex-1">
-                        <div className="h-4 w-32 bg-white/10 rounded" />
-                        <div className="h-3 w-24 bg-white/5 rounded" />
-                      </div>
-                    </div>
-                    <div className="h-6 w-3/4 bg-white/10 rounded" />
-                    <div className="h-4 w-5/6 bg-white/5 rounded" />
-                    <div className="h-44 sm:h-56 w-full bg-white/5 rounded-2xl" />
-                  </div>
-                ))}
-              </div>
-            ) : posts.length === 0 ? (
+            {/* Posts List */}
+            {posts.length === 0 ? (
               <div className="bg-[#171514] border border-[rgba(255,240,238,0.08)] rounded-3xl p-10 text-center space-y-4">
                 <div className="w-14 h-14 rounded-full bg-[rgba(228,52,47,0.1)] border border-[rgba(228,52,47,0.2)] flex items-center justify-center mx-auto text-[#ff8175]">
                   <Sparkles className="w-7 h-7" />
