@@ -560,7 +560,12 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   const isAdmin = isUserAdmin(currentUser);
 
   return (
-    <div className="min-h-screen bg-[#0d0b0a] text-[#f6f3f2] font-sans selection:bg-[#e4342f] selection:text-white pb-24">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      className="min-h-screen bg-[#0d0b0a] text-[#f6f3f2] font-sans selection:bg-[#e4342f] selection:text-white pb-24"
+    >
       {/* Top Sticky Header */}
       <header className="sticky top-0 z-40 bg-[#12100f]/95 backdrop-blur-md border-b border-[rgba(255,240,238,0.08)]">
         <div className="max-w-3xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-3">
@@ -620,7 +625,12 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
       </header>
 
       {/* Main Container */}
-      <main className="max-w-3xl mx-auto px-3 sm:px-4 pt-4 sm:pt-6 space-y-4 sm:space-y-6">
+      <motion.main
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-3xl mx-auto px-3 sm:px-4 pt-4 sm:pt-6 space-y-4 sm:space-y-6"
+      >
 
         {/* ------------------------------------------------------------- */}
         {/* SINGLE ARTICLE VIEW (News Portal Reader Mode with Direct Link) */}
@@ -1013,7 +1023,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
             ) : null}
           </>
         )}
-      </main>
+      </motion.main>
 
       {/* Lightbox Modal */}
       <AnimatePresence>
@@ -1199,9 +1209,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-
-
-    </div>
+    </motion.div>
   );
 };
 
