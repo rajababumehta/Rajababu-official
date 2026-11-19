@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +24,12 @@ try {
   console.warn('Server Firestore initialization note:', err);
 }
 
+interface CachedImageItem {
+  imageBuffer?: Buffer;
+  imageMime?: string;
+  imageUrl?: string;
+}
+
 interface CachedPost {
   title: string;
   summary: string;
@@ -31,12 +37,67 @@ interface CachedPost {
   imageBuffer?: Buffer;
   imageMime?: string;
   imageUrl?: string;
+  imagesList?: CachedImageItem[];
   category?: string;
   fetchedAt: number;
 }
 
-// In-memory cache to keep response times under 10ms for crawlers
+interface LightweightFeedPost {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorEmail: string;
+  authorPhoto: string;
+  content: string;
+  contentNe: string;
+  images: string[];
+  category: string;
+  likesCount: number;
+  commentsCount: number;
+  createdAt: string;
+  updatedAt?: string;
+  isPublished: boolean;
+}
+
+// In-memory cache to keep response times under 10ms for crawlers & visitors
 const postCache = new Map<string, CachedPost>();
+let feedCache: { posts: LightweightFeedPost[]; fetchedAt: number } | null = null;
+let feedFetchPromise: Promise<LightweightFeedPost[]> | null = null;
+
+function buildCachedPostFromData(postId: string, data: any): CachedPost {
+  const lines = (data.content || '').split('\n').filter((l: string) => l.trim().length > 0);
+  const rawHeadline = lines[0] ? lines[0].replace(/^#+\s*/, '').trim() : '';
+  const headline = rawHeadline.length > 0 ? rawHeadline.slice(0, 100) : 'Official Update by Rajababu Mehta';
+  const summary = (data.content || '').replace(/\s+/g, ' ').trim().slice(0, 200) || headline;
+
+  const imagesList: CachedImageItem[] = [];
+  if (Array.isArray(data.images)) {
+    for (const rawImg of data.images) {
+      if (typeof rawImg !== 'string') continue;
+      const match = rawImg.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);
+      if (match) {
+        imagesList.push({
+          imageMime: match[1],
+          imageBuffer: Buffer.from(match[2], 'base64'),
+        });
+      } else if (rawImg.startsWith('http://') || rawImg.startsWith('https://')) {
+        imagesList.push({ imageUrl: rawImg });
+      }
+    }
+  }
+
+  return {
+    title: headline,
+    summary,
+    fullContent: data.content || '',
+    imageBuffer: imagesList[0]?.imageBuffer,
+    imageMime: imagesList[0]?.imageMime,
+    imageUrl: imagesList[0]?.imageUrl,
+    imagesList,
+    category: data.category || 'News',
+    fetchedAt: Date.now(),
+  };
+}
 
 async function getPostData(postId: string): Promise<CachedPost | null> {
   if (!postId || !firestoreDb) return null;
@@ -50,43 +111,102 @@ async function getPostData(postId: string): Promise<CachedPost | null> {
     const snap = await getDoc(doc(firestoreDb, 'posts', postId));
     if (!snap.exists()) return null;
 
-    const data = snap.data();
-    const lines = (data.content || '').split('\n').filter((l: string) => l.trim().length > 0);
-    const rawHeadline = lines[0] ? lines[0].replace(/^#+\s*/, '').trim() : '';
-    const headline = rawHeadline.length > 0 ? rawHeadline.slice(0, 100) : 'Official Update by Rajababu Mehta';
-    const summary = (data.content || '').replace(/\s+/g, ' ').trim().slice(0, 200) || headline;
-
-    let imageBuffer: Buffer | undefined;
-    let imageMime: string | undefined;
-    let imageUrl: string | undefined;
-
-    if (data.images && data.images.length > 0 && typeof data.images[0] === 'string') {
-      const first = data.images[0];
-      const match = first.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);
-      if (match) {
-        imageMime = match[1];
-        imageBuffer = Buffer.from(match[2], 'base64');
-      } else if (first.startsWith('http://') || first.startsWith('https://')) {
-        imageUrl = first;
-      }
-    }
-
-    const item: CachedPost = {
-      title: headline,
-      summary,
-      fullContent: data.content || '',
-      imageBuffer,
-      imageMime,
-      imageUrl,
-      category: data.category || 'News',
-      fetchedAt: Date.now(),
-    };
+    const item = buildCachedPostFromData(postId, snap.data());
     postCache.set(postId, item);
     return item;
   } catch (err) {
     console.warn(`Error fetching post ${postId} on server:`, err);
     return null;
   }
+}
+
+async function getCachedFeedPosts(forceRefresh = false): Promise<LightweightFeedPost[]> {
+  if (!firestoreDb) return [];
+
+  if (!forceRefresh && feedCache && Date.now() - feedCache.fetchedAt < 30000) {
+    return feedCache.posts;
+  }
+
+  if (feedFetchPromise && !forceRefresh) {
+    return feedFetchPromise;
+  }
+
+  feedFetchPromise = (async () => {
+    try {
+      const q = query(collection(firestoreDb, 'posts'), orderBy('createdAt', 'desc'));
+      const snap = await getDocs(q);
+      const lightweightPosts: LightweightFeedPost[] = [];
+
+      snap.forEach((docSnap) => {
+        const data = docSnap.data();
+        const postId = docSnap.id;
+
+        // Warm individual post cache too
+        const cachedItem = buildCachedPostFromData(postId, data);
+        postCache.set(postId, cachedItem);
+
+        // Replace heavy base64 strings with fast HTTP image URLs
+        const lightImages: string[] = [];
+        if (Array.isArray(data.images)) {
+          data.images.forEach((rawImg: any, idx: number) => {
+            if (typeof rawImg !== 'string') return;
+            if (rawImg.startsWith('data:image/')) {
+              lightImages.push(idx === 0 ? `/api/post-image/${postId}.jpg` : `/api/post-image/${postId}.jpg?idx=${idx}`);
+            } else if (rawImg.startsWith('http://') || rawImg.startsWith('https://') || rawImg.startsWith('/')) {
+              lightImages.push(rawImg);
+            }
+          });
+        }
+
+        let createdAtStr = new Date().toISOString();
+        if (data.createdAt?.toDate) {
+          createdAtStr = data.createdAt.toDate().toISOString();
+        } else if (typeof data.createdAt === 'string') {
+          createdAtStr = data.createdAt;
+        }
+
+        lightweightPosts.push({
+          id: postId,
+          authorId: data.authorId || '',
+          authorName: data.authorName || 'Rajababu Mehta',
+          authorEmail: data.authorEmail || '',
+          authorPhoto: '/favicon-96x96.png',
+          content: data.content || '',
+          contentNe: data.contentNe || '',
+          images: lightImages,
+          category: data.category || 'Announcement',
+          likesCount: typeof data.likesCount === 'number' ? data.likesCount : 0,
+          commentsCount: typeof data.commentsCount === 'number' ? data.commentsCount : 0,
+          createdAt: createdAtStr,
+          updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt,
+          isPublished: data.isPublished ?? true,
+        });
+      });
+
+      feedCache = { posts: lightweightPosts, fetchedAt: Date.now() };
+      return lightweightPosts;
+    } catch (err) {
+      console.warn('Feed cache refresh note:', err);
+      return feedCache?.posts || [];
+    } finally {
+      feedFetchPromise = null;
+    }
+  })();
+
+  return feedFetchPromise;
+}
+
+function injectInitialPostsScript(html: string, posts: LightweightFeedPost[]): string {
+  const safeJson = JSON.stringify(posts)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+  return html.replace(
+    '</head>',
+    `<script>window.__INITIAL_POSTS__=${safeJson};</script></head>`
+  );
 }
 
 function escapeHtml(str: string): string {
@@ -305,26 +425,29 @@ async function startServer() {
   });
 
   // -------------------------------------------------------------
-  // 1. Direct Image Endpoint for Facebook & WhatsApp Crawlers (.jpg)
+  // 1. Direct Image & Instant Feed API Endpoints
   // -------------------------------------------------------------
   const handleImageRequest = async (req: express.Request, res: express.Response) => {
     const rawParam = req.params.postId;
     const rawId = Array.isArray(rawParam) ? rawParam[0] : (rawParam || '');
     const postId = String(rawId).replace(/\.(?:jpg|jpeg|png|webp)$/i, '');
+    const idx = Math.max(0, parseInt(String(req.query.idx || '0'), 10) || 0);
     const post = await getPostData(postId);
 
-    if (post?.imageBuffer && post.imageMime) {
-      res.setHeader('Content-Type', post.imageMime);
-      res.setHeader('Content-Length', post.imageBuffer.length);
+    const imgEntry = post?.imagesList?.[idx] || (idx === 0 ? post : undefined);
+
+    if (imgEntry?.imageBuffer && imgEntry.imageMime) {
+      res.setHeader('Content-Type', imgEntry.imageMime);
+      res.setHeader('Content-Length', imgEntry.imageBuffer.length);
       res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=604800');
-      return res.send(post.imageBuffer);
+      return res.send(imgEntry.imageBuffer);
     }
 
-    if (post?.imageUrl) {
-      return res.redirect(302, post.imageUrl);
+    if (imgEntry?.imageUrl) {
+      return res.redirect(302, imgEntry.imageUrl);
     }
 
-    // Fallback: serve high-res brand portrait
+    // Fallback: serve crisp brand avatar
     const fallbackPath = path.resolve(__dirname, 'public', 'brand-avatar.png');
     if (fs.existsSync(fallbackPath)) {
       res.setHeader('Content-Type', 'image/png');
@@ -338,8 +461,24 @@ async function startServer() {
   app.get('/api/post-image/:postId', handleImageRequest);
   app.get('/posts/:postId/image.jpg', handleImageRequest);
 
+  app.get('/api/posts', async (_req, res) => {
+    const posts = await getCachedFeedPosts();
+    res.setHeader('Cache-Control', 'public, max-age=10, stale-while-revalidate=60');
+    return res.json({ posts });
+  });
+
+  app.post('/api/posts/invalidate', async (_req, res) => {
+    feedCache = null;
+    postCache.clear();
+    await getCachedFeedPosts(true);
+    return res.json({ ok: true });
+  });
+
+  // Warm feed cache immediately on boot so the very first visitor gets 0ms response
+  getCachedFeedPosts().catch(() => {});
+
   // -------------------------------------------------------------
-  // 2. Open Graph & Social Preview HTML Middleware
+  // 2. Open Graph, Social Preview & Instant Posts Hydration Middleware
   // -------------------------------------------------------------
   let vite: any = null;
   if (!isProduction) {
@@ -349,53 +488,78 @@ async function startServer() {
     });
   }
 
-  // Intercept requests containing ?post=ID or /posts/:id to render exact Open Graph metadata
+  // Intercept HTML page requests to inject Open Graph metadata & initial posts for 0ms load
   app.use(async (req, res, next) => {
-    // Only inspect GET requests that ask for HTML
     if (req.method !== 'GET') return next();
+    if (
+      req.path.startsWith('/api') ||
+      req.path.startsWith('/assets') ||
+      req.path.startsWith('/src') ||
+      req.path.startsWith('/@') ||
+      req.path.startsWith('/node_modules') ||
+      req.path.includes('.')
+    ) {
+      return next();
+    }
+
+    const accept = String(req.headers.accept || '');
+    const isHtmlRequest = accept.includes('text/html') || accept === '*/*' || accept === '';
+    if (!isHtmlRequest) return next();
 
     // Check for post ID in query params (?post=...) or URL path (/posts/...)
     let targetPostId: string | null = null;
     if (typeof req.query.post === 'string' && req.query.post.trim().length > 0) {
       targetPostId = req.query.post.trim();
     } else {
-      const pathMatch = req.path.match(/^\/(?:posts|post|p)\/([a-zA-Z0-9_\-]+)/);
+      const pathMatch = req.path.match(/^\/(?:posts|post|p|news)\/([a-zA-Z0-9_\-]+)/);
       if (pathMatch) {
         targetPostId = pathMatch[1];
       }
     }
 
-    // If no post parameter or looking for static assets, pass to next middleware
-    if (!targetPostId) return next();
-    if (req.path.startsWith('/assets') || req.path.startsWith('/src') || req.path.startsWith('/@') || req.path.includes('.')) {
-      return next();
-    }
-
     try {
-      const post = await getPostData(targetPostId);
-      if (!post) return next();
+      // Wait up to 1500ms if cache is still cold so first visitor never hangs
+      const initialPostsPromise = feedCache
+        ? Promise.resolve(feedCache.posts)
+        : Promise.race([
+            getCachedFeedPosts(),
+            new Promise<LightweightFeedPost[]>((resolve) => setTimeout(() => resolve([]), 1500)),
+          ]);
+
+      const [initialPosts, singlePost] = await Promise.all([
+        initialPostsPromise,
+        targetPostId ? getPostData(targetPostId) : Promise.resolve(null),
+      ]);
 
       const protocol = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'https';
       const host = req.headers['x-forwarded-host'] || req.headers.host;
       const baseUrl = `${protocol}://${host}`;
-      const postUrl = `${baseUrl}/posts/${targetPostId}`;
-      const imageUrl = `${baseUrl}/api/post-image/${targetPostId}.jpg`;
+
+      const templatePath = !isProduction && vite
+        ? path.resolve(__dirname, 'index.html')
+        : path.resolve(__dirname, 'dist', 'index.html');
+
+      if (!fs.existsSync(templatePath)) return next();
+
+      let html = fs.readFileSync(templatePath, 'utf-8');
+
+      if (targetPostId && singlePost) {
+        const postUrl = `${baseUrl}/posts/${targetPostId}`;
+        const imageUrl = `${baseUrl}/api/post-image/${targetPostId}.jpg`;
+        html = injectPostOpenGraph(html, singlePost, postUrl, imageUrl);
+      }
+
+      if (initialPosts.length > 0) {
+        html = injectInitialPostsScript(html, initialPosts);
+      }
 
       if (!isProduction && vite) {
-        const rawTemplate = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');
-        const enriched = injectPostOpenGraph(rawTemplate, post, postUrl, imageUrl);
-        const transformed = await vite.transformIndexHtml(req.originalUrl, enriched);
-        return res.status(200).set({ 'Content-Type': 'text/html' }).end(transformed);
-      } else {
-        const prodIndexPath = path.resolve(__dirname, 'dist', 'index.html');
-        if (fs.existsSync(prodIndexPath)) {
-          const rawTemplate = fs.readFileSync(prodIndexPath, 'utf-8');
-          const enriched = injectPostOpenGraph(rawTemplate, post, postUrl, imageUrl);
-          return res.status(200).set({ 'Content-Type': 'text/html' }).end(enriched);
-        }
+        html = await vite.transformIndexHtml(req.originalUrl, html);
       }
+
+      return res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
     } catch (err) {
-      console.warn('Post OpenGraph generation note:', err);
+      console.warn('HTML hydration note:', err);
     }
 
     next();

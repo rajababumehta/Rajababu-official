@@ -2,6 +2,14 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/posts",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/api/posts/invalidate",
+      "destination": "/api/index"
+    },
+    {
       "source": "/api/post-image/(.*)",
       "destination": "/api/index"
     },

@@ -18,7 +18,7 @@ import { AdminModal } from './components/AdminModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { PostsFeedView } from './components/PostsFeedView';
 
-import { Language, Moment, Comment, SystemSettings, ClipzoneImage } from './types';
+import { Language, Moment, Comment, SystemSettings, ClipzoneImage, FeedPost } from './types';
 import {
   STORAGE_KEYS,
   DEFAULT_SYSTEM_SETTINGS,
@@ -28,7 +28,31 @@ import {
 import {
   subscribeToClipzoneImages,
   subscribeToSystemSettings,
+  subscribeToFeedPosts,
 } from './services/firebase';
+
+declare global {
+  interface Window {
+    __INITIAL_POSTS__?: FeedPost[];
+  }
+}
+
+const LOCAL_POSTS_CACHE_KEY = 'rajababu_news_posts_cache_v4';
+
+const toLightweightCachePosts = (posts: FeedPost[]): FeedPost[] =>
+  posts.map((p) => ({
+    ...p,
+    authorPhoto: '/favicon-96x96.png',
+    images: Array.isArray(p.images)
+      ? p.images.map((img, idx) =>
+          typeof img === 'string' && img.startsWith('data:image/')
+            ? idx === 0
+              ? `/api/post-image/${p.id}.jpg`
+              : `/api/post-image/${p.id}.jpg?idx=${idx}`
+            : img
+        )
+      : [],
+  }));
 
 const FIXED_HERO_IMAGE = '/hero-portrait.png';
 
@@ -202,6 +226,34 @@ export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const handleOpenAdmin = () => setIsAdminOpen(true);
   const handleCloseAdmin = () => setIsAdminOpen(false);
+
+  // 7.5 Prefetched News & Official Posts (0ms instant load for Posts section)
+  const [prefetchedPosts, setPrefetchedPosts] = useState<FeedPost[]>(() => {
+    if (typeof window !== 'undefined' && Array.isArray(window.__INITIAL_POSTS__) && window.__INITIAL_POSTS__.length > 0) {
+      return window.__INITIAL_POSTS__;
+    }
+    try {
+      const raw = localStorage.getItem(LOCAL_POSTS_CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [hasResolvedPosts, setHasResolvedPosts] = useState<boolean>(() => {
+    if (typeof window !== 'undefined' && Array.isArray(window.__INITIAL_POSTS__) && window.__INITIAL_POSTS__.length > 0) {
+      return true;
+    }
+    try {
+      const raw = localStorage.getItem(LOCAL_POSTS_CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return true;
+      }
+    } catch {}
+    return false;
+  });
 
   // 8. Posts Feed View State (Directly open post section & details on shared links)
   const [isPostsViewOpen, setIsPostsViewOpen] = useState(() => {
@@ -405,6 +457,46 @@ export default function App() {
     return () => unsubscribeImages();
   }, []);
 
+  // Prefetch Posts immediately on initial load so opening Posts tab is instant for first-time users
+  useEffect(() => {
+    let isMounted = true;
+    let snapshotResolved = false;
+
+    fetch('/api/posts')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!isMounted || snapshotResolved) return;
+        if (data && Array.isArray(data.posts)) {
+          setPrefetchedPosts(data.posts);
+          setHasResolvedPosts(true);
+          try {
+            localStorage.setItem(LOCAL_POSTS_CACHE_KEY, JSON.stringify(toLightweightCachePosts(data.posts)));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+
+    const unsubPosts = subscribeToFeedPosts(
+      (loadedPosts) => {
+        snapshotResolved = true;
+        if (!isMounted) return;
+        setPrefetchedPosts(loadedPosts);
+        setHasResolvedPosts(true);
+        try {
+          localStorage.setItem(LOCAL_POSTS_CACHE_KEY, JSON.stringify(toLightweightCachePosts(loadedPosts)));
+        } catch {}
+      },
+      () => {
+        if (isMounted) setHasResolvedPosts(true);
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      unsubPosts();
+    };
+  }, []);
+
   // Handlers
   const handleToggleLanguage = () => {
     const nextLang = language === 'EN' ? 'NE' : 'EN';
@@ -514,6 +606,8 @@ export default function App() {
           onBackToHome={handleClosePosts}
           onShowToast={(msg, type) => showToast(msg, type === 'error' ? 'error' : 'success')}
           initialPostId={initialPostId}
+          initialPosts={prefetchedPosts}
+          hasResolvedPosts={hasResolvedPosts}
         />
       ) : (
         <>

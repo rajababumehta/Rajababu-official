@@ -107,9 +107,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden flex-shrink-0 relative shadow-[0_4px_18px_-4px_rgba(228,52,47,0.85)] border border-[#e4342f]/40 transition-transform duration-300 group-hover:scale-105">
               <img
-                src="/brand-avatar.png"
+                src="/favicon-96x96.png"
                 alt={profile.name || 'Rajababu Mehta'}
-                className="w-full h-full object-cover object-center"
+                loading="eager"
+                decoding="sync"
+                fetchPriority="high"
+                className="w-full h-full object-cover object-top"
               />
             </span>
             <span className="text-base sm:text-[18px] font-extrabold tracking-tight text-[#f6f3f2] flex items-center gap-1">
@@ -203,9 +206,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <div className="flex items-center gap-3">
                     <span className="w-10 h-10 rounded-full overflow-hidden border border-[#e4342f]/50 shadow-[0_0_12px_rgba(228,52,47,0.4)]">
                       <img
-                        src="/brand-avatar.png"
+                        src="/favicon-96x96.png"
                         alt={profile.name || 'Rajababu Mehta'}
-                        className="w-full h-full object-cover"
+                        loading="eager"
+                        decoding="sync"
+                        className="w-full h-full object-cover object-top"
                       />
                     </span>
                     <div>

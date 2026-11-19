@@ -13,9 +13,69 @@ interface PostData {
 }
 
 const memoryCache = new Map<string, { data: PostData; time: number }>();
+let feedMemoryCache: { posts: any[]; time: number } | null = null;
 
-async function fetchPostFromFirestore(postId: string): Promise<PostData | null> {
-  const cached = memoryCache.get(postId);
+async function fetchAllPostsFromFirestore(): Promise<any[]> {
+  if (feedMemoryCache && Date.now() - feedMemoryCache.time < 15000) {
+    return feedMemoryCache.posts;
+  }
+
+  const url = `https://firestore.googleapis.com/v1/projects/gen-lang-client-0360487518/databases/ai-studio-rajababumehtadig-e31d8ee4-7431-4f52-a943-99ab02ac110a/documents/posts?pageSize=50`;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!res.ok) return feedMemoryCache?.posts || [];
+
+    const json: any = await res.json();
+    const docs = Array.isArray(json.documents) ? json.documents : [];
+    const posts = docs.map((docItem: any) => {
+      const nameParts = String(docItem.name || '').split('/');
+      const postId = nameParts[nameParts.length - 1] || '';
+      const fields = docItem.fields || {};
+      const imgArr = fields.images?.arrayValue?.values || [];
+      const lightImages: string[] = [];
+      imgArr.forEach((entry: any, idx: number) => {
+        const val = entry?.stringValue;
+        if (!val) return;
+        if (val.startsWith('data:image/')) {
+          lightImages.push(idx === 0 ? `/api/post-image/${postId}.jpg` : `/api/post-image/${postId}.jpg?idx=${idx}`);
+        } else {
+          lightImages.push(val);
+        }
+      });
+
+      return {
+        id: postId,
+        authorId: fields.authorId?.stringValue || '',
+        authorName: fields.authorName?.stringValue || 'Rajababu Mehta',
+        authorEmail: fields.authorEmail?.stringValue || '',
+        authorPhoto: '/favicon-96x96.png',
+        content: fields.content?.stringValue || '',
+        contentNe: fields.contentNe?.stringValue || '',
+        images: lightImages,
+        category: fields.category?.stringValue || 'Announcement',
+        likesCount: Number(fields.likesCount?.integerValue || fields.likesCount?.doubleValue || 0),
+        commentsCount: Number(fields.commentsCount?.integerValue || fields.commentsCount?.doubleValue || 0),
+        createdAt: fields.createdAt?.timestampValue || fields.createdAt?.stringValue || new Date().toISOString(),
+        updatedAt: fields.updatedAt?.timestampValue || fields.updatedAt?.stringValue,
+        isPublished: fields.isPublished?.booleanValue ?? true,
+      };
+    });
+
+    posts.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    feedMemoryCache = { posts, time: Date.now() };
+    return posts;
+  } catch (err) {
+    console.error('Error listing posts:', err);
+    return feedMemoryCache?.posts || [];
+  }
+}
+
+async function fetchPostFromFirestore(postId: string, idx = 0): Promise<PostData | null> {
+  const cacheKey = `${postId}:${idx}`;
+  const cached = memoryCache.get(cacheKey);
   if (cached && Date.now() - cached.time < 60000) {
     return cached.data;
   }
@@ -46,14 +106,14 @@ async function fetchPostFromFirestore(postId: string): Promise<PostData | null> 
     let imageUrl: string | undefined;
 
     const imgArr = fields.images?.arrayValue?.values;
-    if (imgArr && imgArr.length > 0 && imgArr[0].stringValue) {
-      const firstImg = imgArr[0].stringValue;
-      const match = firstImg.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);
+    if (imgArr && imgArr.length > idx && imgArr[idx]?.stringValue) {
+      const targetImg = imgArr[idx].stringValue;
+      const match = targetImg.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);
       if (match) {
         imageMime = match[1];
         imageBuffer = Buffer.from(match[2], 'base64');
-      } else if (firstImg.startsWith('http://') || firstImg.startsWith('https://')) {
-        imageUrl = firstImg;
+      } else if (targetImg.startsWith('http://') || targetImg.startsWith('https://')) {
+        imageUrl = targetImg;
       }
     }
 
@@ -68,7 +128,7 @@ async function fetchPostFromFirestore(postId: string): Promise<PostData | null> 
       createdAt,
     };
 
-    memoryCache.set(postId, { data: post, time: Date.now() });
+    memoryCache.set(cacheKey, { data: post, time: Date.now() });
     return post;
   } catch (err) {
     console.error(`Error fetching post ${cleanId}:`, err);
@@ -90,12 +150,31 @@ export default async function handler(req: any, res: any) {
   const protocol = 'https';
   const baseUrl = `${protocol}://${host}`;
 
+  // 0. Fast Lightweight Posts Feed JSON (/api/posts)
+  if (reqUrl.startsWith('/api/posts')) {
+    if (reqUrl.includes('/invalidate')) {
+      feedMemoryCache = null;
+      memoryCache.clear();
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({ ok: true }));
+    }
+    const posts = await fetchAllPostsFromFirestore();
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'public, max-age=10, stale-while-revalidate=60');
+    return res.end(JSON.stringify({ posts }));
+  }
+
   // 1. Direct Image Endpoint for WhatsApp and Facebook (.jpg)
   const imgMatch = reqUrl.match(/(?:\/api\/post-image\/|\/posts\/)([a-zA-Z0-9_\-]+)(?:\.jpg|\/image\.jpg|$)/);
   if (reqUrl.includes('/api/post-image/') || reqUrl.includes('/image.jpg')) {
     const rawId = imgMatch ? imgMatch[1] : '';
     const postId = rawId.replace(/\.(?:jpg|jpeg|png|webp)$/i, '');
-    const post = await fetchPostFromFirestore(postId);
+    let idx = 0;
+    try {
+      const parsed = new URL(reqUrl, baseUrl);
+      idx = Math.max(0, parseInt(parsed.searchParams.get('idx') || '0', 10) || 0);
+    } catch {}
+    const post = await fetchPostFromFirestore(postId, idx);
 
     if (post?.imageBuffer && post.imageMime) {
       res.setHeader('Content-Type', post.imageMime);
@@ -154,8 +233,8 @@ export default async function handler(req: any, res: any) {
         ]
       },
       "publisher": {
-        "@type": "NewsMediaOrganization",
-        "name": "Rajababu Mehta News",
+        "@type": "Person",
+        "name": "Rajababu Mehta",
         "logo": {
           "@type": "ImageObject",
           "url": `${baseUrl}/brand-avatar.png`
@@ -169,7 +248,7 @@ export default async function handler(req: any, res: any) {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${safeTitle} | Rajababu Mehta News</title>
+    <title>${safeTitle} | Rajababu Mehta</title>
     <link rel="canonical" href="${postUrl}" />
     <link rel="icon" type="image/png" href="/brand-avatar.png" />
     <meta name="description" content="${safeDesc}" />
@@ -178,7 +257,7 @@ export default async function handler(req: any, res: any) {
 
     <!-- Open Graph (Facebook, WhatsApp, LinkedIn) Exactly like ronbpost.com -->
     <meta property="og:locale" content="ne_NP" />
-    <meta property="og:site_name" content="Rajababu Mehta News" />
+    <meta property="og:site_name" content="Rajababu Mehta" />
     <meta property="og:type" content="article" />
     <meta property="og:title" content="${safeTitle}" />
     <meta property="og:description" content="${safeDesc}" />

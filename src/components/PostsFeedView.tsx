@@ -92,6 +92,8 @@ interface PostsFeedViewProps {
   onBackToHome?: () => void;
   onShowToast: (message: string, type: 'success' | 'info' | 'warning' | 'error') => void;
   initialPostId?: string | null;
+  initialPosts?: FeedPost[];
+  hasResolvedPosts?: boolean;
 }
 
 const CATEGORIES = [
@@ -104,14 +106,35 @@ const CATEGORIES = [
 
 const LOCAL_POSTS_CACHE_KEY = 'rajababu_news_posts_cache_v4';
 
+const toLightweightCachePosts = (posts: FeedPost[]): FeedPost[] =>
+  posts.map((p) => ({
+    ...p,
+    authorPhoto: '/favicon-96x96.png',
+    images: Array.isArray(p.images)
+      ? p.images.map((img, idx) =>
+          typeof img === 'string' && img.startsWith('data:image/')
+            ? idx === 0
+              ? `/api/post-image/${p.id}.jpg`
+              : `/api/post-image/${p.id}.jpg?idx=${idx}`
+            : img
+        )
+      : [],
+  }));
+
 export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   language,
   onBackToHome,
   onShowToast,
   initialPostId,
+  initialPosts,
+  hasResolvedPosts,
 }) => {
   // Instant Cache Initialization for 0ms loading lag
   const [posts, setPosts] = useState<FeedPost[]>(() => {
+    if (initialPosts && initialPosts.length > 0) return initialPosts;
+    if (typeof window !== 'undefined' && Array.isArray((window as any).__INITIAL_POSTS__) && (window as any).__INITIAL_POSTS__.length > 0) {
+      return (window as any).__INITIAL_POSTS__;
+    }
     try {
       const raw = localStorage.getItem(LOCAL_POSTS_CACHE_KEY);
       if (raw) {
@@ -121,8 +144,32 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     } catch {}
     return [];
   });
-  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [hasResolved, setHasResolved] = useState<boolean>(() => {
+    if (hasResolvedPosts) return true;
+    if (initialPosts && initialPosts.length > 0) return true;
+    if (typeof window !== 'undefined' && Array.isArray((window as any).__INITIAL_POSTS__) && (window as any).__INITIAL_POSTS__.length > 0) {
+      return true;
+    }
+    try {
+      const raw = localStorage.getItem(LOCAL_POSTS_CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return true;
+      }
+    } catch {}
+    return false;
+  });
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
+
+  // Sync with prefetched posts from App.tsx as soon as they resolve
+  useEffect(() => {
+    if (initialPosts && initialPosts.length > 0) {
+      setPosts(initialPosts);
+      setHasResolved(true);
+    } else if (hasResolvedPosts) {
+      setHasResolved(true);
+    }
+  }, [initialPosts, hasResolvedPosts]);
 
   // Active Selected Post for Dedicated News View
   const [activePostId, setActivePostId] = useState<string | null>(initialPostId || null);
@@ -204,40 +251,71 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     return () => unsub();
   }, []);
 
-  // Subscribe to real-time posts (updates cache seamlessly in background)
+  // Subscribe to real-time posts + fast HTTP /api/posts race so first-time visitors never wait
   useEffect(() => {
+    let isMounted = true;
+    let snapshotArrived = false;
+
+    fetch('/api/posts')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!isMounted || snapshotArrived) return;
+        if (data && Array.isArray(data.posts)) {
+          setPosts(data.posts);
+          setHasResolved(true);
+          try {
+            localStorage.setItem(LOCAL_POSTS_CACHE_KEY, JSON.stringify(toLightweightCachePosts(data.posts)));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+
     const unsub = subscribeToFeedPosts(
       (loadedPosts) => {
+        snapshotArrived = true;
+        if (!isMounted) return;
         setPosts(loadedPosts);
-        setLoadingPosts(false);
+        setHasResolved(true);
         try {
-          localStorage.setItem(LOCAL_POSTS_CACHE_KEY, JSON.stringify(loadedPosts));
+          localStorage.setItem(LOCAL_POSTS_CACHE_KEY, JSON.stringify(toLightweightCachePosts(loadedPosts)));
         } catch {}
       },
       (err) => {
         console.warn('Posts listener note:', err);
-        setLoadingPosts(false);
+        if (isMounted) setHasResolved(true);
       }
     );
-    return () => unsub();
+    return () => {
+      isMounted = false;
+      unsub();
+    };
   }, []);
 
   const [directLoadedPost, setDirectLoadedPost] = useState<FeedPost | null>(null);
+  const [singlePostResolved, setSinglePostResolved] = useState<boolean>(false);
 
   // If activePostId is set but not in posts array, fetch directly from Firestore
   useEffect(() => {
     if (activePostId && !posts.some((p) => p.id === activePostId)) {
       let isMounted = true;
-      getSingleFeedPost(activePostId).then((fetched) => {
-        if (isMounted && fetched) {
-          setDirectLoadedPost(fetched);
-        }
-      });
+      setSinglePostResolved(false);
+      getSingleFeedPost(activePostId)
+        .then((fetched) => {
+          if (isMounted && fetched) {
+            setDirectLoadedPost(fetched);
+          }
+        })
+        .finally(() => {
+          if (isMounted) setSinglePostResolved(true);
+        });
       return () => {
         isMounted = false;
       };
     } else if (activePostId && posts.some((p) => p.id === activePostId)) {
       setDirectLoadedPost(null);
+      setSinglePostResolved(true);
+    } else {
+      setSinglePostResolved(false);
     }
   }, [activePostId, posts]);
 
@@ -326,11 +404,13 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
         authorId: currentUser?.uid || 'admin-rajababu',
         authorName: 'Rajababu Mehta',
         authorEmail: currentUser?.email || 'rajababum426@gmail.com',
-        authorPhoto: '/brand-avatar.png',
+        authorPhoto: '/favicon-96x96.png',
         content: fullContent,
         images: imageFiles,
         category: selectedCategory,
       });
+
+      fetch('/api/posts/invalidate', { method: 'POST' }).catch(() => {});
 
       setPostTitle('');
       setPostContent('');
@@ -371,6 +451,8 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
     }
     try {
       await deleteFeedPost(postId);
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+      fetch('/api/posts/invalidate', { method: 'POST' }).catch(() => {});
       if (activePostId === postId) {
         setActivePostId(null);
         window.history.pushState(null, '', window.location.pathname);
@@ -444,7 +526,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
   const handleUniversalShare = async (post: FeedPost) => {
     const directUrl = getDirectPostUrl(post.id);
     const firstLine = post.content.split('\n')[0].replace(/^#+\s*/, '').trim();
-    const headline = firstLine || 'Rajababu Mehta News';
+    const headline = firstLine || 'Official Update | Rajababu Mehta';
     const summary = post.content.slice(0, 140).replace(/\n/g, ' ');
 
     if (navigator.share) {
@@ -494,9 +576,16 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
           ) : (
             <div className="flex items-center gap-2.5">
               <img
-                src="/brand-avatar.png"
+                src="/favicon-96x96.png"
                 alt="Rajababu Mehta"
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-[#e4342f] shadow-sm"
+                loading="eager"
+                decoding="sync"
+                fetchPriority="high"
+                onError={(e) => {
+                  const img = e.currentTarget as HTMLImageElement;
+                  if (!img.src.endsWith('/brand-avatar.png')) img.src = '/brand-avatar.png';
+                }}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover object-top ring-2 ring-[#e4342f] bg-[#1a1716] shadow-sm shrink-0"
               />
               <div className="flex items-center gap-1.5">
                 <span className="text-xs sm:text-sm font-bold text-[#f6f3f2] tracking-tight">
@@ -537,19 +626,21 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
         {/* SINGLE ARTICLE VIEW (News Portal Reader Mode with Direct Link) */}
         {/* ------------------------------------------------------------- */}
         {activePostId && !currentActivePost ? (
-          <div className="bg-[#161413] border border-[rgba(255,240,238,0.1)] rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center space-y-4">
-            <p className="text-stone-300 text-sm">
-              {language === 'NE' ? 'यो पोस्ट वा सामग्री फेला परेन।' : 'This post or article could not be found.'}
-            </p>
-            <button
-              onClick={handleBackToFeed}
-              aria-label="Back"
-              title="Back"
-              className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-[#e4342f] hover:bg-[#c92823] text-white transition-colors cursor-pointer active:scale-95 shadow-md mx-auto"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-          </div>
+          hasResolved && singlePostResolved ? (
+            <div className="bg-[#161413] border border-[rgba(255,240,238,0.1)] rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-center space-y-4">
+              <p className="text-stone-300 text-sm">
+                {language === 'NE' ? 'यो पोस्ट वा सामग्री फेला परेन।' : 'This post or article could not be found.'}
+              </p>
+              <button
+                onClick={handleBackToFeed}
+                aria-label="Back"
+                title="Back"
+                className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-[#e4342f] hover:bg-[#c92823] text-white transition-colors cursor-pointer active:scale-95 shadow-md mx-auto"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            </div>
+          ) : null
         ) : currentActivePost ? (
           <article className="bg-[#161413] border border-[rgba(255,240,238,0.1)] rounded-2xl sm:rounded-3xl p-4 sm:p-7 md:p-8 shadow-2xl space-y-5 sm:space-y-6">
             {/* Breadcrumb & Status */}
@@ -580,11 +671,15 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
             <div className="flex items-center gap-3">
               <div className="relative shrink-0">
                 <img
-                  src="/brand-avatar.png"
+                  src="/favicon-96x96.png"
                   alt={currentActivePost.authorName || 'Rajababu Mehta'}
-                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover object-center ring-2 ring-[#e4342f] shadow-md bg-stone-900"
+                  loading="eager"
+                  decoding="sync"
+                  fetchPriority="high"
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover object-top ring-2 ring-[#e4342f] shadow-md bg-[#1a1716]"
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = '/brand-avatar.png';
+                    const img = e.currentTarget as HTMLImageElement;
+                    if (!img.src.endsWith('/brand-avatar.png')) img.src = '/brand-avatar.png';
                   }}
                 />
               </div>
@@ -733,9 +828,11 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                 <div className="flex items-center gap-3 mb-4">
                   <div className="relative shrink-0">
                     <img
-                      src="/brand-avatar.png"
+                      src="/favicon-96x96.png"
                       alt="Rajababu Mehta"
-                      className="w-11 h-11 rounded-full object-cover object-center ring-2 ring-[#e4342f] shadow-md bg-stone-900"
+                      loading="eager"
+                      decoding="sync"
+                      className="w-11 h-11 rounded-full object-cover object-top ring-2 ring-[#e4342f] shadow-md bg-[#1a1716]"
                     />
                   </div>
                   <div>
@@ -881,23 +978,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
             </div>
 
             {/* Posts List */}
-            {posts.length === 0 ? (
-              <div className="bg-[#171514] border border-[rgba(255,240,238,0.08)] rounded-3xl p-10 text-center space-y-4">
-                <div className="w-14 h-14 rounded-full bg-[rgba(228,52,47,0.1)] border border-[rgba(228,52,47,0.2)] flex items-center justify-center mx-auto text-[#ff8175]">
-                  <Sparkles className="w-7 h-7" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-[#f6f3f2]">
-                    {language === 'NE' ? 'कुनै समाचार उपलब्ध छैन' : 'No Articles Published Yet'}
-                  </h3>
-                  <p className="text-xs text-[#f6f3f2]/60 max-w-sm mx-auto mt-1">
-                    {language === 'NE'
-                      ? 'राजाबाबु मेहताले यहाँ पहिलो सामग्री वा अपडेट प्रकाशित गरेपछि प्रत्यक्ष रूपमा सेयर गर्न सकिनेछ।'
-                      : 'Posts published here can be directly shared across WhatsApp, Facebook, and social platforms.'}
-                  </p>
-                </div>
-              </div>
-            ) : (
+            {posts.length > 0 ? (
               posts.map((post) => (
                 <NewsPostCard
                   key={post.id}
@@ -913,7 +994,23 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                   onOpenImage={(imgUrl) => setLightboxImage(imgUrl)}
                 />
               ))
-            )}
+            ) : hasResolved ? (
+              <div className="bg-[#171514] border border-[rgba(255,240,238,0.08)] rounded-3xl p-10 text-center space-y-4">
+                <div className="w-14 h-14 rounded-full bg-[rgba(228,52,47,0.1)] border border-[rgba(228,52,47,0.2)] flex items-center justify-center mx-auto text-[#ff8175]">
+                  <Sparkles className="w-7 h-7" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#f6f3f2]">
+                    {language === 'NE' ? 'कुनै समाचार उपलब्ध छैन' : 'No Articles Published Yet'}
+                  </h3>
+                  <p className="text-xs text-[#f6f3f2]/60 max-w-sm mx-auto mt-1">
+                    {language === 'NE'
+                      ? 'राजाबाबु मेहताले यहाँ पहिलो सामग्री वा अपडेट प्रकाशित गरेपछि प्रत्यक्ष रूपमा सेयर गर्न सकिनेछ।'
+                      : 'Posts published here can be directly shared across WhatsApp, Facebook, and social platforms.'}
+                  </p>
+                </div>
+              </div>
+            ) : null}
           </>
         )}
       </main>
@@ -994,9 +1091,9 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                   />
                 ) : (
                   <img
-                    src="/brand-avatar.png"
+                    src="/favicon-96x96.png"
                     alt="Author"
-                    className="w-14 h-14 rounded-xl object-cover shrink-0 border border-white/10"
+                    className="w-14 h-14 rounded-xl object-cover object-top shrink-0 border border-white/10"
                   />
                 )}
                 <div className="min-w-0 flex-1">
@@ -1166,11 +1263,15 @@ const NewsPostCard: React.FC<NewsPostCardProps> = ({
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <div className="relative shrink-0">
             <img
-              src="/brand-avatar.png"
+              src="/favicon-96x96.png"
               alt={post.authorName || 'Rajababu Mehta'}
-              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover object-center ring-2 ring-[#e4342f] shadow-md bg-stone-900"
+              loading="eager"
+              decoding="sync"
+              fetchPriority="high"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover object-top ring-2 ring-[#e4342f] shadow-md bg-[#1a1716]"
               onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = '/brand-avatar.png';
+                const img = e.currentTarget as HTMLImageElement;
+                if (!img.src.endsWith('/brand-avatar.png')) img.src = '/brand-avatar.png';
               }}
             />
           </div>
