@@ -51,24 +51,20 @@ export const Header: React.FC<HeaderProps> = ({
   interface TechItem {
     name: string;
     logo: React.ReactNode;
-    isFeatured?: boolean;
   }
 
-  // Official AI Clipzone brand item (repeated prominently throughout the ticker)
   const aiClipzoneItem: TechItem = {
     name: 'AI Clipzone',
-    isFeatured: true,
     logo: (
       <img
         src="/assets/aistudio/logo_3c930995.png"
         alt="AI Clipzone Logo"
-        className="w-5 h-5 shrink-0 rounded-full object-cover border border-[#e4342f] shadow-[0_0_10px_rgba(228,52,47,0.7)]"
+        className="w-5 h-5 shrink-0 rounded-full object-cover"
       />
     ),
   };
 
-  const techItems: TechItem[] = [
-    aiClipzoneItem,
+  const baseTechItems: TechItem[] = [
     {
       name: 'Google Gemini AI',
       logo: (
@@ -120,7 +116,6 @@ export const Header: React.FC<HeaderProps> = ({
         </svg>
       ),
     },
-    aiClipzoneItem,
     {
       name: 'TypeScript',
       logo: (
@@ -174,7 +169,6 @@ export const Header: React.FC<HeaderProps> = ({
         </svg>
       ),
     },
-    aiClipzoneItem,
     {
       name: 'Vite',
       logo: (
@@ -216,7 +210,6 @@ export const Header: React.FC<HeaderProps> = ({
         </svg>
       ),
     },
-    aiClipzoneItem,
     {
       name: 'JavaScript',
       logo: (
@@ -227,6 +220,11 @@ export const Header: React.FC<HeaderProps> = ({
       ),
     },
   ];
+
+  // Repeat AI Clipzone after every 2 technologies
+  const techItems: TechItem[] = baseTechItems.flatMap((item, index) =>
+    index % 2 === 0 ? [aiClipzoneItem, item] : [item]
+  );
 
   return (
     <>
@@ -389,25 +387,14 @@ export const Header: React.FC<HeaderProps> = ({
             {techItems.concat(techItems).map((tech, idx) => (
               <div
                 key={idx}
-                className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all whitespace-nowrap cursor-default group ${
-                  tech.isFeatured
-                    ? 'bg-[#e4342f]/15 border border-[#e4342f]/50 shadow-[0_4px_18px_-4px_rgba(228,52,47,0.45)] hover:bg-[#e4342f]/25 hover:border-[#ff6a4d]'
-                    : 'bg-[rgba(255,255,255,0.035)] border border-[rgba(255,240,238,0.08)] hover:border-[#e4342f]/50 hover:bg-[rgba(255,255,255,0.065)] hover:shadow-[0_8px_24px_-6px_rgba(228,52,47,0.3)]'
-                }`}
+                className="flex items-center gap-3 px-4 py-2 rounded-xl transition-all whitespace-nowrap cursor-default group bg-[rgba(255,255,255,0.035)] border border-[rgba(255,240,238,0.08)] hover:border-[#e4342f]/50 hover:bg-[rgba(255,255,255,0.065)] hover:shadow-[0_8px_24px_-6px_rgba(228,52,47,0.3)]"
               >
                 <div className="w-5 h-5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                   {tech.logo}
                 </div>
-                <span className={`font-bold text-xs sm:text-[13px] tracking-tight transition-colors ${
-                  tech.isFeatured ? 'text-[#ff8175] group-hover:text-white' : 'text-[#f6f3f2]/85 group-hover:text-white'
-                }`}>
+                <span className="font-bold text-xs sm:text-[13px] tracking-tight transition-colors text-[#f6f3f2]/85 group-hover:text-white">
                   {tech.name}
                 </span>
-                {tech.isFeatured && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#e4342f]/30 border border-[#e4342f]/50 text-[#ffb08e] font-extrabold uppercase tracking-widest">
-                    Founder
-                  </span>
-                )}
               </div>
             ))}
           </div>
