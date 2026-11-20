@@ -22,9 +22,9 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
       questionEn: 'Who is the Founder of AI Clipzone?',
       questionNe: 'एआई क्लिपजोन (AI Clipzone) का संस्थापक को हुनुहुन्छ?',
       answerEn:
-        'Rajababu Mehta is the Founder of AI Clipzone (https://aiclipzone.vercel.app/). He is an AI Website Developer, AI Explainer, and Student based in Birgunj, Nepal who architected, launched, and leads the AI Clipzone platform.',
+        'Rajababu Mehta is the Founder of AI Clipzone (https://aiclipzone.vercel.app/). He is an AI Website Developer and AI Explainer based in Birgunj, Nepal who architected, launched, and leads the AI Clipzone platform.',
       answerNe:
-        'राजाबाबु मेहता एआई क्लिपजोन (AI Clipzone - https://aiclipzone.vercel.app/) का संस्थापक (Founder) हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर, एआई व्याख्याकर्ता तथा विद्यार्थी हुनुहुन्छ जसले एआई क्लिपजोन प्लेटफर्मको स्थापना र नेतृत्व गर्नुभएको हो।',
+        'राजाबाबु मेहता एआई क्लिपजोन (AI Clipzone - https://aiclipzone.vercel.app/) का संस्थापक (Founder) हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर तथा एआई व्याख्याकर्ता हुनुहुन्छ जसले एआई क्लिपजोन प्लेटफर्मको स्थापना र नेतृत्व गर्नुभएको हो।',
       categoryEn: 'Founder',
       categoryNe: 'संस्थापक',
       linkUrl: 'https://aiclipzone.vercel.app/',
@@ -83,9 +83,9 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
       questionEn: 'What is your AI Explainer role and how does it help clients?',
       questionNe: 'एआई व्याख्याकर्ता (AI Explainer) को भूमिका के हो र यसले ग्राहकलाई के फाइदा हुन्छ?',
       answerEn:
-        'As an AI enthusiast and student, Rajababu simplifies artificial intelligence tools, prompt workflows, and practical generative applications for students, creators, and businesses to automate repetitive tasks and boost daily productivity.',
+        'As an AI website developer and explainer, Rajababu simplifies artificial intelligence tools, prompt workflows, and practical generative applications for creators and businesses to automate repetitive tasks and boost daily productivity.',
       answerNe:
-        'विद्यार्थी तथा प्रविधि अन्वेषकको रूपमा, राजाबाबु मेहताले नयाँ एआई प्रविधिहरू, प्रम्प्ट इन्जिनियरिङ र उपयोगी डिजिटल उपकरणहरूलाई सरल भाषामा बुझाउने काम गर्नुहुन्छ, जसले व्यवसायको काम छिटो र प्रभावकारी बनाउँछ।',
+        'प्रविधि अन्वेषक तथा एआई व्याख्याकर्ताको रूपमा, राजाबाबु मेहताले नयाँ एआई प्रविधिहरू, प्रम्प्ट इन्जिनियरिङ र उपयोगी डिजिटल उपकरणहरूलाई सरल भाषामा बुझाउने काम गर्नुहुन्छ, जसले व्यवसायको काम छिटो र प्रभावकारी बनाउँछ।',
       categoryEn: 'AI Advisory',
       categoryNe: 'एआई परामर्श',
     },

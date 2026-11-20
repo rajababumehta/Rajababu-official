@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ArrowLeft,
@@ -19,6 +19,7 @@ import {
   Mail,
   Smartphone,
   MessageCircle,
+  Search,
 } from 'lucide-react';
 import { FeedPost, Language, AdminUser } from '../types';
 import {
@@ -192,6 +193,21 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
 
   // Active Share Modal Post (Universal Share Anywhere)
   const [shareModalPost, setShareModalPost] = useState<FeedPost | null>(null);
+
+  // Feed Search Query
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredPosts = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return posts;
+    return posts.filter((post) => {
+      const contentMatch = post.content?.toLowerCase().includes(q);
+      const contentNeMatch = post.contentNe?.toLowerCase().includes(q);
+      const categoryMatch = post.category?.toLowerCase().includes(q);
+      const authorMatch = post.authorName?.toLowerCase().includes(q);
+      return Boolean(contentMatch || contentNeMatch || categoryMatch || authorMatch);
+    });
+  }, [posts, searchQuery]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -987,9 +1003,36 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
               </p>
             </div>
 
+            {/* Search Bar */}
+            <div className="relative flex items-center bg-[#151312] border border-[rgba(255,240,238,0.1)] focus-within:border-[#e4342f]/70 rounded-2xl px-3.5 sm:px-4 transition-colors shadow-sm">
+              <Search className="w-4 h-4 text-[#f6f3f2]/45 shrink-0 mr-2.5" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={
+                  language === 'NE'
+                    ? 'शीर्षक वा शब्दले खोज्नुहोस्...'
+                    : 'Search posts by title or keyword...'
+                }
+                aria-label={language === 'NE' ? 'पोस्ट खोज्नुहोस्' : 'Search posts'}
+                className="w-full bg-transparent py-2.5 sm:py-3 text-xs sm:text-sm text-[#f6f3f2] placeholder-[#f6f3f2]/40 outline-none"
+              />
+              {searchQuery.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  aria-label={language === 'NE' ? 'खोज मेटाउनुहोस्' : 'Clear search'}
+                  className="p-1 ml-1.5 rounded-full text-[#f6f3f2]/50 hover:text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
             {/* Posts List */}
-            {posts.length > 0 ? (
-              posts.map((post) => (
+            {filteredPosts.length > 0 ? (
+              filteredPosts.map((post) => (
                 <NewsPostCard
                   key={post.id}
                   post={post}
@@ -1004,6 +1047,29 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                   onOpenImage={(imgUrl) => setLightboxImage(imgUrl)}
                 />
               ))
+            ) : posts.length > 0 && searchQuery.trim().length > 0 ? (
+              <div className="bg-[#171514] border border-[rgba(255,240,238,0.08)] rounded-3xl p-8 sm:p-10 text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-[rgba(228,52,47,0.1)] border border-[rgba(228,52,47,0.2)] flex items-center justify-center mx-auto text-[#ff8175]">
+                  <Search className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-[#f6f3f2]">
+                    {language === 'NE' ? 'कुनै मिल्दो पोस्ट फेला परेन' : 'No Matching Articles Found'}
+                  </h3>
+                  <p className="text-xs text-[#f6f3f2]/60 max-w-sm mx-auto mt-1">
+                    {language === 'NE'
+                      ? `"${searchQuery.trim()}" सँग मिल्ने कुनै सामग्री भेटिएन।`
+                      : `No posts matched "${searchQuery.trim()}". Try a different keyword.`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[rgba(255,255,255,0.06)] hover:bg-[#e4342f] text-xs font-semibold text-[#f6f3f2] hover:text-white border border-[rgba(255,240,238,0.12)] transition-colors cursor-pointer"
+                >
+                  {language === 'NE' ? 'सबै पोस्ट हेर्नुहोस्' : 'Clear search'}
+                </button>
+              </div>
             ) : hasResolved ? (
               <div className="bg-[#171514] border border-[rgba(255,240,238,0.08)] rounded-3xl p-10 text-center space-y-4">
                 <div className="w-14 h-14 rounded-full bg-[rgba(228,52,47,0.1)] border border-[rgba(228,52,47,0.2)] flex items-center justify-center mx-auto text-[#ff8175]">

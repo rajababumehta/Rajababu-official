@@ -23,7 +23,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   const cleanBio1Ne =
     about.bioParagraph1Ne && !about.bioParagraph1Ne.includes('नेता')
       ? about.bioParagraph1Ne
-      : 'राजाबाबु मेहता एआई क्लिपजोन (AI Clipzone - https://aiclipzone.vercel.app/) का संस्थापक हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर (AI Website Developer), विद्यार्थी (Student) तथा एआई व्याख्याकर्ता (AI Explainer) हुनुहुन्छ। आधुनिक वेब प्रविधिहरू तथा उदीयमान आर्टिफिसियल इन्टेलिजेन्स (एआई) का उपकरणहरूमा गहिरो रुचि राख्दै, उहाँले व्यवसाय, व्यक्तिगत ब्रान्ड तथा संस्थाहरूका लागि छिटो, सुरक्षित, आकर्षक र गुगल-अनुकूल वेबसाइटहरू निर्माण गर्दै आउनुभएको छ।';
+      : 'राजाबाबु मेहता एआई क्लिपजोन (AI Clipzone - https://aiclipzone.vercel.app/) का संस्थापक हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर (AI Website Developer) तथा एआई व्याख्याकर्ता (AI Explainer) हुनुहुन्छ। आधुनिक वेब प्रविधिहरू तथा उदीयमान आर्टिफिसियल इन्टेलिजेन्स (एआई) का उपकरणहरूमा गहिरो रुचि राख्दै, उहाँले व्यवसाय, व्यक्तिगत ब्रान्ड तथा संस्थाहरूका लागि छिटो, सुरक्षित, आकर्षक र गुगल-अनुकूल वेबसाइटहरू निर्माण गर्दै आउनुभएको छ।';
 
   const cleanBio2Ne =
     about.bioParagraph2Ne && !about.bioParagraph2Ne.includes('नेता')
@@ -40,7 +40,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     },
     {
       src: '/assets/who/dr-photo-2.jpg',
-      alt: 'Rajababu Mehta - Nature & outdoor study portrait',
+      alt: 'Rajababu Mehta - Nature & outdoor portrait',
       captionEn: 'Outdoor portrait in natural greenery with arms crossed',
       captionNe: 'प्राकृतिक हरियाली र खुला वातावरणमा खिचिएको तस्बिर',
     },
@@ -78,8 +78,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 
           <p className="mt-4 text-base sm:text-lg text-[#f6f3f2]/70 max-w-2xl leading-relaxed">
             {language === 'NE'
-              ? 'एआई क्लिपजोनका संस्थापक (Founder)। एआई वेबसाइट डेभलपर, प्रविधि व्याख्याकर्ता तथा डेसिमल कलेज, वीरगञ्जका विद्यार्थी।'
-              : 'Founder of AI Clipzone. AI Website Developer. Tech Explainer. Student at Decimal College, Birgunj.'}
+              ? 'एआई क्लिपजोनका संस्थापक (Founder), एआई वेबसाइट डेभलपर तथा प्रविधि व्याख्याकर्ता, वीरगञ्ज, नेपाल।'
+              : 'Founder of AI Clipzone. AI Website Developer & Tech Explainer based in Birgunj, Nepal.'}
           </p>
         </div>
 
@@ -122,8 +122,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 </div>
                 <div className="text-[#f6f3f2]/75 text-xs sm:text-[13px] leading-relaxed">
                   {language === 'NE'
-                    ? 'एआई क्लिपजोन (AI Clipzone) का संस्थापक। +२ व्यवस्थापन अध्ययनरत, डेसिमल कलेज, वीरगञ्ज।'
-                    : '+2 Management at Decimal College, Birgunj. Founder of AI Clipzone. Based in Birgunj, Nepal.'}
+                    ? 'एआई क्लिपजोन (AI Clipzone) का संस्थापक तथा एआई वेबसाइट डेभलपर, वीरगञ्ज, नेपाल।'
+                    : 'Founder of AI Clipzone & AI Website Developer. Based in Birgunj, Nepal.'}
                 </div>
               </div>
             </div>
@@ -250,30 +250,30 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 <div>
                   <b className="group-hover:text-[#ff8175] transition-colors">
                     {language === 'NE'
-                      ? '+२ व्यवस्थापन तथा एआई वेब विकास'
-                      : '+2 Management & AI Web Architecture'}
+                      ? 'एआई वेब आर्किटेक्चर तथा डिजिटल प्रणाली'
+                      : 'AI Web Architecture & Custom Platforms'}
                   </b>
                   <span>
                     {language === 'NE'
-                      ? 'डेसिमल कलेज, वीरगञ्जमा +२ व्यवस्थापन अध्ययनसँगै तीव्र गतिका आधुनिक वेबसाइटहरूको सफल विकास।'
-                      : 'Decimal College, Birgunj. Pursuing higher management studies alongside architecting bespoke high-performance web systems.'}
+                      ? 'व्यवसाय तथा व्यक्तिगत ब्रान्डका लागि तीव्र गतिका आधुनिक वेबसाइट र एआई-आधारित डिजिटल समाधानहरूको विकास।'
+                      : 'Architecting bespoke high-performance web systems, SEO-ready portals, and practical AI solutions for brands and businesses.'}
                   </span>
                 </div>
               </div>
 
               {/* Award / Milestone 3 */}
               <div className="award group">
-                <div className="award-year">2022</div>
+                <div className="award-year">7+ Yrs</div>
                 <div>
                   <b className="group-hover:text-[#ff8175] transition-colors">
                     {language === 'NE'
-                      ? 'माध्यमिक शिक्षा (SEE उत्तीर्ण)'
-                      : 'Secondary Education Examination (SEE)'}
+                      ? 'प्रविधि तथा वेब विकास यात्रा'
+                      : 'Technology & Web Engineering Journey'}
                   </b>
                   <span>
                     {language === 'NE'
-                      ? 'श्री जिल्ला उचङ्गल रामदेव कलवार माध्यमिक विद्यालयबाट माध्यमिक शिक्षा उत्तीर्ण गरी कम्प्युटर प्रविधिमा समर्पित।'
-                      : 'Graduated from Shree Zilla Uchangal Ramdev Kalwar Secondary School with early passion for software, web, and technology.'}
+                      ? '७ वर्षभन्दा बढी समयदेखि कम्प्युटर प्रविधि, आधुनिक वेब उपकरण तथा डिजिटल निर्माणमा निरन्तर सक्रिय।'
+                      : 'Over 7 years of hands-on experience building modern websites, exploring AI tools, and crafting digital experiences in Birgunj, Nepal.'}
                   </span>
                 </div>
               </div>

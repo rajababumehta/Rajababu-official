@@ -28,14 +28,14 @@ export const Header: React.FC<HeaderProps> = ({
     'Founder of AI Clipzone',
     'AI Website Developer',
     'AI Explainer & Creator',
-    'Student in Birgunj, Nepal',
+    'Digital Innovator in Birgunj, Nepal',
   ];
 
   const rolesNe = [
     'एआई क्लिपजोनका संस्थापक',
     'एआई वेबसाइट डेभलपर',
     'एआई व्याख्याकर्ता तथा सर्जक',
-    'वीरगञ्ज, नेपालका विद्यार्थी',
+    'वीरगञ्ज, नेपालका डिजिटल नवप्रवर्तक',
   ];
 
   const roles = language === 'NE' ? rolesNe : rolesEn;

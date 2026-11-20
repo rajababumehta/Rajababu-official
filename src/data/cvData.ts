@@ -39,27 +39,16 @@ export interface CvData {
 
 export const RAJABABU_CV_DATA: CvData = {
   name: 'RAJABABU MEHTA',
-  role: 'Founder of AI Clipzone | AI Web Developer | Student',
+  role: 'Founder of AI Clipzone | AI Web Developer | AI Explainer',
   location: 'Birgunj, Nepal',
   email: 'support@rajababumehta.com.np',
   website: 'https://rajababumehta.com.np',
   phone: '9816689232',
   summary:
-    'Rajababu Mehta is the Founder of AI Clipzone (https://aiclipzone.vercel.app/), an AI Website Developer, and Student based in Birgunj, Nepal. Passionate about artificial intelligence, modern frontend engineering, and intuitive digital tools.',
+    'Rajababu Mehta is the Founder of AI Clipzone (https://aiclipzone.vercel.app/), an AI Website Developer, and AI Explainer based in Birgunj, Nepal. Passionate about artificial intelligence, modern frontend engineering, and intuitive digital tools.',
   objective:
     'To lead and expand AI Clipzone as Founder while building high-performance modern websites, mastering emerging AI technologies, and delivering exceptional digital experiences.',
-  education: [
-    {
-      degree: '+2 Management',
-      status: 'Currently Studying',
-      institution: 'Decimal College, Birgunj (Nepal Education Board - NEB)',
-    },
-    {
-      degree: 'Secondary Education',
-      status: 'SEE Completed',
-      institution: 'Shree Zilla Uchangal Ramdev Kalwar Secondary School',
-    },
-  ],
+  education: [],
   technicalSkills: [
     'AI Clipzone Platform & AI Workflows',
     'AI Tools & AI Technology',
