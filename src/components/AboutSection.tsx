@@ -23,12 +23,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   const cleanBio1Ne =
     about.bioParagraph1Ne && !about.bioParagraph1Ne.includes('नेता')
       ? about.bioParagraph1Ne
-      : 'राजाबाबु मेहता एआई क्लिपजोन (AI Clipzone - https://aiclipzone.vercel.app/) का संस्थापक हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर (AI Website Developer) तथा एआई व्याख्याकर्ता (AI Explainer) हुनुहुन्छ। आधुनिक वेब प्रविधिहरू तथा उदीयमान आर्टिफिसियल इन्टेलिजेन्स (एआई) का उपकरणहरूमा गहिरो रुचि राख्दै, उहाँले व्यवसाय, व्यक्तिगत ब्रान्ड तथा संस्थाहरूका लागि छिटो, सुरक्षित, आकर्षक र गुगल-अनुकूल वेबसाइटहरू निर्माण गर्दै आउनुभएको छ।';
+      : 'राजाबाबु मेहता HamroLms का संस्थापक हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर (AI Website Developer) तथा एआई व्याख्याकर्ता (AI Explainer) हुनुहुन्छ। आधुनिक वेब प्रविधिहरू तथा उदीयमान आर्टिफिसियल इन्टेलिजेन्स (एआई) का उपकरणहरूमा गहिरो रुचि राख्दै, उहाँले व्यवसाय, व्यक्तिगत ब्रान्ड तथा संस्थाहरूका लागि छिटो, सुरक्षित, आकर्षक र गुगल-अनुकूल वेबसाइटहरू निर्माण गर्दै आउनुभएको छ।';
 
   const cleanBio2Ne =
     about.bioParagraph2Ne && !about.bioParagraph2Ne.includes('नेता')
       ? about.bioParagraph2Ne
-      : 'एआई क्लिपजोनका संस्थापक तथा प्रविधि अन्वेषकको रूपमा, राजाबाबु मेहताले यस आधिकारिक वेबसाइटमार्फत आफ्ना परियोजनाहरू, प्राविधिक सीपहरू र सेवाहरू प्रस्तुत गर्नुभएको छ। व्यक्तिगत पोर्टफोलियो, व्यवसायिक पोर्टल, ल्यान्डिङ पेज वा कुनै पनि आधुनिक वेबसाइट बनाउन परेमा, अथवा एआई प्रविधिको व्यवहारिक प्रयोगबारे बुझ्न चाहेमा राजाबाबु मेहतासँग सिधै सम्पर्क गर्न सक्नुहुन्छ।';
+      : 'HamroLms का संस्थापक तथा प्रविधि अन्वेषकको रूपमा, राजाबाबु मेहताले यस आधिकारिक वेबसाइटमार्फत आफ्ना परियोजनाहरू, प्राविधिक सीपहरू र सेवाहरू प्रस्तुत गर्नुभएको छ। व्यक्तिगत पोर्टफोलियो, व्यवसायिक पोर्टल, ल्यान्डिङ पेज वा कुनै पनि आधुनिक वेबसाइट बनाउन परेमा, अथवा एआई प्रविधिको व्यवहारिक प्रयोगबारे बुझ्न चाहेमा राजाबाबु मेहतासँग सिधै सम्पर्क गर्न सक्नुहुन्छ।';
 
   // 2-photo strip under Who am I (Image 3 / 4th overall image removed as requested)
   const photoStrip = [
@@ -78,8 +78,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 
           <p className="mt-4 text-base sm:text-lg text-[#f6f3f2]/70 max-w-2xl leading-relaxed">
             {language === 'NE'
-              ? 'एआई क्लिपजोनका संस्थापक (Founder), एआई वेबसाइट डेभलपर तथा प्रविधि व्याख्याकर्ता, वीरगञ्ज, नेपाल।'
-              : 'Founder of AI Clipzone. AI Website Developer & Tech Explainer based in Birgunj, Nepal.'}
+              ? 'HamroLms का संस्थापक (Founder), एआई वेबसाइट डेभलपर तथा प्रविधि व्याख्याकर्ता, वीरगञ्ज, नेपाल।'
+              : 'Founder of HamroLms. AI Website Developer & Tech Explainer based in Birgunj, Nepal.'}
           </p>
         </div>
 
@@ -122,8 +122,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 </div>
                 <div className="text-[#f6f3f2]/75 text-xs sm:text-[13px] leading-relaxed">
                   {language === 'NE'
-                    ? 'एआई क्लिपजोन (AI Clipzone) का संस्थापक तथा एआई वेबसाइट डेभलपर, वीरगञ्ज, नेपाल।'
-                    : 'Founder of AI Clipzone & AI Website Developer. Based in Birgunj, Nepal.'}
+                    ? 'HamroLms का संस्थापक तथा एआई वेबसाइट डेभलपर, वीरगञ्ज, नेपाल।'
+                    : 'Founder of HamroLms & AI Website Developer. Based in Birgunj, Nepal.'}
                 </div>
               </div>
             </div>
@@ -173,8 +173,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 <span className="w-1.5 h-4 rounded-full bg-[#e4342f]" />
                 <span>
                   {language === 'NE'
-                    ? 'एआई क्लिपजोनका संस्थापक तथा प्राविधिक अन्वेषक'
-                    : 'Founder of AI Clipzone, Web Developer & Tech Explorer'}
+                    ? 'HamroLms का संस्थापक तथा प्राविधिक अन्वेषक'
+                    : 'Founder of HamroLms, Web Developer & Tech Explorer'}
                 </span>
               </h3>
               
@@ -191,7 +191,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             <div className="stat-row">
               <div className="stat">
                 <span className="stat-num text-[#ff8175]">Founder</span>
-                <span className="stat-label">AI Clipzone Founder</span>
+                <span className="stat-label">HamroLms Founder</span>
               </div>
               <div className="stat">
                 <span className="stat-num text-[#ff8175]">25+</span>
@@ -233,13 +233,13 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 <div className="award-year">2024</div>
                 <div>
                   <b className="group-hover:text-[#ff8175] transition-colors flex items-center gap-2">
-                    <span>Founder — AI Clipzone</span>
+                    <span>Founder — HamroLms</span>
                     <ExternalLink className="w-3.5 h-3.5 text-[#e4342f] opacity-80" />
                   </b>
                   <span>
                     {language === 'NE'
-                      ? 'एआई क्लिपजोन (https://aiclipzone.vercel.app/) को स्थापना तथा सञ्चालन – एआई टुल्स र आधुनिक डिजिटल सेवाहरूको हब।'
-                      : 'Founded and launched AI Clipzone (aiclipzone.vercel.app), leading next-gen artificial intelligence tools curation & modern web platforms.'}
+                      ? 'HamroLms को स्थापना तथा सञ्चालन – एआई टुल्स र आधुनिक डिजिटल सेवाहरूको हब।'
+                      : 'Founded and launched HamroLms, leading next-gen artificial intelligence tools curation & modern web platforms.'}
                   </span>
                 </div>
               </div>
@@ -286,15 +286,15 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 "{language === 'NE' ? about.mottoNe : about.mottoEn}"
               </p>
               <div className="mt-2 text-xs text-[#ff8175] font-semibold">
-                — Rajababu Mehta (Founder, AI Clipzone)
+                — Rajababu Mehta (Founder, HamroLms)
               </div>
             </div>
 
             {/* Dhruv Rathee Disclaimer / Footnote (.who-note) */}
             <p className="who-note">
               {language === 'NE'
-                ? '* सबै तथ्यांक र आधिकारिक विवरणहरू सार्वजनिक पोर्टफोलियो तथा एआई क्लिपजोन (aiclipzone.vercel.app) बाट प्रमाणित।'
-                : '* Figures and credentials are verified from public portfolio records and AI Clipzone (aiclipzone.vercel.app).'}
+                ? '* सबै तथ्यांक र आधिकारिक विवरणहरू सार्वजनिक पोर्टफोलियो तथा HamroLms बाट प्रमाणित।'
+                : '* Figures and credentials are verified from public portfolio records and HamroLms.'}
             </p>
 
           </div>
@@ -303,34 +303,34 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
 
         {/* ========================================================
            FEATURED PLATFORM SHOWCASE CARD (.ac - DR ACADEMY STYLE)
-           Showcasing AI Clipzone (Founder)
+           Showcasing HamroLms (Founder)
            ======================================================== */}
         <div className="ac flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="relative z-10 max-w-2xl">
             <div className="ac-tag flex items-center gap-2">
               <img
                 src="/assets/aistudio/logo_3c930995.png"
-                alt="AI Clipzone Logo"
+                alt="HamroLms Logo"
                 className="w-4 h-4 rounded-full object-cover shrink-0"
               />
               <span>{language === 'NE' ? 'आधिकारिक प्लेटफर्म • संस्थापक' : 'Featured Platform • Founder'}</span>
             </div>
 
             <h3 className="ac-h">
-              AI Clipzone — <span className="font-serif italic font-normal text-[#e4342f]">
+              HamroLms — <span className="font-serif italic font-normal text-[#e4342f]">
                 {language === 'NE' ? 'आधुनिक एआई हब' : 'Next-Gen AI Platform'}
               </span>
             </h3>
 
             <p className="ac-p">
               {language === 'NE'
-                ? 'राजाबाबु मेहताद्वारा स्थापित तथा सञ्चालित एआई क्लिपजोन (AI Clipzone) – आधुनिक आर्टिफिसियल इन्टेलिजेन्स, उपयोगी डिजिटल टुल्स तथा रचनात्मक वेबसाइट समाधानहरूको अग्रणी अनलाइन केन्द्र।'
-                : 'Founded and led by Rajababu Mehta, AI Clipzone is an interactive platform curating the most powerful artificial intelligence tools, web solutions, and digital resources for creators, businesses, and learners.'}
+                ? 'राजाबाबु मेहताद्वारा स्थापित तथा सञ्चालित HamroLms – आधुनिक आर्टिफिसियल इन्टेलिजेन्स, उपयोगी डिजिटल टुल्स तथा रचनात्मक वेबसाइट समाधानहरूको अग्रणी अनलाइन केन्द्र।'
+                : 'Founded and led by Rajababu Mehta, HamroLms is an interactive platform curating the most powerful artificial intelligence tools, web solutions, and digital resources for creators, businesses, and learners.'}
             </p>
 
             <div className="ac-meta">
               <span className="ac-chip">Founder: Rajababu Mehta</span>
-              <span className="ac-chip">URL: aiclipzone.vercel.app</span>
+              <span className="ac-chip">Platform: HamroLms</span>
               <span className="ac-chip">Status: Live & Verified</span>
               <span className="ac-chip">Birgunj, Nepal</span>
             </div>
@@ -341,22 +341,22 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               rel="noopener noreferrer"
               className="ac-btn"
             >
-              <span>{language === 'NE' ? 'AI Clipzone खोल्नुहोस्' : 'Visit AI Clipzone'}</span>
+              <span>{language === 'NE' ? 'HamroLms खोल्नुहोस्' : 'Visit HamroLms'}</span>
               <ChevronRight className="w-4 h-4" />
             </a>
           </div>
 
-          {/* AI Clipzone Emblem Crest (mirroring DR Academy crest on dhruvrathee.com) */}
+          {/* HamroLms Emblem Crest (mirroring DR Academy crest on dhruvrathee.com) */}
           <div className="relative z-10 shrink-0 self-center md:self-auto hidden sm:flex flex-col items-center justify-center p-3">
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-tr from-[#e4342f]/50 via-white/10 to-transparent border border-white/20 shadow-[0_12px_36px_-8px_rgba(228,52,47,0.45)] hover:scale-105 transition-transform">
               <img
                 src="/assets/aistudio/logo_3c930995.png"
-                alt="AI Clipzone Logo"
+                alt="HamroLms Logo"
                 className="w-full h-full rounded-full object-cover bg-black"
               />
             </div>
             <span className="mt-2 text-[10.5px] font-bold tracking-widest uppercase text-[#f6f3f2]/40">
-              AI Clipzone
+              HamroLms
             </span>
           </div>
         </div>

@@ -72,8 +72,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     {
       num: '04',
       href: 'https://aiclipzone.vercel.app/',
-      labelEn: 'AI Clipzone',
-      labelNe: 'एआई क्लिपजोन',
+      labelEn: 'HamroLms',
+      labelNe: 'HamroLms',
       isExternal: true,
       badge: 'Platform',
     },
@@ -140,20 +140,20 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Right Action Controls */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
 
-            {/* Direct AI Clipzone CTA Button with uploaded logo */}
+            {/* Direct HamroLms CTA Button with uploaded logo */}
             <a
               href="https://aiclipzone.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#e4342f] hover:bg-[#ff3d38] text-white text-xs sm:text-[13px] font-bold tracking-tight shadow-[0_6px_22px_-6px_rgba(228,52,47,0.8)] transition-all hover:scale-[1.03]"
-              title="Visit AI Clipzone Platform"
+              title="Visit HamroLms Platform"
             >
               <img
                 src="/assets/aistudio/logo_3c930995.png"
-                alt="AI Clipzone"
+                alt="HamroLms"
                 className="w-4 h-4 rounded-full object-cover shrink-0"
               />
-              <span>AI Clipzone</span>
+              <span>HamroLms</span>
               <ExternalLink className="w-3 h-3 text-white/90" />
             </a>
 
@@ -292,7 +292,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                             {item.isExternal && (
                               <img
                                 src="/assets/aistudio/logo_3c930995.png"
-                                alt="AI Clipzone Logo"
+                                alt="HamroLms Logo"
                                 className="w-5 h-5 rounded-full object-cover border border-[#e4342f]/60 shrink-0"
                               />
                             )}
@@ -315,10 +315,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </nav>
               </div>
 
-              {/* Bottom Section: AI Clipzone Feature + Controls */}
+              {/* Bottom Section: HamroLms Feature + Controls */}
               <div className="pt-8 mt-6 border-t border-[rgba(255,240,238,0.08)] space-y-4">
                 
-                {/* AI Clipzone Direct Highlight Card */}
+                {/* HamroLms Direct Highlight Card */}
                 <a
                   href="https://aiclipzone.vercel.app/"
                   target="_blank"
@@ -329,18 +329,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <div className="flex items-center gap-3">
                     <img
                       src="/assets/aistudio/logo_3c930995.png"
-                      alt="AI Clipzone Logo"
+                      alt="HamroLms Logo"
                       className="w-9 h-9 rounded-full object-cover border border-white/20 shrink-0 shadow-md group-hover:scale-105 transition-transform"
                     />
                     <div>
                       <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <span>AI Clipzone</span>
+                        <span>HamroLms</span>
                         <span className="text-[9.5px] px-1.5 py-0.2 rounded bg-[#e4342f] text-white uppercase font-extrabold tracking-wide">
                           Founder
                         </span>
                       </div>
                       <div className="text-[11px] text-[#f6f3f2]/60">
-                        aiclipzone.vercel.app
+                        {language === 'NE' ? 'आधिकारिक प्लेटफर्म' : 'Official Platform'}
                       </div>
                     </div>
                   </div>
@@ -352,7 +352,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {/* Footer Location & Credential Tag */}
                 <div className="pt-2 text-[11px] text-[#f6f3f2]/40 text-center flex items-center justify-center gap-1.5">
                   <MapPin className="w-3 h-3 text-[#e4342f]" />
-                  <span>Birgunj, Nepal · Founder, AI Clipzone</span>
+                  <span>Birgunj, Nepal · Founder, HamroLms</span>
                 </div>
 
               </div>

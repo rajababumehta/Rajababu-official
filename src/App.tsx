@@ -65,7 +65,7 @@ const clipzoneImageToMoment = (img: ClipzoneImage): Moment => ({
   descNe: img.descNe || img.description || '',
   imgUrl: img.imgUrl,
   likes: img.likes || 0,
-  category: img.category || 'AI Clipzone',
+  category: img.category || 'HamroLms',
   date: img.uploadDate ? new Date(img.uploadDate).toLocaleDateString() : 'Recent',
   isUserUploaded: true,
   uploadedAt: img.uploadDate,
@@ -383,8 +383,8 @@ export default function App() {
     localStorage.setItem(STORAGE_KEYS.LANGUAGE, language);
     document.title =
       language === 'NE'
-        ? 'राजाबाबु मेहता | एआई क्लिपजोनका संस्थापक, एआई वेबसाइट डेभलपर'
-        : 'Rajababu Mehta | Founder of AI Clipzone & AI Website Developer';
+        ? 'राजाबाबु मेहता | HamroLms का संस्थापक, एआई वेबसाइट डेभलपर'
+        : 'Rajababu Mehta | Founder of HamroLms & AI Website Developer';
   }, [language]);
 
   useEffect(() => {

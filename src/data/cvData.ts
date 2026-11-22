@@ -39,18 +39,18 @@ export interface CvData {
 
 export const RAJABABU_CV_DATA: CvData = {
   name: 'RAJABABU MEHTA',
-  role: 'Founder of AI Clipzone | AI Web Developer | AI Explainer',
+  role: 'Founder of HamroLms | AI Web Developer | AI Explainer',
   location: 'Birgunj, Nepal',
   email: 'support@rajababumehta.com.np',
   website: 'https://rajababumehta.com.np',
   phone: '9816689232',
   summary:
-    'Rajababu Mehta is the Founder of AI Clipzone (https://aiclipzone.vercel.app/), an AI Website Developer, and AI Explainer based in Birgunj, Nepal. Passionate about artificial intelligence, modern frontend engineering, and intuitive digital tools.',
+    'Rajababu Mehta is the Founder of HamroLms, an AI Website Developer, and AI Explainer based in Birgunj, Nepal. Passionate about artificial intelligence, modern frontend engineering, and intuitive digital tools.',
   objective:
-    'To lead and expand AI Clipzone as Founder while building high-performance modern websites, mastering emerging AI technologies, and delivering exceptional digital experiences.',
+    'To lead and expand HamroLms as Founder while building high-performance modern websites, mastering emerging AI technologies, and delivering exceptional digital experiences.',
   education: [],
   technicalSkills: [
-    'AI Clipzone Platform & AI Workflows',
+    'HamroLms Platform & AI Workflows',
     'AI Tools & AI Technology',
     'AI-based Website Design',
     'Website Development',
@@ -59,17 +59,17 @@ export const RAJABABU_CV_DATA: CvData = {
   ],
   projects: [
     {
-      title: 'AI Clipzone (Founder)',
+      title: 'HamroLms (Founder)',
       type: 'Founder • AI Learning Platform & Tool Hub',
       url: 'https://aiclipzone.vercel.app/',
       description: 'Interactive AI hub and creative showcase founded and led by Rajababu Mehta, offering modern AI resources and digital tools.',
     },
   ],
   experience: {
-    title: 'Founder of AI Clipzone & Web Developer',
+    title: 'Founder of HamroLms & Web Developer',
     duration: '7 Years of Hands-on Experience',
     description:
-      'Founder of AI Clipzone (https://aiclipzone.vercel.app/) with over 7 years of deep experience in technology, AI tools, web engineering, and digital platforms.',
+      'Founder of HamroLms with over 7 years of deep experience in technology, AI tools, web engineering, and digital platforms.',
   },
   languages: ['Nepali', 'Bhojpuri', 'Hindi', 'English'],
   socialMedia: [

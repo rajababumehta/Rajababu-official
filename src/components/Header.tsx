@@ -25,14 +25,14 @@ export const Header: React.FC<HeaderProps> = ({
   const heroImageSrc = profile.heroImage || '/hero-portrait.png';
 
   const rolesEn = [
-    'Founder of AI Clipzone',
+    'Founder of HamroLms',
     'AI Website Developer',
     'AI Explainer & Creator',
     'Digital Innovator in Birgunj, Nepal',
   ];
 
   const rolesNe = [
-    'एआई क्लिपजोनका संस्थापक',
+    'HamroLms का संस्थापक',
     'एआई वेबसाइट डेभलपर',
     'एआई व्याख्याकर्ता तथा सर्जक',
     'वीरगञ्ज, नेपालका डिजिटल नवप्रवर्तक',
@@ -53,12 +53,12 @@ export const Header: React.FC<HeaderProps> = ({
     logo: React.ReactNode;
   }
 
-  const aiClipzoneItem: TechItem = {
-    name: 'AI Clipzone',
+  const hamroLmsItem: TechItem = {
+    name: 'HamroLms',
     logo: (
       <img
         src="/assets/aistudio/logo_3c930995.png"
-        alt="AI Clipzone Logo"
+        alt="HamroLms Logo"
         className="w-5 h-5 shrink-0 rounded-full object-cover"
       />
     ),
@@ -141,7 +141,7 @@ export const Header: React.FC<HeaderProps> = ({
         </svg>
       ),
     },
-    aiClipzoneItem,
+    hamroLmsItem,
     {
       name: 'Node.js',
       logo: (
@@ -221,9 +221,9 @@ export const Header: React.FC<HeaderProps> = ({
     },
   ];
 
-  // Repeat AI Clipzone after every 2 technologies
+  // Repeat HamroLms after every 2 technologies
   const techItems: TechItem[] = baseTechItems.flatMap((item, index) =>
-    index % 2 === 0 ? [aiClipzoneItem, item] : [item]
+    index % 2 === 0 ? [hamroLmsItem, item] : [item]
   );
 
   return (

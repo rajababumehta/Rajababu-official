@@ -100,7 +100,7 @@ interface PostsFeedViewProps {
 const CATEGORIES = [
   { id: 'Announcement', en: '📢 Announcement', ne: '📢 मुख्य घोषणा' },
   { id: 'Article', en: '💡 Thoughts & Article', ne: '💡 विचार र लेख' },
-  { id: 'Clipzone', en: '🚀 AI Clipzone News', ne: '🚀 एआई क्लिपजोन समाचार' },
+  { id: 'Clipzone', en: '🚀 HamroLms News', ne: '🚀 HamroLms समाचार' },
   { id: 'Tech', en: '💻 Tech & Innovation', ne: '💻 प्रविधि तथा विकास' },
   { id: 'Personal', en: '📸 Behind The Scenes', ne: '📸 व्यक्तिगत पलहरू' },
 ];
@@ -717,7 +717,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                   <FacebookVerifiedBadge className="w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0" />
                 </div>
                 <div className="text-[11px] sm:text-xs text-[#f6f3f2]/60 flex items-center gap-1.5 mt-0.5 flex-wrap">
-                  <span>Founder, AI Clipzone</span>
+                  <span>Founder, HamroLms</span>
                   <span>·</span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3 text-[#ff8175]/80" />
@@ -867,7 +867,7 @@ export const PostsFeedView: React.FC<PostsFeedViewProps> = ({
                       <FacebookVerifiedBadge className="w-4 h-4 shrink-0" />
                     </div>
                     <div className="flex items-center gap-1 text-[11px] text-[#f6f3f2]/60">
-                      <span>Publisher & Founder, AI Clipzone</span>
+                      <span>Publisher & Founder, HamroLms</span>
                       <span>·</span>
                       <span className="text-emerald-400 flex items-center gap-0.5">
                         <Globe className="w-3 h-3" /> Public
@@ -1357,7 +1357,7 @@ const NewsPostCard: React.FC<NewsPostCardProps> = ({
               <FacebookVerifiedBadge className="w-4 h-4 shrink-0" />
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-[#f6f3f2]/60 mt-0.5">
-              <span className="truncate">Founder, AI Clipzone</span>
+              <span className="truncate">Founder, HamroLms</span>
               <span>·</span>
               <span className="flex items-center gap-1 shrink-0">
                 <Clock className="w-3 h-3 text-[#ff8175]/80" />

@@ -19,12 +19,12 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
 
   const faqItems = [
     {
-      questionEn: 'Who is the Founder of AI Clipzone?',
-      questionNe: 'एआई क्लिपजोन (AI Clipzone) का संस्थापक को हुनुहुन्छ?',
+      questionEn: 'Who is the Founder of HamroLms?',
+      questionNe: 'HamroLms का संस्थापक को हुनुहुन्छ?',
       answerEn:
-        'Rajababu Mehta is the Founder of AI Clipzone (https://aiclipzone.vercel.app/). He is an AI Website Developer and AI Explainer based in Birgunj, Nepal who architected, launched, and leads the AI Clipzone platform.',
+        'Rajababu Mehta is the Founder of HamroLms. He is an AI Website Developer and AI Explainer based in Birgunj, Nepal who architected, launched, and leads the HamroLms platform.',
       answerNe:
-        'राजाबाबु मेहता एआई क्लिपजोन (AI Clipzone - https://aiclipzone.vercel.app/) का संस्थापक (Founder) हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर तथा एआई व्याख्याकर्ता हुनुहुन्छ जसले एआई क्लिपजोन प्लेटफर्मको स्थापना र नेतृत्व गर्नुभएको हो।',
+        'राजाबाबु मेहता HamroLms का संस्थापक (Founder) हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर तथा एआई व्याख्याकर्ता हुनुहुन्छ जसले HamroLms प्लेटफर्मको स्थापना र नेतृत्व गर्नुभएको हो।',
       categoryEn: 'Founder',
       categoryNe: 'संस्थापक',
       linkUrl: 'https://aiclipzone.vercel.app/',
@@ -180,7 +180,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#e4342f] hover:bg-[#ff3d38] text-white text-xs font-bold transition-all shadow-md shadow-[#e4342f]/30"
                             >
-                              <span>{language === 'NE' ? 'AI Clipzone खोल्नुहोस्' : 'Visit AI Clipzone'}</span>
+                              <span>{language === 'NE' ? 'HamroLms खोल्नुहोस्' : 'Visit HamroLms'}</span>
                               <ExternalLink className="w-3 h-3" />
                             </a>
                           </div>

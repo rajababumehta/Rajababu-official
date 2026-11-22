@@ -549,7 +549,7 @@ export const subscribeToClipzoneImages = (
             imgUrl: data.imgUrl || '',
             storagePath: data.storagePath,
             uploadDate: data.uploadDate || new Date().toISOString(),
-            category: data.category || 'AI Clipzone',
+            category: data.category || 'HamroLms',
             likes: typeof data.likes === 'number' ? data.likes : 0,
             tags: Array.isArray(data.tags) ? data.tags : [],
             fileSize: data.fileSize,

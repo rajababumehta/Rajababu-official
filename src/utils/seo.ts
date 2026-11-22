@@ -119,7 +119,7 @@ export const updatePostSeo = (post: FeedPost | null) => {
     'author': {
       '@type': 'Person',
       'name': 'Rajababu Mehta',
-      'jobTitle': 'Founder of AI Clipzone',
+      'jobTitle': 'Founder of HamroLms',
       'url': 'https://rajababumehta.com.np',
       'sameAs': [
         'https://aiclipzone.vercel.app/',
@@ -129,7 +129,7 @@ export const updatePostSeo = (post: FeedPost | null) => {
     },
     'publisher': {
       '@type': 'Organization',
-      'name': 'AI Clipzone News & Articles',
+      'name': 'HamroLms News & Articles',
       'url': 'https://aiclipzone.vercel.app/',
       'logo': {
         '@type': 'ImageObject',
@@ -147,10 +147,10 @@ export const updatePostSeo = (post: FeedPost | null) => {
 export const resetPostSeo = () => {
   if (typeof document === 'undefined') return;
 
-  document.title = 'Rajababu Mehta | Founder of AI Clipzone & AI Website Developer';
+  document.title = 'Rajababu Mehta | Founder of HamroLms & AI Website Developer';
 
   const defaultDesc =
-    'Rajababu Mehta is the Founder of AI Clipzone. He is an AI Website Developer and AI Explainer from Birgunj, Nepal creating modern websites and AI solutions.';
+    'Rajababu Mehta is the Founder of HamroLms. He is an AI Website Developer and AI Explainer from Birgunj, Nepal creating modern websites and AI solutions.';
 
   const setMetaTag = (
     attributeName: 'name' | 'property',
@@ -163,7 +163,7 @@ export const resetPostSeo = () => {
 
   setMetaTag('name', 'description', defaultDesc);
   setMetaTag('property', 'og:type', 'profile');
-  setMetaTag('property', 'og:title', 'Rajababu Mehta | Founder of AI Clipzone & AI Website Developer');
+  setMetaTag('property', 'og:title', 'Rajababu Mehta | Founder of HamroLms & AI Website Developer');
   setMetaTag('property', 'og:description', defaultDesc);
   setMetaTag('property', 'og:url', 'https://rajababumehta.com.np/');
   setMetaTag('property', 'og:image', 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhi7Uh94xTz0y-F0J_tapw44abY8zaSaDjrnGVWMyV-Odly0GMfSYtxK8FVOnFsFi0Nw_IveBY14ECZbwVtn2ab2u2OvbFFjr65hVXXuQKDmFh-U3RzfY1nOfUUF5d11Rjx6cWLUBamvlr4FrpncgobVp_itVNzzeXUKiFeD1UppSfItN2dxNhMq9Tu_JUO/s1372/20602.jpg');

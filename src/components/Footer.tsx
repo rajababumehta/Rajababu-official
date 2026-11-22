@@ -30,8 +30,8 @@ export const Footer: React.FC<FooterProps> = ({
             
             <div className="text-xs text-[#f6f3f2]/50 mt-1.5 max-w-md">
               {language === 'NE'
-                ? 'राजाबाबु मेहता • एआई क्लिपजोनका संस्थापक, एआई वेबसाइट डेभलपर • वीरगञ्ज, नेपाल © २०२६'
-                : 'Rajababu Mehta • Founder of AI Clipzone & AI Website Developer • Birgunj, Nepal © 2026'}
+                ? 'राजाबाबु मेहता • HamroLms का संस्थापक, एआई वेबसाइट डेभलपर • वीरगञ्ज, नेपाल © २०२६'
+                : 'Rajababu Mehta • Founder of HamroLms & AI Website Developer • Birgunj, Nepal © 2026'}
             </div>
           </div>
 
@@ -51,7 +51,7 @@ export const Footer: React.FC<FooterProps> = ({
               rel="noopener noreferrer"
               className="text-[#ff8175] hover:text-white font-bold inline-flex items-center gap-1 transition-colors"
             >
-              <span>AI Clipzone</span>
+              <span>HamroLms</span>
               <ExternalLink className="w-3 h-3" />
             </a>
             <span className="text-[#f6f3f2]/20">·</span>
