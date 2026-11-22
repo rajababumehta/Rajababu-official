@@ -27,7 +27,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
         'राजाबाबु मेहता HamroLms का संस्थापक (Founder) हुनुहुन्छ। उहाँ वीरगञ्ज, नेपालका एक समर्पित एआई वेबसाइट डेभलपर तथा एआई व्याख्याकर्ता हुनुहुन्छ जसले HamroLms प्लेटफर्मको स्थापना र नेतृत्व गर्नुभएको हो।',
       categoryEn: 'Founder',
       categoryNe: 'संस्थापक',
-      linkUrl: 'https://aiclipzone.vercel.app/',
+      linkUrl: 'https://hamrolms.vercel.app/',
     },
     {
       questionEn: 'How do we start a website project together?',

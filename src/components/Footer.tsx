@@ -46,7 +46,7 @@ export const Footer: React.FC<FooterProps> = ({
             </a>
             <span className="text-[#f6f3f2]/20">·</span>
             <a
-              href="https://aiclipzone.vercel.app/"
+              href="https://hamrolms.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#ff8175] hover:text-white font-bold inline-flex items-center gap-1 transition-colors"

@@ -229,7 +229,7 @@ export default async function handler(req: any, res: any) {
         "url": "https://www.facebook.com/share/1JMEFsQwNA/",
         "sameAs": [
           "https://www.facebook.com/share/1JMEFsQwNA/",
-          "https://aiclipzone.vercel.app/"
+          "https://hamrolms.vercel.app/"
         ]
       },
       "publisher": {

@@ -336,7 +336,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             </div>
 
             <a
-              href="https://aiclipzone.vercel.app/"
+              href="https://hamrolms.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="ac-btn"

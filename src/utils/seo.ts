@@ -122,7 +122,7 @@ export const updatePostSeo = (post: FeedPost | null) => {
       'jobTitle': 'Founder of HamroLms',
       'url': 'https://rajababumehta.com.np',
       'sameAs': [
-        'https://aiclipzone.vercel.app/',
+        'https://hamrolms.vercel.app/',
         'https://www.linkedin.com/in/rajababumehta',
         'https://www.facebook.com/share/1JMEFsQwNA/',
       ],
@@ -130,7 +130,7 @@ export const updatePostSeo = (post: FeedPost | null) => {
     'publisher': {
       '@type': 'Organization',
       'name': 'HamroLms News & Articles',
-      'url': 'https://aiclipzone.vercel.app/',
+      'url': 'https://hamrolms.vercel.app/',
       'logo': {
         '@type': 'ImageObject',
         'url': `${window.location.origin}/brand-avatar.png`,

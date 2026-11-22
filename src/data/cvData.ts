@@ -61,7 +61,7 @@ export const RAJABABU_CV_DATA: CvData = {
     {
       title: 'HamroLms (Founder)',
       type: 'Founder • AI Learning Platform & Tool Hub',
-      url: 'https://aiclipzone.vercel.app/',
+      url: 'https://hamrolms.vercel.app/',
       description: 'Interactive AI hub and creative showcase founded and led by Rajababu Mehta, offering modern AI resources and digital tools.',
     },
   ],

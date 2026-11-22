@@ -71,7 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     },
     {
       num: '04',
-      href: 'https://aiclipzone.vercel.app/',
+      href: 'https://hamrolms.vercel.app/',
       labelEn: 'HamroLms',
       labelNe: 'HamroLms',
       isExternal: true,
@@ -142,7 +142,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Direct HamroLms CTA Button with uploaded logo */}
             <a
-              href="https://aiclipzone.vercel.app/"
+              href="https://hamrolms.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#e4342f] hover:bg-[#ff3d38] text-white text-xs sm:text-[13px] font-bold tracking-tight shadow-[0_6px_22px_-6px_rgba(228,52,47,0.8)] transition-all hover:scale-[1.03]"
@@ -320,7 +320,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 
                 {/* HamroLms Direct Highlight Card */}
                 <a
-                  href="https://aiclipzone.vercel.app/"
+                  href="https://hamrolms.vercel.app/"
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={handleLinkClick}
